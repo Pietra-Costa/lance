@@ -1,1 +1,9 @@
 node_modules
+
+# Build output
+dist/
+build/
+coverage/
+
+# Generated Prisma Client
+apps/api/generated/prisma/

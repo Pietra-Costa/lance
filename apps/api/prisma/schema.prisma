@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -19,12 +20,10 @@ enum CatalogSource {
 }
 
 enum LotStatus {
-  DRAFT
   SCHEDULED
-  OPEN
-  CLOSED
-  SETTLED
-  CANCELLED
+  LIVE
+  ENDED
+  CANCELED
 }
 
 enum ImageUsageStatus {
@@ -45,11 +44,12 @@ enum WalletTransactionType {
 enum BidReservationStatus {
   ACTIVE
   RELEASED
-  CAPTURED
+  CONSUMED
 }
 
 enum SettlementStatus {
   PENDING
+  PROCESSING
   COMPLETED
   FAILED
 }
@@ -63,9 +63,26 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  wallet      Wallet?
-  createdLots Lot[]   @relation("LotSeller")
-  bids        Bid[]   @relation("Bidder")
+  sellerAgreements SellerAgreement[]
+  wallet           Wallet?
+  createdLots      Lot[]              @relation("LotSeller")
+  leadingLots      Lot[]              @relation("LotLeader")
+  bids             Bid[]              @relation("Bidder")
+  notifications    Notification[]
+}
+
+model SellerAgreement {
+  id          String   @id @default(cuid())
+  userId      String
+  version     String
+  contentHash String
+  acceptedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, version])
+  @@index([userId, acceptedAt])
 }
 
 model Wallet {
@@ -76,20 +93,19 @@ model Wallet {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user              User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
-  transactions      WalletTransactionType[]
-  reservations      BidReservation[]
-  walletTransaction WalletTransaction?
+  user         User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  transactions WalletTransaction[]
+  reservations BidReservation[]
 }
 
 model WalletTransaction {
-  id            String                @id @default(cuid())
-  walletId      String                @unique
-  type          WalletTransactionType
-  amountCents   Int
-  dempotencyKey String                @unique
-  description   String?
-  createdAt     DateTime              @default(now())
+  id             String                @id @default(cuid())
+  walletId       String
+  type           WalletTransactionType
+  amountCents    Int
+  idempotencyKey String                @unique
+  description    String?
+  createdAt      DateTime              @default(now())
 
   wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Restrict)
 
@@ -114,6 +130,7 @@ model CatalogItem {
 
   @@unique([source, externalId])
   @@index([title])
+  @@index([category])
 }
 
 model CatalogItemImage {
@@ -134,38 +151,46 @@ model CatalogItemImage {
 model Lot {
   id                 String    @id @default(cuid())
   sellerId           String
-  status             LotStatus @default(DRAFT)
+  currentLeaderId    String?
+  status             LotStatus @default(SCHEDULED)
   startingPriceCents Int
   currentPriceCents  Int       @default(0)
   minIncrementCents  Int       @default(1)
-  startAt            DateTime
-  endAt              DateTime
+  startsAt           DateTime
+  endsAt             DateTime
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
   seller       User               @relation("LotSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  currentLeader User?              @relation("LotLeader", fields: [currentLeaderId], references: [id], onDelete: Restrict)
   itemSnapshot LotItemSnapshot?
   bids         Bid[]
   reservations BidReservation[]
   settlement   AuctionSettlement?
 
-  @@index([status, startAt, endAt])
+  @@index([status, startsAt, endsAt])
   @@index([sellerId])
+  @@index([currentLeaderId])
 }
 
 model LotItemSnapshot {
-  id            String         @id @default(cuid())
-  lotId         String         @unique
-  catalogItemId String?
-  title         String
-  description   String?
-  source        CatalogSource?
-  externalId    String?
-  attributes    Json?
-  snapshotAt    DateTime       @default(now())
+  id               String        @id @default(cuid())
+  lotId            String        @unique
+  catalogItemId    String?
+  title            String
+  description      String?
+  source           CatalogSource?
+  externalId       String?
+  attributes       Json?
+  imageUrl         String?
+  imageAttribution String?
+  sourceUrl        String?
+  snapshotAt       DateTime      @default(now())
 
   lot         Lot          @relation(fields: [lotId], references: [id], onDelete: Restrict)
   catalogItem CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: Restrict)
+
+  @@index([catalogItemId])
 }
 
 model Bid {
@@ -212,23 +237,24 @@ model AuctionSettlement {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
-  lot        Lot              @relation(fields: [lotId], references: [id], onDelete: Restrict)
-  winningBid Bid?             @relation("WinningBid", fields: [winningBidId], references: [id], onDelete: Restrict)
-  receipt    PurchaseReceipt?
+  lot        Lot     @relation(fields: [lotId], references: [id], onDelete: Restrict)
+  winningBid Bid?    @relation("WinningBid", fields: [winningBidId], references: [id], onDelete: Restrict)
+  receipt    Receipt?
 }
 
-model PurchaseReceipt {
-  id            String   @id @default(cuid())
-  settlementId  String   @unique
-  receiptNumber String   @unique
-  issuedAt      DateTime @default(now())
-  details       Json
+model Receipt {
+  id               String   @id @default(cuid())
+  settlementId     String   @unique
+  verificationCode String   @unique
+  snapshot         Json
+  issuedAt         DateTime @default(now())
 
   settlement AuctionSettlement @relation(fields: [settlementId], references: [id], onDelete: Restrict)
 }
 
 model AuditEvent {
   id              String   @id @default(cuid())
+  sequence        BigInt   @unique @default(autoincrement())
   eventType       String
   entityType      String
   entityId        String
@@ -239,4 +265,43 @@ model AuditEvent {
   createdAt       DateTime @default(now())
 
   @@index([entityType, entityId, createdAt])
+}
+
+model AuditChainState {
+  id            String   @id @default("global")
+  lastSequence  BigInt   @default(0)
+  lastEventHash String?
+  checkpointHash String?
+  signature     String?
+  anchoredAt    DateTime?
+  updatedAt     DateTime @updatedAt
+}
+
+model OutboxEvent {
+  id            String   @id @default(cuid())
+  eventKey      String   @unique
+  eventType     String
+  aggregateType String
+  aggregateId   String
+  payload       Json
+  attempts      Int      @default(0)
+  createdAt     DateTime @default(now())
+  publishedAt   DateTime?
+  lastError     String?
+
+  @@index([publishedAt, createdAt])
+  @@index([aggregateType, aggregateId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, readAt, createdAt])
 }
