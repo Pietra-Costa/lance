@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  LEILOEIRO
+  LICITANTE
+}
+
+enum CatalogSource {
+  MET
+  ART_INSTITUTE_CHICAGO
+  MUSICBRAINZ
+}
+
+enum LotStatus {
+  DRAFT
+  SCHEDULED
+  OPEN
+  CLOSED
+  SETTLED
+  CANCELLED
+}
+
+enum ImageUsageStatus {
+  UNKNOWN
+  ALLOWED
+  RESTRICTED
+  EXTERNAL_ONLY
+}
+
+enum WalletTransactionType {
+  SIMULATED_DEPOSIT
+  BID_RESERVATION
+  BID_RELEASE
+  AUCTION_SETTLEMENT
+  REFUND
+}
+
+enum BidReservationStatus {
+  ACTIVE
+  RELEASED
+  CAPTURED
+}
+
+enum SettlementStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  wallet      Wallet?
+  createdLots Lot[]   @relation("LotSeller")
+  bids        Bid[]   @relation("Bidder")
+}
+
+model Wallet {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  balanceCents  Int      @default(0)
+  reservedCents Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  transactions      WalletTransactionType[]
+  reservations      BidReservation[]
+  walletTransaction WalletTransaction?
+}
+
+model WalletTransaction {
+  id            String                @id @default(cuid())
+  walletId      String                @unique
+  type          WalletTransactionType
+  amountCents   Int
+  dempotencyKey String                @unique
+  description   String?
+  createdAt     DateTime              @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Restrict)
+
+  @@index([walletId, createdAt])
+}
+
+model CatalogItem {
+  id          String        @id @default(cuid())
+  source      CatalogSource
+  externalId  String
+  title       String
+  description String?
+  category    String?
+  creator     String?
+  sourceUrl   String?
+  attributes  Json?
+  importedAt  DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  images    CatalogItemImage[]
+  snapshots LotItemSnapshot[]
+
+  @@unique([source, externalId])
+  @@index([title])
+}
+
+model CatalogItemImage {
+  id            String           @id @default(cuid())
+  catalogItemId String
+  sourceUrl     String
+  storageKey    String?
+  usageStatus   ImageUsageStatus @default(UNKNOWN)
+  attribution   String?
+  rightsNotes   String?
+  createdAt     DateTime         @default(now())
+
+  catalogItem CatalogItem @relation(fields: [catalogItemId], references: [id], onDelete: Restrict)
+
+  @@index([catalogItemId])
+}
+
+model Lot {
+  id                 String    @id @default(cuid())
+  sellerId           String
+  status             LotStatus @default(DRAFT)
+  startingPriceCents Int
+  currentPriceCents  Int       @default(0)
+  minIncrementCents  Int       @default(1)
+  startAt            DateTime
+  endAt              DateTime
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  seller       User               @relation("LotSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  itemSnapshot LotItemSnapshot?
+  bids         Bid[]
+  reservations BidReservation[]
+  settlement   AuctionSettlement?
+
+  @@index([status, startAt, endAt])
+  @@index([sellerId])
+}
+
+model LotItemSnapshot {
+  id            String         @id @default(cuid())
+  lotId         String         @unique
+  catalogItemId String?
+  title         String
+  description   String?
+  source        CatalogSource?
+  externalId    String?
+  attributes    Json?
+  snapshotAt    DateTime       @default(now())
+
+  lot         Lot          @relation(fields: [lotId], references: [id], onDelete: Restrict)
+  catalogItem CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: Restrict)
+}
+
+model Bid {
+  id          String   @id @default(cuid())
+  lotId       String
+  bidderId    String
+  amountCents Int
+  createdAt   DateTime @default(now())
+
+  lot         Lot                @relation(fields: [lotId], references: [id], onDelete: Restrict)
+  bidder      User               @relation("Bidder", fields: [bidderId], references: [id], onDelete: Restrict)
+  reservation BidReservation?
+  settlement  AuctionSettlement? @relation("WinningBid")
+
+  @@index([lotId, amountCents])
+  @@index([bidderId, createdAt])
+}
+
+model BidReservation {
+  id          String               @id @default(cuid())
+  walletId    String
+  lotId       String
+  bidId       String               @unique
+  amountCents Int
+  status      BidReservationStatus @default(ACTIVE)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  lot    Lot    @relation(fields: [lotId], references: [id], onDelete: Restrict)
+  bid    Bid    @relation(fields: [bidId], references: [id], onDelete: Restrict)
+
+  @@index([lotId, status])
+  @@index([walletId, status])
+}
+
+model AuctionSettlement {
+  id           String           @id @default(cuid())
+  lotId        String           @unique
+  winningBidId String?          @unique
+  amountCents  Int
+  status       SettlementStatus @default(PENDING)
+  settledAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  lot        Lot              @relation(fields: [lotId], references: [id], onDelete: Restrict)
+  winningBid Bid?             @relation("WinningBid", fields: [winningBidId], references: [id], onDelete: Restrict)
+  receipt    PurchaseReceipt?
+}
+
+model PurchaseReceipt {
+  id            String   @id @default(cuid())
+  settlementId  String   @unique
+  receiptNumber String   @unique
+  issuedAt      DateTime @default(now())
+  details       Json
+
+  settlement AuctionSettlement @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+}
+
+model AuditEvent {
+  id              String   @id @default(cuid())
+  eventType       String
+  entityType      String
+  entityId        String
+  payload         Json
+  previousHash    String?
+  eventHash       String   @unique
+  anchorReference String?
+  createdAt       DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+}
