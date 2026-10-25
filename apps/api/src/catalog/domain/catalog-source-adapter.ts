@@ -1,4 +1,4 @@
-export type CatalogSource = 'THE_MET' | 'Artic' | 'MUSICBRAINZ';
+export type CatalogSource = 'THE_MET' | 'ARTIC' | 'MUSICBRAINZ';
 
 export interface ExternalCatalogItem {
   externalId: string;
@@ -9,7 +9,7 @@ export interface ExternalCatalogItem {
   medium: string | null;
   sourceUrl: string;
   imageUrl: string | null;
-  attributes: Record<string, number>;
+  attributes: Record<string, unknown>;
 }
 
 export interface CatalogSourceAdapter {
