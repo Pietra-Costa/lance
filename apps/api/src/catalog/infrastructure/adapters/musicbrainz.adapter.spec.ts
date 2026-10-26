@@ -121,7 +121,7 @@ describe('MusicBrainzAdapter', () => {
     expect(result[0].title).toBe('Album A');
     expect(result[1].title).toBe('Album B');
     expect(result[1].creator).toBeNull();
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
   });
 
   it('deve enviar um User-Agent nas requisições', async () => {

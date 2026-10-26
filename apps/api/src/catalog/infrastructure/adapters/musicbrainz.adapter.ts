@@ -2,6 +2,7 @@ import {
   CatalogSourceAdapter,
   ExternalCatalogItem,
 } from '../../domain/catalog-source-adapter';
+import { CoverArtArchiveAdapter } from './cover-art-archive.adapter';
 
 interface MusicBrainzArtistCredit {
   name?: string;
@@ -31,7 +32,9 @@ export class MusicBrainzAdapter implements CatalogSourceAdapter {
   private readonly baseUrl = 'https://musicbrainz.org/ws/2';
 
   private readonly userAgent =
-    'LanceAuctionHouse/1.0 (contact: pietracosta.dev@gmail.com)';
+    'LanceAuctionHouse/1.0 (contact: admin@lance.local)';
+
+  private readonly coverArtArchive = new CoverArtArchiveAdapter();
 
   async search(query: string): Promise<ExternalCatalogItem[]> {
     const normalizedQuery = query.trim();
@@ -57,7 +60,9 @@ export class MusicBrainzAdapter implements CatalogSourceAdapter {
 
     const result = (await response.json()) as MusicBrainzSearchResponse;
 
-    return result['release-groups'].map((group) => this.mapReleaseGroup(group));
+    return Promise.all(
+      result['release-groups'].map((group) => this.mapReleaseGroup(group)),
+    );
   }
 
   async getById(externalId: string): Promise<ExternalCatalogItem | null> {
@@ -90,10 +95,20 @@ export class MusicBrainzAdapter implements CatalogSourceAdapter {
     return this.mapReleaseGroup(result);
   }
 
-  private mapReleaseGroup(group: MusicBrainzReleaseGroup): ExternalCatalogItem {
+  private async mapReleaseGroup(
+    group: MusicBrainzReleaseGroup,
+  ): Promise<ExternalCatalogItem> {
     const artistNames = (group['artist-credit'] ?? [])
       .map((credit) => credit.name ?? credit.artist?.name)
       .filter((name): name is string => Boolean(name));
+
+    let imageUrl: string | null = null;
+
+    try {
+      imageUrl = await this.coverArtArchive.getFrontCover(group.id);
+    } catch {
+      // A falha no serviço de capas não deve descartar os metadados.
+    }
 
     return {
       externalId: group.id,
@@ -103,7 +118,7 @@ export class MusicBrainzAdapter implements CatalogSourceAdapter {
       date: group['first-release-date'] ?? null,
       medium: null,
       sourceUrl: `https://musicbrainz.org/release-group/${group.id}`,
-      imageUrl: null,
+      imageUrl,
       attributes: {
         primaryType: group['primary-type'] ?? null,
         secondaryTypes: group['secondary-types'] ?? [],
