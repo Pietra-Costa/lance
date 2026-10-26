@@ -37,6 +37,9 @@ export class AuthService {
         email,
         passwordHash,
         role: dto.role,
+        wallet: {
+          create: {},
+        },
       },
       select: {
         id: true,

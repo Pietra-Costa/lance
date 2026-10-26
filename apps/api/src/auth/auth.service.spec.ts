@@ -72,6 +72,9 @@ describe('AuthService', () => {
           email: dto.email,
           passwordHash: 'hashed-password',
           role: dto.role,
+          wallet: {
+            create: {},
+          },
         },
         select: {
           id: true,
