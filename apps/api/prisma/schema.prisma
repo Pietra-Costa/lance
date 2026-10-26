@@ -67,6 +67,7 @@ model User {
   leadingLots      Lot[]              @relation("LotLeader")
   bids             Bid[]              @relation("Bidder")
   notifications    Notification[]
+  bidRequests BidRequest[]
 }
 
 model SellerAgreement {
@@ -167,6 +168,7 @@ model Lot {
   bids         Bid[]
   reservations BidReservation[]
   settlement   AuctionSettlement?
+  bidRequests BidRequest[]
 
   @@index([status, startsAt, endsAt])
   @@index([sellerId])
@@ -204,10 +206,30 @@ model Bid {
   bidder      User               @relation("Bidder", fields: [bidderId], references: [id], onDelete: Restrict)
   reservation BidReservation?
   settlement  AuctionSettlement? @relation("WinningBid")
+  request BidRequest?
 
   @@index([lotId, amountCents])
   @@index([bidderId, createdAt])
 }
+
+
+model BidRequest {
+  id             String   @id @default(cuid())
+  bidderId       String
+  lotId          String
+  idempotencyKey String
+  requestHash    String
+  bidId          String?  @unique
+  createdAt      DateTime @default(now())
+
+  bidder User  @relation(fields: [bidderId], references: [id], onDelete: Restrict)
+  lot    Lot   @relation(fields: [lotId], references: [id], onDelete: Restrict)
+  bid    Bid?  @relation(fields: [bidId], references: [id], onDelete: Restrict)
+
+  @@unique([bidderId, idempotencyKey])
+  @@index([lotId, createdAt])
+}
+
 
 model BidReservation {
   id          String               @id @default(cuid())
