@@ -219,6 +219,7 @@ model BidRequest {
   lotId          String
   idempotencyKey String
   requestHash    String
+  response       Json?
   bidId          String?  @unique
   createdAt      DateTime @default(now())
 
@@ -229,7 +230,6 @@ model BidRequest {
   @@unique([bidderId, idempotencyKey])
   @@index([lotId, createdAt])
 }
-
 
 model BidReservation {
   id          String               @id @default(cuid())

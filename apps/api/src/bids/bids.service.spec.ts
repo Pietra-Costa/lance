@@ -4,52 +4,55 @@ import { PrismaService } from '../infrastructure/database/prisma.service';
 
 describe('BidsService', () => {
   let service: BidsService;
-  let prisma: {
-    $transaction: jest.Mock;
-  };
+  let prisma: PrismaService;
 
   beforeEach(() => {
     prisma = {
       $transaction: jest.fn(),
-    };
+    } as unknown as PrismaService;
 
-    service = new BidsService(prisma as unknown as PrismaService);
+    service = new BidsService(prisma);
   });
 
-  it('rejeita um valor de lance igual a zero', async () => {
-    await expect(service.createBid('bidder-1', 'lot-1', 0)).rejects.toThrow(
-      ConflictException,
-    );
+  describe('createBid', () => {
+    it('deve rejeitar um valor igual a zero', async () => {
+      await expect(
+        service.createBid('bidder-1', 'lot-1', 0, 'test-key-1'),
+      ).rejects.toThrow(ConflictException);
 
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-  });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
 
-  it('rejeita um valor de lance negativo', async () => {
-    await expect(service.createBid('bidder-1', 'lot-1', -100)).rejects.toThrow(
-      ConflictException,
-    );
+    it('deve rejeitar um valor negativo', async () => {
+      await expect(
+        service.createBid('bidder-1', 'lot-1', -100, 'test-key-2'),
+      ).rejects.toThrow(ConflictException);
 
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-  });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
 
-  it('rejeita um valor que não seja inteiro', async () => {
-    await expect(service.createBid('bidder-1', 'lot-1', 10.5)).rejects.toThrow(
-      ConflictException,
-    );
+    it('deve rejeitar um valor não inteiro', async () => {
+      await expect(
+        service.createBid('bidder-1', 'lot-1', 10.5, 'test-key-3'),
+      ).rejects.toThrow(ConflictException);
 
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-  });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
 
-  it('retorna erro quando o lote não existe', async () => {
-    prisma.$transaction.mockImplementation(
-      async (callback: (tx: unknown) => Promise<unknown>) =>
-        callback({
-          $queryRaw: jest.fn().mockResolvedValue([]),
-        }),
-    );
+    it('deve rejeitar um lote inexistente', async () => {
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            $queryRaw: jest.fn().mockResolvedValue([]),
+          };
 
-    await expect(
-      service.createBid('bidder-1', 'lot-inexistente', 1000),
-    ).rejects.toThrow(NotFoundException);
+          return callback(tx);
+        },
+      );
+
+      await expect(
+        service.createBid('bidder-1', 'lot-inexistente', 1000, 'test-key-4'),
+      ).rejects.toThrow(NotFoundException);
+    });
   });
 });

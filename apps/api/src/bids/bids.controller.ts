@@ -1,4 +1,13 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Headers,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthenticatedUser } from '../auth/auth.type';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -19,7 +28,23 @@ export class BidsController {
     @Req() request: AuthenticatedRequest,
     @Param('lotId') lotId: string,
     @Body() dto: CreateBidDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.bidsService.createBid(request.user.id, lotId, dto.amountCents);
+    if (
+      !idempotencyKey ||
+      idempotencyKey.trim().length === 0 ||
+      idempotencyKey.length > 200
+    ) {
+      throw new BadRequestException(
+        'Informe um cabeçalho Idempotency-Key válido.',
+      );
+    }
+
+    return this.bidsService.createBid(
+      request.user.id,
+      lotId,
+      dto.amountCents,
+      idempotencyKey.trim(),
+    );
   }
 }

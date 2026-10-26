@@ -16,10 +16,19 @@ import { PrismaService } from '../infrastructure/database/prisma.service';
 export class BidsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createBid(bidderId: string, lotId: string, amountCents: number) {
+  async createBid(
+    bidderId: string,
+    lotId: string,
+    amountCents: number,
+    idempotencyKey: string,
+  ) {
     if (!Number.isSafeInteger(amountCents) || amountCents <= 0) {
       throw new ConflictException('Valor de lance inválido.');
     }
+
+    const requestHash = createHash('sha256')
+      .update(JSON.stringify({ lotId, amountCents }))
+      .digest('hex');
 
     // Conflitos de serialização podem ocorrer quando há lances simultâneos.
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -37,6 +46,43 @@ export class BidsService {
             if (lockedLots.length === 0) {
               throw new NotFoundException('Lote não encontrado.');
             }
+
+            const existingRequest = await tx.bidRequest.findUnique({
+              where: {
+                bidderId_idempotencyKey: {
+                  bidderId,
+                  idempotencyKey,
+                },
+              },
+            });
+
+            if (existingRequest) {
+              if (
+                existingRequest.lotId !== lotId ||
+                existingRequest.requestHash !== requestHash
+              ) {
+                throw new ConflictException(
+                  'Esta chave de idempotência já foi usada com outros dados.',
+                );
+              }
+
+              if (!existingRequest.response) {
+                throw new ConflictException(
+                  'A solicitação anterior não possui um resultado disponível.',
+                );
+              }
+
+              return existingRequest.response;
+            }
+
+            const bidRequest = await tx.bidRequest.create({
+              data: {
+                bidderId,
+                lotId,
+                idempotencyKey,
+                requestHash,
+              },
+            });
 
             const now = new Date();
 
@@ -272,13 +318,25 @@ export class BidsService {
               },
             });
 
-            return {
+            const result = {
               bid,
               reservation,
               currentPriceCents: amountCents,
               availableBalanceCents:
                 wallet.balanceCents - wallet.reservedCents - amountCents,
             };
+
+            const storedResponse = JSON.parse(JSON.stringify(result));
+
+            await tx.bidRequest.update({
+              where: { id: bidRequest.id },
+              data: {
+                bidId: bid.id,
+                response: storedResponse,
+              },
+            });
+
+            return result;
           },
           {
             isolationLevel: 'Serializable',
