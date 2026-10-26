@@ -1,10 +1,16 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { BidsService } from './bids.service';
 import { PrismaService } from '../infrastructure/database/prisma.service';
 
 describe('BidsService', () => {
   let service: BidsService;
   let prisma: PrismaService;
+
+  const createRequestHash = (lotId: string, amountCents: number) =>
+    createHash('sha256')
+      .update(JSON.stringify({ lotId, amountCents }))
+      .digest('hex');
 
   beforeEach(() => {
     prisma = {
@@ -53,6 +59,105 @@ describe('BidsService', () => {
       await expect(
         service.createBid('bidder-1', 'lot-inexistente', 1000, 'test-key-4'),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('deve retornar a resposta armazenada ao repetir a mesma requisição', async () => {
+      const lotId = 'lot-1';
+      const amountCents = 1000;
+      const idempotencyKey = 'same-request-key';
+
+      const storedResponse = {
+        bid: { id: 'bid-1', lotId, amountCents },
+        reservation: { id: 'reservation-1', amountCents },
+        currentPriceCents: amountCents,
+        availableBalanceCents: 9000,
+      };
+
+      const findUnique = jest.fn().mockResolvedValue({
+        id: 'request-1',
+        bidderId: 'bidder-1',
+        lotId,
+        idempotencyKey,
+        requestHash: createRequestHash(lotId, amountCents),
+        bidId: 'bid-1',
+        response: storedResponse,
+        createdAt: new Date(),
+      });
+
+      const create = jest.fn();
+
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            $queryRaw: jest.fn().mockResolvedValue([{ id: lotId }]),
+            bidRequest: {
+              findUnique,
+              create,
+            },
+          };
+
+          return callback(tx);
+        },
+      );
+
+      const result = await service.createBid(
+        'bidder-1',
+        lotId,
+        amountCents,
+        idempotencyKey,
+      );
+
+      expect(result).toEqual(storedResponse);
+      expect(findUnique).toHaveBeenCalledWith({
+        where: {
+          bidderId_idempotencyKey: {
+            bidderId: 'bidder-1',
+            idempotencyKey,
+          },
+        },
+      });
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    it('deve rejeitar a mesma chave quando o valor do lance for diferente', async () => {
+      const lotId = 'lot-1';
+      const idempotencyKey = 'reused-key';
+
+      const findUnique = jest.fn().mockResolvedValue({
+        id: 'request-1',
+        bidderId: 'bidder-1',
+        lotId,
+        idempotencyKey,
+        requestHash: createRequestHash(lotId, 1000),
+        bidId: 'bid-1',
+        response: {
+          bid: { id: 'bid-1' },
+          currentPriceCents: 1000,
+        },
+        createdAt: new Date(),
+      });
+
+      const create = jest.fn();
+
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            $queryRaw: jest.fn().mockResolvedValue([{ id: lotId }]),
+            bidRequest: {
+              findUnique,
+              create,
+            },
+          };
+
+          return callback(tx);
+        },
+      );
+
+      await expect(
+        service.createBid('bidder-1', lotId, 1500, idempotencyKey),
+      ).rejects.toThrow(ConflictException);
+
+      expect(create).not.toHaveBeenCalled();
     });
   });
 });
