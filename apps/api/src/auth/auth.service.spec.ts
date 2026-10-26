@@ -102,6 +102,38 @@ describe('AuthService', () => {
       expect(result.user).not.toHaveProperty('passwordHash');
     });
 
+    it('deve criar uma carteira ao cadastrar um leiloeiro', async () => {
+      const leiloeiroDto: RegisterDto = {
+        name: 'Leiloeiro de Teste',
+        email: 'leiloeiro@example.com',
+        password: 'SenhaTeste123!',
+        role: UserRole.LEILOEIRO,
+      };
+
+      prismaMock.user.findUnique.mockResolvedValue(null);
+      jest.mocked(bcrypt.hash).mockResolvedValue('hashed-password' as never);
+
+      prismaMock.user.create.mockResolvedValue({
+        id: 'seller-123',
+        name: leiloeiroDto.name,
+        email: leiloeiroDto.email,
+        role: leiloeiroDto.role,
+      });
+
+      await authService.register(leiloeiroDto);
+
+      expect(prismaMock.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            role: UserRole.LEILOEIRO,
+            wallet: {
+              create: {},
+            },
+          }),
+        }),
+      );
+    });
+
     it('deve rejeitar um e-mail já cadastrado', async () => {
       prismaMock.user.findUnique.mockResolvedValue({
         id: 'existing-user',
@@ -162,6 +194,7 @@ describe('AuthService', () => {
     it('deve rejeitar uma senha incorreta', async () => {
       prismaMock.user.findUnique.mockResolvedValue(existingUser);
       jest.mocked(bcrypt.compare).mockImplementation(async () => false);
+
       await expect(authService.login(dto)).rejects.toThrow(
         UnauthorizedException,
       );
