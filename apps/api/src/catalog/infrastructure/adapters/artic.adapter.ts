@@ -53,7 +53,10 @@ export class ArticAdapter implements CatalogSourceAdapter {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`ARTIC search failed: HTTP ${response.status}`);
+      const contentType = response.headers?.get('content-type') ?? 'unknown';
+      throw new Error(
+        `ARTIC search failed: HTTP ${response.status}, content-type: ${contentType}`,
+      );
     }
 
     const result = (await response.json()) as ArticSearchResponse;
@@ -76,7 +79,11 @@ export class ArticAdapter implements CatalogSourceAdapter {
     }
 
     if (!response.ok) {
-      throw new Error(`ARTIC artwork request failed: HTTP ${response.status}`);
+      const contentType = response.headers?.get('content-type') ?? 'unknown';
+
+      throw new Error(
+        `ARTIC artwork request failed: HTTP ${response.status}, content-type: ${contentType}`,
+      );
     }
 
     const result = (await response.json()) as ArticArtworkResponse;

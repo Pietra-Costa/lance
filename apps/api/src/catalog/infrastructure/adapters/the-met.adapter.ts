@@ -37,7 +37,9 @@ export class TheMetAdapter implements CatalogSourceAdapter {
       return [];
     }
 
-    const searchUrl = new URL(`${this.baseUrl}/search`);
+    const searchUrl = new URL(
+      'https://collectionapi.metmuseum.org/public/collection/v1.1/search',
+    );
     searchUrl.searchParams.set('q', normalizedQuery);
     searchUrl.searchParams.set('hasImages', 'true');
 
