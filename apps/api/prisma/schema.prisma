@@ -34,11 +34,9 @@ enum ImageUsageStatus {
 }
 
 enum WalletTransactionType {
-  SIMULATED_DEPOSIT
-  BID_RESERVATION
-  BID_RELEASE
-  AUCTION_SETTLEMENT
-  REFUND
+  DEPOSIT
+  WINNER_DEBIT
+  SELLER_CREDIT
 }
 
 enum BidReservationStatus {
@@ -104,6 +102,8 @@ model WalletTransaction {
   type           WalletTransactionType
   amountCents    Int
   idempotencyKey String                @unique
+  referenceType  String
+  referenceId    String
   description    String?
   createdAt      DateTime              @default(now())
 
