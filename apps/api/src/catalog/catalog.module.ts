@@ -5,11 +5,15 @@ import {
   CATALOG_SOURCE_ADAPTERS,
   CatalogSearchService,
 } from './application/catalog-search.service';
+import { PrismaCatalogRepository } from './infrastructure/repositories/prisma-catalog.repository';
+import { CatalogImportService } from './application/catalog-import.service';
 
 @Module({
   providers: [
     TheMetAdapter,
     ArticAdapter,
+    PrismaCatalogRepository,
+    CatalogImportService,
     {
       provide: CATALOG_SOURCE_ADAPTERS,
       useFactory: (
@@ -20,6 +24,10 @@ import {
     },
     CatalogSearchService,
   ],
-  exports: [CatalogSearchService],
+  exports: [
+    CatalogSearchService,
+    PrismaCatalogRepository,
+    CatalogImportService,
+  ],
 })
 export class CatalogModule {}
