@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from 'generated/prisma/client';
-import { CatalogSource } from 'generated/prisma/enums';
-import { ExternalCatalogItem } from 'src/catalog/domain/catalog-source-adapter';
-import { PrismaService } from 'src/infrastructure/database/prisma.service';
+import { Prisma } from '../../../../generated/prisma/client';
+import { CatalogSource as PrismaCatalogSource } from '../../../../generated/prisma/enums';
+import {
+  CatalogSource as DomainCatalogSource,
+  ExternalCatalogItem,
+} from '../../domain/catalog-source-adapter';
+import { PrismaService } from '../../../infrastructure/database/prisma.service';
 
-const PRISMA_SOURCE: Record<
-  CatalogSource,
-  'MET' | 'ART_INSTITUTE_CHICAGO' | 'MUSICBRAINZ'
-> = {
-  MET: 'MET',
-  ART_INSTITUTE_CHICAGO: 'ART_INSTITUTE_CHICAGO',
+const PRISMA_SOURCE: Record<DomainCatalogSource, PrismaCatalogSource> = {
+  THE_MET: 'MET',
+  ARTIC: 'ART_INSTITUTE_CHICAGO',
   MUSICBRAINZ: 'MUSICBRAINZ',
 };
 
@@ -17,7 +17,10 @@ const PRISMA_SOURCE: Record<
 export class PrismaCatalogRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async saveImportedItem(source: CatalogSource, item: ExternalCatalogItem) {
+  async saveImportedItem(
+    source: DomainCatalogSource,
+    item: ExternalCatalogItem,
+  ) {
     const prismaSource = PRISMA_SOURCE[source];
 
     const attributes = {
@@ -63,12 +66,13 @@ export class PrismaCatalogRepository {
         await this.prisma.catalogItemImage.create({
           data: {
             catalogItemId: catalogItem.id,
-            sourceUrl: item.sourceUrl,
+            sourceUrl: item.imageUrl,
             usageStatus: 'UNKNOWN',
           },
         });
       }
     }
+
     return catalogItem;
   }
 }

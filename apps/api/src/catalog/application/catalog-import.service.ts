@@ -5,9 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CATALOG_SOURCE_ADAPTERS } from './catalog-search.service';
-import { CatalogSourceAdapter } from '../domain/catalog-source-adapter';
 import { PrismaCatalogRepository } from '../infrastructure/repositories/prisma-catalog.repository';
-import { CatalogSource } from 'generated/prisma/enums';
+import {
+  CatalogSource,
+  CatalogSourceAdapter,
+} from '../domain/catalog-source-adapter';
 
 @Injectable()
 export class CatalogImportService {
@@ -29,9 +31,7 @@ export class CatalogImportService {
     );
 
     if (!adapter) {
-      throw new NotFoundException(
-        `Item ${normalizedId} was not found in ${source}`,
-      );
+      throw new BadRequestException(`Catalog source ${source} is not enabled`);
     }
 
     const item = await adapter.getById(normalizedId);
