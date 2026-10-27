@@ -4,6 +4,7 @@ import {
   Controller,
   Headers,
   Post,
+  Get,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +22,16 @@ type AuthenticatedRequest = Request & {
 @UseGuards(JwtAuthGuard)
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}
+
+  @Get()
+  getWallet(@Req() request: AuthenticatedRequest) {
+    return this.walletService.getWallet(request.user.id);
+  }
+
+  @Get('transactions')
+  transactions(@Req() request: AuthenticatedRequest) {
+    return this.walletService.transactions(request.user.id);
+  }
 
   @Post('deposits')
   createDeposit(

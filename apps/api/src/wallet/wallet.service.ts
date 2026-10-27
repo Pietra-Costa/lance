@@ -10,6 +10,30 @@ import { WalletTransactionType } from '../../generated/prisma/enums';
 export class WalletService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getWallet(userId: string) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { userId },
+      select: { balanceCents: true, reservedCents: true, updatedAt: true },
+    });
+    if (!wallet) throw new NotFoundException('Carteira não encontrada.');
+    return {
+      ...wallet,
+      availableCents: wallet.balanceCents - wallet.reservedCents,
+    };
+  }
+
+  async transactions(userId: string) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (!wallet) throw new NotFoundException('Carteira não encontrada.');
+    return this.prisma.walletTransaction.findMany({
+      where: { walletId: wallet.id },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async createDeposit(
     userId: string,
     amountCents: number,
