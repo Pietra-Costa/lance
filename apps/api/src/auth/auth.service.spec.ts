@@ -1,6 +1,7 @@
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 
 import { UserRole } from '../../generated/prisma/enums';
 import { PrismaService } from '../infrastructure/database/prisma.service';
@@ -12,6 +13,11 @@ jest.mock('bcrypt', () => ({
   hash: jest.fn(),
   compare: jest.fn(),
 }));
+jest.mock('argon2', () => ({
+  argon2id: 2,
+  hash: jest.fn(),
+  verify: jest.fn(),
+}));
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -20,6 +26,13 @@ describe('AuthService', () => {
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
+    },
+    refreshSession: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
     },
   };
 
@@ -36,6 +49,8 @@ describe('AuthService', () => {
     );
 
     jwtMock.signAsync.mockResolvedValue('fake-jwt-token');
+    jest.mocked(argon2.hash).mockResolvedValue('argon-hash' as never);
+    prismaMock.refreshSession.create.mockResolvedValue({ id: 'refresh-123' });
   });
 
   describe('register', () => {
@@ -48,7 +63,6 @@ describe('AuthService', () => {
 
     it('deve cadastrar um usuário e retornar um token', async () => {
       prismaMock.user.findUnique.mockResolvedValue(null);
-      jest.mocked(bcrypt.hash).mockResolvedValue('hashed-password' as never);
 
       prismaMock.user.create.mockResolvedValue({
         id: 'user-123',
@@ -64,13 +78,15 @@ describe('AuthService', () => {
         select: { id: true },
       });
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(dto.password, 12);
+      expect(argon2.hash).toHaveBeenCalledWith(dto.password, {
+        type: argon2.argon2id,
+      });
 
       expect(prismaMock.user.create).toHaveBeenCalledWith({
         data: {
           name: dto.name,
           email: dto.email,
-          passwordHash: 'hashed-password',
+          passwordHash: 'argon-hash',
           role: dto.role,
           wallet: {
             create: {},
@@ -88,16 +104,19 @@ describe('AuthService', () => {
         sub: 'user-123',
       });
 
-      expect(result).toEqual({
-        accessToken: 'fake-jwt-token',
-        tokenType: 'Bearer',
-        user: {
-          id: 'user-123',
-          name: dto.name,
-          email: dto.email,
-          role: dto.role,
-        },
-      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          accessToken: 'fake-jwt-token',
+          tokenType: 'Bearer',
+          user: {
+            id: 'user-123',
+            name: dto.name,
+            email: dto.email,
+            role: dto.role,
+          },
+        }),
+      );
+      expect(result.refreshToken).toContain('refresh-123.');
 
       expect(result.user).not.toHaveProperty('passwordHash');
     });
@@ -111,7 +130,6 @@ describe('AuthService', () => {
       };
 
       prismaMock.user.findUnique.mockResolvedValue(null);
-      jest.mocked(bcrypt.hash).mockResolvedValue('hashed-password' as never);
 
       prismaMock.user.create.mockResolvedValue({
         id: 'seller-123',
@@ -177,16 +195,19 @@ describe('AuthService', () => {
         sub: existingUser.id,
       });
 
-      expect(result).toEqual({
-        accessToken: 'fake-jwt-token',
-        tokenType: 'Bearer',
-        user: {
-          id: existingUser.id,
-          name: existingUser.name,
-          email: existingUser.email,
-          role: existingUser.role,
-        },
-      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          accessToken: 'fake-jwt-token',
+          tokenType: 'Bearer',
+          user: {
+            id: existingUser.id,
+            name: existingUser.name,
+            email: existingUser.email,
+            role: existingUser.role,
+          },
+        }),
+      );
+      expect(result.refreshToken).toContain('refresh-123.');
 
       expect(result.user).not.toHaveProperty('passwordHash');
     });
