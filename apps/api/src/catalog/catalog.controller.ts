@@ -6,6 +6,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
+import type { Request } from 'express';
+import { UserRole } from '../../generated/prisma/enums';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { CatalogSearchService } from './application/catalog-search.service';
 import { CatalogImportService } from './application/catalog-import.service';
 
@@ -29,6 +35,8 @@ export class CatalogController {
   }
 
   @Post(':source/:externalId/import')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.LEILOEIRO)
   async importItem(
     @Param('source') source: string,
     @Param('externalId') externalId: string,
