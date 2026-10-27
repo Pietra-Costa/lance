@@ -11,6 +11,31 @@ import {
   UserRole,
 } from '../../generated/prisma/enums';
 import { PrismaService } from '../infrastructure/database/prisma.service';
+import { Prisma } from 'generated/prisma/client';
+
+function isSerializationConflict(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const err = error as {
+    code?: unknown;
+    meta?: {
+      code?: unknown;
+      message?: unknown;
+    };
+    message?: unknown;
+  };
+
+  return (
+    err.code === 'P2034' ||
+    (err.code === 'P2010' && err.meta?.code === '40001') ||
+    String(err.message ?? '').includes(
+      'could not serialize access due to concurrent update',
+    ) ||
+    String(err.meta?.message ?? '').includes('40001')
+  );
+}
 
 @Injectable()
 export class BidsService {
@@ -151,8 +176,6 @@ export class BidsService {
 
             const previousReservation = lot.reservations[0];
 
-            // Libera a reserva anterior antes de validar o saldo
-            // necessário para cobrir integralmente o novo lance.
             if (previousReservation) {
               const released = await tx.wallet.updateMany({
                 where: {
@@ -234,11 +257,19 @@ export class BidsService {
               },
             });
 
+            const shouldExtendAuction =
+              lot.endsAt.getTime() - now.getTime() <= 120_000;
+
             await tx.lot.update({
               where: { id: lotId },
               data: {
                 currentLeaderId: bidderId,
                 currentPriceCents: amountCents,
+                ...(shouldExtendAuction
+                  ? {
+                      endsAt: new Date(now.getTime() + 120_000),
+                    }
+                  : {}),
               },
             });
 
@@ -343,20 +374,57 @@ export class BidsService {
           },
         );
       } catch (error: unknown) {
-        const isSerializationConflict =
+        if (isSerializationConflict(error)) {
+          if (attempt < 3) {
+            // Dá tempo para a transação concorrente terminar antes da nova tentativa.
+            await new Promise((resolve) => setTimeout(resolve, 50 * attempt));
+
+            continue;
+          }
+
+          throw new ConflictException(
+            'Não foi possível registrar o lance devido a um conflito de concorrência. Tente novamente.',
+          );
+        }
+
+        const isUniqueConstraintConflict =
           typeof error === 'object' &&
           error !== null &&
           'code' in error &&
-          error.code === 'P2034';
+          error.code === 'P2002';
 
-        if (isSerializationConflict && attempt < 3) {
-          continue;
-        }
+        if (isUniqueConstraintConflict) {
+          const existingRequest = await this.prisma.bidRequest.findUnique({
+            where: {
+              bidderId_idempotencyKey: {
+                bidderId,
+                idempotencyKey,
+              },
+            },
+          });
 
-        if (isSerializationConflict) {
-          throw new ConflictException(
-            'O lote recebeu alterações concorrentes. Tente novamente.',
-          );
+          if (existingRequest) {
+            if (
+              existingRequest.lotId !== lotId ||
+              existingRequest.requestHash !== requestHash
+            ) {
+              throw new ConflictException(
+                'Esta chave de idempotência já foi usada com outros dados.',
+              );
+            }
+
+            if (existingRequest.response) {
+              return existingRequest.response;
+            }
+
+            if (attempt < 3) {
+              continue;
+            }
+
+            throw new ConflictException(
+              'A solicitação anterior ainda não possui um resultado disponível.',
+            );
+          }
         }
 
         throw error;

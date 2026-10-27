@@ -108,6 +108,7 @@ describe('BidsService', () => {
       );
 
       expect(result).toEqual(storedResponse);
+
       expect(findUnique).toHaveBeenCalledWith({
         where: {
           bidderId_idempotencyKey: {
@@ -116,6 +117,7 @@ describe('BidsService', () => {
           },
         },
       });
+
       expect(create).not.toHaveBeenCalled();
     });
 
@@ -158,6 +160,47 @@ describe('BidsService', () => {
       ).rejects.toThrow(ConflictException);
 
       expect(create).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar a resposta criada por uma requisição concorrente', async () => {
+      const lotId = 'lot-1';
+      const amountCents = 1000;
+      const idempotencyKey = 'concurrent-key';
+
+      const storedResponse = {
+        bid: { id: 'bid-1', lotId, amountCents },
+        reservation: { id: 'reservation-1', amountCents },
+        currentPriceCents: amountCents,
+        availableBalanceCents: 9000,
+      };
+
+      const findUnique = jest.fn().mockResolvedValue({
+        lotId,
+        requestHash: createRequestHash(lotId, amountCents),
+        response: storedResponse,
+      });
+
+      (prisma.$transaction as jest.Mock).mockRejectedValue({
+        code: 'P2002',
+      });
+
+      // Configura o model consultado pelo serviço após o erro de unicidade.
+      (prisma as any).bidRequest = {
+        findUnique,
+      };
+
+      await expect(
+        service.createBid('bidder-1', lotId, amountCents, idempotencyKey),
+      ).resolves.toEqual(storedResponse);
+
+      expect(findUnique).toHaveBeenCalledWith({
+        where: {
+          bidderId_idempotencyKey: {
+            bidderId: 'bidder-1',
+            idempotencyKey,
+          },
+        },
+      });
     });
   });
 });
