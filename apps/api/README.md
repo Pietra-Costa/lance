@@ -22,6 +22,19 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## Lance API
+
+API NestJS para a casa de leilões Lance. Requer `DATABASE_URL`, `JWT_SECRET`, `SEED_DEMO_PASSWORD` e, em produção, `WEB_ORIGIN` (origens CORS separadas por vírgula).
+
+```bash
+npm run db:generate --workspace @lance/api
+npm run db:migrate --workspace @lance/api
+npm run db:seed --workspace @lance/api
+npm run start:dev --workspace @lance/api
+```
+
+O seed cria um leiloeiro, dois licitantes, carteiras com saldo demonstrativo e um lote ao vivo. A liquidação é simulada; o worker roda dentro da API, reconcilia ao iniciar e a cada 20 segundos. Em hospedagens que suspendem a API, a liquidação pode atrasar até a próxima inicialização.
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
