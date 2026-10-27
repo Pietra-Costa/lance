@@ -11,7 +11,7 @@ import {
   UserRole,
 } from '../../generated/prisma/enums';
 import { PrismaService } from '../infrastructure/database/prisma.service';
-import { Prisma } from 'generated/prisma/client';
+import { appendAuditEvent } from '../audit/audit-chain';
 
 function isSerializationConflict(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) {
@@ -60,7 +60,7 @@ export class BidsService {
       try {
         return await this.prisma.$transaction(
           async (tx) => {
-            // Serializa todos os lances que disputam o mesmo lote.
+            // Serializa os lances que disputam o mesmo lote.
             const lockedLots = await tx.$queryRaw<Array<{ id: string }>>`
               SELECT "id"
               FROM "Lot"
@@ -283,61 +283,8 @@ export class BidsService {
             };
 
             const eventType = 'BID_PLACED';
-            const entityType = 'LOT';
-            const createdAt = new Date();
 
-            // Serializa a escrita da cadeia de auditoria.
-            await tx.auditChainState.upsert({
-              where: { id: 'global' },
-              create: { id: 'global' },
-              update: {},
-            });
-
-            await tx.$queryRaw`
-              SELECT "id"
-              FROM "AuditChainState"
-              WHERE "id" = 'global'
-              FOR UPDATE
-            `;
-
-            const chainState = await tx.auditChainState.findUniqueOrThrow({
-              where: { id: 'global' },
-            });
-
-            const previousHash = chainState.lastEventHash;
-
-            const eventHash = createHash('sha256')
-              .update(
-                JSON.stringify({
-                  eventType,
-                  entityType,
-                  entityId: lotId,
-                  payload: eventPayload,
-                  previousHash,
-                  createdAt: createdAt.toISOString(),
-                }),
-              )
-              .digest('hex');
-
-            const auditEvent = await tx.auditEvent.create({
-              data: {
-                eventType,
-                entityType,
-                entityId: lotId,
-                payload: eventPayload,
-                previousHash,
-                eventHash,
-                createdAt,
-              },
-            });
-
-            await tx.auditChainState.update({
-              where: { id: 'global' },
-              data: {
-                lastSequence: auditEvent.sequence,
-                lastEventHash: eventHash,
-              },
-            });
+            await appendAuditEvent(tx, eventType, 'LOT', lotId, eventPayload);
 
             await tx.outboxEvent.create({
               data: {
@@ -376,7 +323,7 @@ export class BidsService {
       } catch (error: unknown) {
         if (isSerializationConflict(error)) {
           if (attempt < 3) {
-            // Dá tempo para a transação concorrente terminar antes da nova tentativa.
+            // Aguarda a transação concorrente antes de tentar novamente.
             await new Promise((resolve) => setTimeout(resolve, 50 * attempt));
 
             continue;

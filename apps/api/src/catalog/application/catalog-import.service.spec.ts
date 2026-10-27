@@ -1,6 +1,5 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+﻿import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CatalogImportService } from './catalog-import.service';
-import { CATALOG_SOURCE_ADAPTERS } from './catalog-search.service';
 import {
   CatalogSourceAdapter,
   ExternalCatalogItem,

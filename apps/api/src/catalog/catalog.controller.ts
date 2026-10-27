@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Controller,
   Get,
@@ -7,7 +7,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
-import type { Request } from 'express';
 import { UserRole } from '../../generated/prisma/enums';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';

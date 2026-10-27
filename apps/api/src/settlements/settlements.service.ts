@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { createHash, randomBytes } from 'node:crypto';
+﻿import { Injectable, Logger } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
+import { appendAuditEvent } from '../audit/audit-chain';
 import {
   BidReservationStatus,
   LotStatus,
@@ -92,12 +93,12 @@ export class SettlementsService {
           include: { wallet: true },
         });
         if (!reservation)
-          throw new Error('Reserva ativa do vencedor não encontrada.');
+          throw new Error('Reserva ativa do vencedor nÃ£o encontrada.');
         const sellerWallet = await tx.wallet.findUnique({
           where: { userId: lot.sellerId },
         });
         if (!sellerWallet)
-          throw new Error('Carteira do leiloeiro não encontrada.');
+          throw new Error('Carteira do leiloeiro nÃ£o encontrada.');
         const amountCents = reservation.amountCents;
         await tx.auctionSettlement.update({
           where: { id: settlement.id },
@@ -127,7 +128,7 @@ export class SettlementsService {
               idempotencyKey: `settlement:${settlement.id}:winner-debit`,
               referenceType: 'AUCTION_SETTLEMENT',
               referenceId: settlement.id,
-              description: 'Débito por arremate simulado',
+              description: 'DÃ©bito por arremate simulado',
             },
             {
               walletId: sellerWallet.id,
@@ -136,7 +137,7 @@ export class SettlementsService {
               idempotencyKey: `settlement:${settlement.id}:seller-credit`,
               referenceType: 'AUCTION_SETTLEMENT',
               referenceId: settlement.id,
-              description: 'Crédito por lote arrematado',
+              description: 'CrÃ©dito por lote arrematado',
             },
           ],
           skipDuplicates: true,
@@ -161,7 +162,7 @@ export class SettlementsService {
           where: { id: settlement.id },
           data: { status: SettlementStatus.COMPLETED, settledAt: new Date() },
         });
-        await this.audit(tx, 'SETTLEMENT_COMPLETED', lotId, {
+        await appendAuditEvent(tx, 'SETTLEMENT_COMPLETED', 'LOT', lotId, {
           settlementId: settlement.id,
           receiptId: receipt.id,
           amountCents,
@@ -183,50 +184,5 @@ export class SettlementsService {
       },
       { isolationLevel: 'Serializable' },
     );
-  }
-
-  private async audit(
-    tx: any,
-    eventType: string,
-    entityId: string,
-    payload: Record<string, unknown>,
-  ) {
-    await tx.auditChainState.upsert({
-      where: { id: 'global' },
-      create: { id: 'global' },
-      update: {},
-    });
-    await tx.$queryRaw`SELECT "id" FROM "AuditChainState" WHERE "id" = 'global' FOR UPDATE`;
-    const state = await tx.auditChainState.findUniqueOrThrow({
-      where: { id: 'global' },
-    });
-    const createdAt = new Date();
-    const eventHash = createHash('sha256')
-      .update(
-        JSON.stringify({
-          eventType,
-          entityType: 'LOT',
-          entityId,
-          payload,
-          previousHash: state.lastEventHash,
-          createdAt: createdAt.toISOString(),
-        }),
-      )
-      .digest('hex');
-    const event = await tx.auditEvent.create({
-      data: {
-        eventType,
-        entityType: 'LOT',
-        entityId,
-        payload,
-        previousHash: state.lastEventHash,
-        eventHash,
-        createdAt,
-      },
-    });
-    await tx.auditChainState.update({
-      where: { id: 'global' },
-      data: { lastSequence: event.sequence, lastEventHash: eventHash },
-    });
   }
 }

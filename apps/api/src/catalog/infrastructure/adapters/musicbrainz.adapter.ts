@@ -1,4 +1,4 @@
-import {
+﻿import {
   CatalogSourceAdapter,
   ExternalCatalogItem,
 } from '../../domain/catalog-source-adapter';
@@ -24,7 +24,7 @@ interface MusicBrainzSearchResponse {
   'release-groups': MusicBrainzReleaseGroup[];
 }
 
-interface MusicBrainzLookupResponse extends MusicBrainzReleaseGroup {}
+type MusicBrainzLookupResponse = MusicBrainzReleaseGroup;
 
 export class MusicBrainzAdapter implements CatalogSourceAdapter {
   readonly source = 'MUSICBRAINZ' as const;
@@ -107,7 +107,7 @@ export class MusicBrainzAdapter implements CatalogSourceAdapter {
     try {
       imageUrl = await this.coverArtArchive.getFrontCover(group.id);
     } catch {
-      // A falha no serviço de capas não deve descartar os metadados.
+      // A falha no serviÃ§o de capas nÃ£o deve descartar os metadados.
     }
 
     return {

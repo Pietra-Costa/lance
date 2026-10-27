@@ -1,16 +1,19 @@
 {
-  "moduleFileExtensions": [
-    "js",
-    "json",
-    "ts"
-  ],
-  "rootDir": ".",
-  "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
-  "moduleNameMapper": {
-    "^generated/prisma/(.*)$": "<rootDir>/../generated/prisma/$1"
-  },
-  "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  }
+    "moduleFileExtensions":  [
+                                 "js",
+                                 "json",
+                                 "ts"
+                             ],
+    "rootDir":  ".",
+    "testEnvironment":  "node",
+    "testRegex":  ".e2e-spec.ts$",
+    "moduleNameMapper":  {
+                             "^generated/prisma/(.*)$":  "\u003crootDir\u003e/../generated/prisma/$1"
+                         },
+    "transform":  {
+                      "^.+\\.(t|j)s$":  "ts-jest"
+                  },
+    "setupFiles":  [
+                       "\u003crootDir\u003e/jest-e2e.setup.ts"
+                   ]
 }
