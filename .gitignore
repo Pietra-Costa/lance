@@ -7,3 +7,27 @@ coverage/
 
 # Generated Prisma Client
 apps/api/generated/prisma/
+
+# Environment files (nunca versionar segredos; use .env.example)
+.env
+.env.*
+!.env.example
+
+# Caches e artefatos temporários de execução de testes (Jest, ts-node, tsx, V8)
+.audit-test-temp/
+.jest-cache/
+jest-cache/
+.jest-transform-cache/
+node-compile-cache/
+.v8-compile-cache/
+.tsbuildinfo
+*.tsbuildinfo
+
+# Logs
+*.log
+logs/
+
+# Sistema operacional / editor
+.DS_Store
+Thumbs.db
+.idea/
