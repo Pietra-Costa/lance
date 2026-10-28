@@ -33,7 +33,7 @@ npm run db:seed --workspace @lance/api
 npm run start:dev --workspace @lance/api
 ```
 
-O seed cria um leiloeiro, dois licitantes, carteiras com saldo demonstrativo e um lote ao vivo. A liquidação é simulada; o worker roda dentro da API, reconcilia ao iniciar e a cada 20 segundos. Em hospedagens que suspendem a API, a liquidação pode atrasar até a próxima inicialização.
+O seed não cria usuários, lotes, carteiras, lances ou itens demonstrativos. Os dados da plataforma devem ser criados por usuários reais através da API. A liquidação é simulada; o worker roda dentro da API e reconcilia periodicamente. Em hospedagens que suspendem a API, a liquidação pode atrasar até a próxima inicialização.
 
 ## Description
 
