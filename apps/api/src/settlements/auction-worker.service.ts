@@ -14,7 +14,7 @@ export class AuctionWorkerService implements OnModuleInit, OnModuleDestroy {
   }
   onModuleInit() {
     void this.run();
-    this.timer = setInterval(() => void this.run(), 20_000);
+    this.timer = setInterval(() => void this.run(), 1_000);
     this.timer.unref();
   }
   onModuleDestroy() {
