@@ -1,35 +1,181 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { AppProvider, useApp } from "./context/AppContext";
+import { ViewportSimulator } from "./components/layout/ViewportSimulator";
+import { Header } from "./components/layout/Header";
+import { Footer } from "./components/layout/Footer";
+import { HomePage } from "./pages/HomePage";
+import { CatalogPage } from "./pages/CatalogPage";
+import { LotDetailPage } from "./pages/LotDetailPage";
+import { AuthPage } from "./pages/AuthPage";
+import { BidderArea } from "./pages/BidderArea";
+import { AuctioneerArea } from "./pages/AuctioneerArea";
+import { CreateLotWizard } from "./pages/CreateLotWizard";
+import { AuditPage } from "./pages/AuditPage";
+import { DesignSystemPage } from "./pages/DesignSystemPage";
+import { BidModal } from "./components/domain/BidModal";
+import { ReceiptModal } from "./components/domain/ReceiptModal";
+import { CheckCircle, AlertTriangle, Info, XCircle, X } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 
-function App() {
-  const [count, setCount] = useState(0)
+const MainAppContent: React.FC = () => {
+  const {
+    currentRoute,
+    viewportMode,
+    selectedLotForBidModal,
+    setSelectedLotForBidModal,
+    selectedReceiptForModal,
+    setSelectedReceiptForModal,
+    notifications,
+    dismissNotification,
+  } = useApp();
+
+  // Resolve current view component from route
+  const renderView = () => {
+    if (currentRoute === "/") {
+      return <HomePage />;
+    }
+    if (currentRoute.startsWith("/lotes/")) {
+      const lotId = currentRoute.replace("/lotes/", "");
+      return <LotDetailPage lotId={lotId} />;
+    }
+    if (currentRoute.startsWith("/lotes")) {
+      return <CatalogPage />;
+    }
+    if (currentRoute === "/entrar") {
+      return <AuthPage initialMode="login" />;
+    }
+    if (currentRoute === "/cadastro") {
+      return <AuthPage initialMode="register" />;
+    }
+    if (currentRoute.startsWith("/conta")) {
+      let initialTab: any = "dashboard";
+      if (currentRoute.includes("/lances")) initialTab = "lances";
+      else if (currentRoute.includes("/arrematados"))
+        initialTab = "arrematados";
+      else if (currentRoute.includes("/carteira")) initialTab = "carteira";
+      else if (currentRoute.includes("/transacoes")) initialTab = "transacoes";
+      else if (currentRoute.includes("/perfil")) initialTab = "perfil";
+      return <BidderArea initialTab={initialTab} />;
+    }
+    if (currentRoute === "/leiloeiro/lotes/novo") {
+      return <CreateLotWizard />;
+    }
+    if (currentRoute.startsWith("/leiloeiro")) {
+      return <AuctioneerArea />;
+    }
+    if (currentRoute === "/auditoria") {
+      return <AuditPage />;
+    }
+    if (currentRoute === "/design-system") {
+      return <DesignSystemPage />;
+    }
+
+    // Default fallback
+    return <HomePage />;
+  };
+
+  // Viewport Frame logic for evaluation
+  const getFrameContainerClass = () => {
+    switch (viewportMode) {
+      case "desktop":
+        return "max-w-[1440px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-xl sm:rounded-2xl border border-[#CDC5B4] overflow-hidden";
+      case "tablet":
+        return "max-w-[768px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-[#0A2B22] overflow-hidden";
+      case "mobile":
+        return "max-w-[390px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-2xl sm:rounded-3xl border-4 sm:border-8 border-[#0A2B22] overflow-hidden";
+      case "native":
+      default:
+        return "w-full max-w-full";
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="min-h-screen bg-[#EFE9DB] flex flex-col font-body w-full max-w-full overflow-x-hidden">
+      {/* Main Responsive Canvas - Vitrine de Leilões */}
+      <div
+        className={`flex-1 flex flex-col justify-between bg-[#F5F1E7] transition-all duration-300 w-full ${getFrameContainerClass()}`}
+      >
+        <Header />
 
-export default App
+        <div className="flex-1 w-full">{renderView()}</div>
+
+        <Footer />
+      </div>
+
+      {/* Global Modals with AnimatePresence */}
+      <AnimatePresence>
+        {selectedLotForBidModal && (
+          <BidModal
+            lot={selectedLotForBidModal}
+            onClose={() => setSelectedLotForBidModal(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedReceiptForModal && (
+          <ReceiptModal
+            receipt={selectedReceiptForModal}
+            onClose={() => setSelectedReceiptForModal(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Notification Toast Stack */}
+      <div className="fixed bottom-4 right-4 sm:right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 max-w-full sm:max-w-sm w-auto pointer-events-none">
+        {notifications.map(notif => (
+          <div
+            key={notif.id}
+            className={`pointer-events-auto p-4 rounded-xl shadow-lg border text-xs flex items-start justify-between gap-3 animate-in slide-in-from-bottom-3 duration-200 ${
+              notif.type === "success"
+                ? "bg-[#EAF7EE] border-[#1E7E34]/30 text-[#1E7E34]"
+                : notif.type === "warning"
+                  ? "bg-[#FEF3C7] border-[#B45309]/30 text-[#B45309]"
+                  : notif.type === "error"
+                    ? "bg-[#FEE2E2] border-[#B91C1C]/30 text-[#B91C1C]"
+                    : "bg-white border-[#CDC5B4] text-[#222923]"
+            }`}
+          >
+            <div className="flex items-start gap-2.5">
+              {notif.type === "success" && (
+                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              )}
+              {notif.type === "warning" && (
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              )}
+              {notif.type === "error" && (
+                <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              )}
+              {notif.type === "info" && (
+                <Info className="w-4 h-4 text-[#123D2F] shrink-0 mt-0.5" />
+              )}
+
+              <div>
+                <p className="font-bold text-[11px]">{notif.title}</p>
+                <p className="text-[11px] mt-0.5 leading-normal opacity-90">
+                  {notif.message}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => dismissNotification(notif.id)}
+              className="opacity-60 hover:opacity-100 p-0.5 cursor-pointer"
+              aria-label="Dispensar aviso"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <AppProvider>
+      <MainAppContent />
+    </AppProvider>
+  );
+}
