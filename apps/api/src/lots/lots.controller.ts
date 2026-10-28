@@ -50,6 +50,12 @@ export class LotsController {
   ) {
     return this.lots.update(req.user.id, id, dto);
   }
+  @Post('lots/:id/publish')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.LEILOEIRO)
+  publish(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.lots.publish(req.user.id, id);
+  }
   @Post('lots/:id/cancel')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.LEILOEIRO)

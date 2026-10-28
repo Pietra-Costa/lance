@@ -22,11 +22,46 @@ export class MeController {
       orderBy: { createdAt: 'desc' },
     });
   }
-  @Get('wins') wins(@Req() req: AuthenticatedRequest) {
+  @Get('wins')
+  wins(@Req() req: AuthenticatedRequest) {
     return this.prisma.auctionSettlement.findMany({
-      where: { winningBid: { bidderId: req.user.id } },
-      include: { lot: { include: { itemSnapshot: true } }, receipt: true },
-      orderBy: { settledAt: 'desc' },
+      where: {
+        winningBid: { bidderId: req.user.id },
+      },
+      include: {
+        lot: {
+          include: {
+            itemSnapshot: {
+              include: {
+                catalogItem: {
+                  select: {
+                    category: true,
+                  },
+                },
+              },
+            },
+            seller: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        winningBid: {
+          include: {
+            bidder: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        receipt: true,
+      },
+      orderBy: {
+        settledAt: 'desc',
+      },
     });
   }
 }

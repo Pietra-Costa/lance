@@ -176,6 +176,23 @@ export class BidsService {
 
             const previousReservation = lot.reservations[0];
 
+            let previousBidderId: string | null = null;
+
+            if (previousReservation) {
+              const previousWallet = await tx.wallet.findUnique({
+                where: { id: previousReservation.walletId },
+                select: { userId: true },
+              });
+
+              if (!previousWallet) {
+                throw new ConflictException(
+                  'Não foi possível identificar o titular da reserva anterior.',
+                );
+              }
+
+              previousBidderId = previousWallet.userId;
+            }
+
             if (previousReservation) {
               const released = await tx.wallet.updateMany({
                 where: {
@@ -246,6 +263,26 @@ export class BidsService {
                 amountCents,
               },
             });
+
+            const walletUserIds = new Set<string>([bidderId]);
+
+            if (previousBidderId) {
+              walletUserIds.add(previousBidderId);
+            }
+
+            for (const userId of walletUserIds) {
+              await tx.outboxEvent.create({
+                data: {
+                  eventKey: `wallet-updated:bid:${bid.id}:${userId}`,
+                  eventType: 'WALLET_UPDATED',
+                  aggregateType: 'WALLET',
+                  aggregateId: userId,
+                  payload: {
+                    bidId: bid.id,
+                  },
+                },
+              });
+            }
 
             const reservation = await tx.bidReservation.create({
               data: {

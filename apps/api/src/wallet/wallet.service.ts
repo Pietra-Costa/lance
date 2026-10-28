@@ -109,6 +109,18 @@ export class WalletService {
           },
         });
 
+        await tx.outboxEvent.create({
+          data: {
+            eventKey: `wallet-deposit:${transaction.id}`,
+            eventType: 'WALLET_UPDATED',
+            aggregateType: 'WALLET',
+            aggregateId: userId,
+            payload: {
+              transactionId: transaction.id,
+            },
+          },
+        });
+
         return {
           ...transaction,
           balanceCents: updatedWallet.balanceCents,

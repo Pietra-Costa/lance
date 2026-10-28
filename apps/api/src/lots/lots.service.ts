@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto';
 import { LotStatus, UserRole } from '../../generated/prisma/enums';
 import { PrismaService } from '../infrastructure/database/prisma.service';
 import { CancelLotDto, CreateLotDto, UpdateLotDto } from './dto/create-lot.dto';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class LotsService {
@@ -24,6 +25,10 @@ export class LotsService {
       });
       if (!item)
         throw new NotFoundException('Item de catálogo não encontrado.');
+      const seller = await tx.user.findUniqueOrThrow({
+        where: { id: sellerId },
+        select: { name: true },
+      });
 
       const lot = await tx.lot.create({
         data: {
@@ -47,12 +52,18 @@ export class LotsService {
             },
           },
         },
-        include: { itemSnapshot: true },
+        include: {
+          itemSnapshot: true,
+          seller: { select: { name: true } },
+        },
       });
 
       await this.audit(tx, 'LOT_CREATED', lot.id, {
         sellerId,
+        actorId: sellerId,
+        actorName: seller.name,
         catalogItemId: item.id,
+        title: item.title,
       });
       await tx.outboxEvent.create({
         data: {
@@ -70,16 +81,25 @@ export class LotsService {
   async list(status?: LotStatus) {
     return this.prisma.lot.findMany({
       where: status ? { status } : { status: { not: LotStatus.CANCELED } },
-      include: { itemSnapshot: true },
+      include: {
+        itemSnapshot: true,
+        seller: { select: { name: true } },
+        _count: {
+          select: {
+            bids: true,
+          },
+        },
+      },
       orderBy: { startsAt: 'asc' },
     });
   }
 
   async getPublic(id: string) {
     const lot = await this.prisma.lot.findFirst({
-      where: { id, status: { not: LotStatus.CANCELED } },
+      where: { id },
       include: {
         itemSnapshot: true,
+        seller: { select: { name: true } },
         bids: {
           orderBy: { createdAt: 'desc' },
           take: 50,
@@ -97,11 +117,11 @@ export class LotsService {
       ...lot,
       bids: lot.bids.map((bid) => ({
         ...bid,
-        bidderAlias: this.alias(lot.id, bid.bidderId),
+        bidderAlias: this.alias(bid.bidderId),
         bidderId: undefined,
       })),
       currentLeaderAlias: lot.currentLeaderId
-        ? this.alias(lot.id, lot.currentLeaderId)
+        ? this.alias(lot.currentLeaderId)
         : null,
       currentLeaderId: undefined,
       sellerId: undefined,
@@ -117,6 +137,29 @@ export class LotsService {
       where: { id: lotId },
       data: { ...dto, startsAt, endsAt },
     });
+  }
+
+  async publish(sellerId: string, lotId: string) {
+    const lot = await this.getOwnedScheduledLot(sellerId, lotId);
+    const published = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.lot.update({
+        where: { id: lot.id },
+        data: { status: LotStatus.LIVE, startsAt: new Date() },
+        include: { itemSnapshot: true },
+      });
+      await this.audit(tx, 'LOT_LIVE', lotId, { actorId: sellerId });
+      await tx.outboxEvent.create({
+        data: {
+          eventKey: `lot-published:${lotId}`,
+          eventType: 'LOT_LIVE',
+          aggregateType: 'LOT',
+          aggregateId: lotId,
+          payload: { lotId },
+        },
+      });
+      return result;
+    });
+    return published;
   }
 
   async cancel(sellerId: string, lotId: string, dto: CancelLotDto) {
@@ -141,19 +184,37 @@ export class LotsService {
           'Lote vencido deve ser liquidado, não cancelado.',
         );
       }
+
       for (const reservation of lot.reservations) {
-        await tx.wallet.update({
+        const wallet = await tx.wallet.update({
           where: { id: reservation.walletId },
           data: { reservedCents: { decrement: reservation.amountCents } },
+          select: { userId: true },
         });
+
         await tx.bidReservation.update({
           where: { id: reservation.id },
           data: { status: 'RELEASED' },
         });
+
+        await tx.outboxEvent.create({
+          data: {
+            eventKey: `wallet-updated:lot-cancelled:${lotId}:${wallet.userId}`,
+            eventType: 'WALLET_UPDATED',
+            aggregateType: 'WALLET',
+            aggregateId: wallet.userId,
+            payload: { lotId },
+          },
+        });
       }
+
       const cancelled = await tx.lot.update({
         where: { id: lotId },
         data: { status: LotStatus.CANCELED },
+        include: {
+          itemSnapshot: true,
+          seller: { select: { name: true } },
+        },
       });
       await this.audit(tx, 'LOT_CANCELED', lotId, {
         actorId: sellerId,
@@ -175,7 +236,11 @@ export class LotsService {
   async sellerLots(sellerId: string) {
     return this.prisma.lot.findMany({
       where: { sellerId },
-      include: { itemSnapshot: true, settlement: true },
+      include: {
+        itemSnapshot: true,
+        settlement: true,
+        seller: { select: { name: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -215,8 +280,8 @@ export class LotsService {
       );
   }
 
-  private alias(lotId: string, userId: string) {
-    return `Licitante ${createHash('sha256').update(`${lotId}:${userId}`).digest('hex').slice(0, 6).toUpperCase()}`;
+  private alias(userId: string) {
+    return AuthService.publicPseudonym(userId);
   }
 
   private async audit(

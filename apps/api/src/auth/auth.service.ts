@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { PrismaService } from '../infrastructure/database/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -94,7 +95,9 @@ export class AuthService {
     });
   }
 
-  private async createAuthResponse(user: AuthenticatedUser) {
+  private async createAuthResponse(
+    user: Omit<AuthenticatedUser, 'publicPseudonym'>,
+  ) {
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
     });
@@ -103,9 +106,21 @@ export class AuthService {
     return {
       accessToken,
       tokenType: 'Bearer',
-      user,
+      user: {
+        ...user,
+        publicPseudonym: AuthService.publicPseudonym(user.id),
+      },
       refreshToken,
     };
+  }
+
+  static publicPseudonym(userId: string): string {
+    const suffix = createHash('sha256')
+      .update(`lance-public-pseudonym:${userId}`)
+      .digest('hex')
+      .slice(-4)
+      .toUpperCase();
+    return `Licitante •••• ${suffix}`;
   }
 
   async refresh(refreshToken: string) {

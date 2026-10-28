@@ -15,20 +15,88 @@ export class SettlementsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async reconcile() {
-    const now = new Date();
-    await this.prisma.lot.updateMany({
+    const scheduledLots = await this.prisma.lot.findMany({
       where: {
         status: LotStatus.SCHEDULED,
-        startsAt: { lte: now },
-        endsAt: { gt: now },
+        startsAt: { lte: new Date() },
+        endsAt: { gt: new Date() },
       },
-      data: { status: LotStatus.LIVE },
-    });
-    const lots = await this.prisma.lot.findMany({
-      where: { status: LotStatus.LIVE, endsAt: { lte: now } },
       select: { id: true },
     });
-    for (const lot of lots) {
+
+    for (const candidate of scheduledLots) {
+      try {
+        await this.prisma.$transaction(async (tx) => {
+          const locked = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT "id"
+          FROM "Lot"
+          WHERE "id" = ${candidate.id}
+          FOR UPDATE
+        `;
+
+          if (!locked.length) return;
+
+          const lot = await tx.lot.findUnique({
+            where: { id: candidate.id },
+            select: {
+              id: true,
+              status: true,
+              startsAt: true,
+              endsAt: true,
+            },
+          });
+
+          const transitionAt = new Date();
+
+          if (
+            !lot ||
+            lot.status !== LotStatus.SCHEDULED ||
+            lot.startsAt > transitionAt ||
+            lot.endsAt <= transitionAt
+          ) {
+            return;
+          }
+
+          await tx.lot.update({
+            where: { id: lot.id },
+            data: { status: LotStatus.LIVE },
+          });
+
+          await appendAuditEvent(tx, 'LOT_LIVE', 'LOT', lot.id, {
+            lotId: lot.id,
+            startedAt: transitionAt.toISOString(),
+            activation: 'SCHEDULED',
+          });
+
+          await tx.outboxEvent.create({
+            data: {
+              eventKey: `lot-live:${lot.id}`,
+              eventType: 'LOT_LIVE',
+              aggregateType: 'LOT',
+              aggregateId: lot.id,
+              payload: {
+                lotId: lot.id,
+              },
+            },
+          });
+        });
+      } catch (error) {
+        this.logger.error(
+          `Falha ao ativar automaticamente o lote ${candidate.id}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+      }
+    }
+
+    const lotsToClose = await this.prisma.lot.findMany({
+      where: {
+        status: LotStatus.LIVE,
+        endsAt: { lte: new Date() },
+      },
+      select: { id: true },
+    });
+
+    for (const lot of lotsToClose) {
       try {
         await this.closeAndSettle(lot.id);
       } catch (error) {
@@ -55,7 +123,8 @@ export class SettlementsService {
         if (lot.status === LotStatus.LIVE && lot.endsAt > new Date())
           return null;
         if (lot.status === LotStatus.SCHEDULED) return null;
-        if (lot.status === LotStatus.LIVE)
+        const wasLive = lot.status === LotStatus.LIVE;
+        if (wasLive)
           await tx.lot.update({
             where: { id: lotId },
             data: { status: LotStatus.ENDED },
@@ -71,6 +140,21 @@ export class SettlementsService {
               orderBy: { createdAt: 'desc' },
             })
           : null;
+        if (wasLive) {
+          await appendAuditEvent(tx, 'AUCTION_ENDED', 'LOT', lotId, {
+            lotId,
+            endedAt: new Date().toISOString(),
+            winningBidId: winningBid?.id ?? null,
+          });
+        }
+        if (winningBid) {
+          await appendAuditEvent(tx, 'AUCTION_WON', 'LOT', lotId, {
+            lotId,
+            winnerId: winningBid.bidderId,
+            winningBidId: winningBid.id,
+            amountCents: winningBid.amountCents,
+          });
+        }
         const settlement = await tx.auctionSettlement.upsert({
           where: { lotId },
           update: {},
@@ -83,10 +167,15 @@ export class SettlementsService {
         });
         if (settlement.status === SettlementStatus.COMPLETED) return settlement;
         if (!lot.currentLeaderId) {
-          return tx.auctionSettlement.update({
+          const completedWithoutWinner = await tx.auctionSettlement.update({
             where: { id: settlement.id },
             data: { status: SettlementStatus.COMPLETED, settledAt: new Date() },
           });
+          await appendAuditEvent(tx, 'SETTLEMENT_COMPLETED', 'LOT', lotId, {
+            settlementId: settlement.id,
+            amountCents: 0,
+          });
+          return completedWithoutWinner;
         }
         const reservation = await tx.bidReservation.findFirst({
           where: { lotId, status: BidReservationStatus.ACTIVE },

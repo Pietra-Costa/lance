@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../infrastructure/database/prisma.service';
+import { AuthService } from './auth.service';
 
 interface JwtPayload {
   sub: string;
@@ -46,6 +47,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Usuário não encontrado.');
     }
 
-    return user;
+    return {
+      ...user,
+      publicPseudonym: AuthService.publicPseudonym(user.id),
+    };
   }
 }
