@@ -1,9 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
+import { io, type Socket } from "socket.io-client";
 
 import {
   apiGet,
   apiPost,
+  apiPatch,
   getAccessToken,
   getRefreshToken,
   clearAuthTokens,
@@ -38,6 +46,15 @@ interface ApiLotsResponse {
   sellerName?: string;
   currentLeaderId?: string | null;
   currentLeaderAlias?: string | null;
+  settlement?: {
+    id: string;
+    status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+    amountCents: number;
+    settledAt: string | null;
+  } | null;
+  category?: string | null;
+  specialConditions?: string | null;
+  sellerNotes?: string | null;
   _count?: { bids: number };
   bids?: Array<{
     id: string;
@@ -52,6 +69,11 @@ interface ApiLotsResponse {
     externalId: string;
     imageUrl: string | null;
     sourceUrl: string | null;
+    medium?: string | null;
+    dimensions?: string | null;
+    attribution?: string | null;
+    period?: string | null;
+    imageConditions?: string | null;
   };
 }
 
@@ -153,10 +175,24 @@ const mapAuditEvent = (event: ApiAuditEvent): AuditEvent => {
     timestamp: event.createdAt,
     prevHash: event.previousHash ?? "",
     hash: event.eventHash,
-    signatureEd25519: "",
-    anchoredOpenTimestamps: false,
   };
 };
+
+/** Campos editáveis de um lote antes de entrar ao vivo. */
+export interface LotEditPatch {
+  category?: string;
+  specialConditions?: string | null;
+  sellerNotes?: string | null;
+  startingPriceCents?: number;
+  minIncrementCents?: number;
+  startsAt?: string;
+  endsAt?: string;
+  medium?: string | null;
+  dimensions?: string | null;
+  attribution?: string | null;
+  period?: string | null;
+  imageConditions?: string | null;
+}
 
 interface PlaceBidResult {
   success: boolean;
@@ -169,7 +205,7 @@ const mapApiLots = (response: ApiLotsResponse[]): Lot[] =>
     id: lot.id,
     code: lot.id,
     title: lot.itemSnapshot.title,
-    category: "" as Lot["category"],
+    category: (lot.category ?? "") as Lot["category"],
     itemSnapshot: {
       source: ({
         THE_MET: "The Met Collection",
@@ -180,15 +216,17 @@ const mapApiLots = (response: ApiLotsResponse[]): Lot[] =>
         lot.itemSnapshot.source) as CatalogItem["source"],
       externalId: lot.itemSnapshot.externalId,
       title: lot.itemSnapshot.title,
-      creator: "",
-      dateOrYear: "",
-      category: "" as CatalogItem["category"],
-      medium: "",
-      dimensions: "",
+      // Campos da ficha técnica vêm do snapshot; vazios quando a fonte não
+      // forneceu e o leiloeiro não completou.
+      creator: lot.itemSnapshot.attribution ?? "",
+      dateOrYear: lot.itemSnapshot.period ?? "",
+      category: (lot.category ?? "") as CatalogItem["category"],
+      medium: lot.itemSnapshot.medium ?? "",
+      dimensions: lot.itemSnapshot.dimensions ?? "",
       description: lot.itemSnapshot.description || "",
       primaryImageUrl: lot.itemSnapshot.imageUrl || "",
       additionalImages: [],
-      licenseNotes: "",
+      licenseNotes: lot.itemSnapshot.imageConditions ?? "",
       sourceUrl: lot.itemSnapshot.sourceUrl || "",
     },
     startingPriceCents: lot.startingPriceCents,
@@ -202,6 +240,9 @@ const mapApiLots = (response: ApiLotsResponse[]): Lot[] =>
     currentLeaderBidderId: lot.currentLeaderId ?? undefined,
     currentLeaderPseudonym: lot.currentLeaderAlias ?? undefined,
     bidCount: lot._count?.bids ?? lot.bids?.length ?? 0,
+    settlement: lot.settlement ?? null,
+    specialConditions: lot.specialConditions ?? null,
+    sellerNotes: lot.sellerNotes ?? null,
   }));
 
 export interface AppNotification {
@@ -252,6 +293,9 @@ interface AppContextType {
   currentUser: User | null;
   currentRole: "LICITANTE" | "LEILOEIRO" | "VISITOR";
 
+  subscribeToLot: (lotId: string) => void;
+  unsubscribeFromLot: (lotId: string) => void;
+
   logoutUser: () => void;
 
   refreshMyWins: () => Promise<void>;
@@ -268,6 +312,7 @@ interface AppContextType {
   bidsByLot: Record<string, Bid[]>;
   myBids: ApiMyBidResponse[];
   refreshLotBids: (lotId: string) => Promise<void>;
+  refreshLots: () => Promise<void>;
   refreshLotAudit: (lotId: string) => Promise<void>;
   refreshMyBids: () => Promise<void>;
 
@@ -286,6 +331,7 @@ interface AppContextType {
 
   placeBid: (lotId: string, amountCents: number) => Promise<PlaceBidResult>;
 
+  updateLot: (lotId: string, patch: LotEditPatch) => Promise<void>;
   publishLot: (lotId: string) => Promise<void>;
   cancelLot: (lotId: string, reason: string) => Promise<void>;
 
@@ -322,6 +368,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return "/";
   });
+
+  const socketRef = useRef<Socket | null>(null);
+  const subscribedLotIdsRef = useRef<Set<string>>(new Set());
+
+  const subscribeToLot = useCallback((lotId: string) => {
+    if (!lotId) return;
+
+    subscribedLotIdsRef.current.add(lotId);
+    socketRef.current?.emit("lot.subscribe", { lotId });
+  }, []);
+
+  const unsubscribeFromLot = useCallback((lotId: string) => {
+    if (!lotId) return;
+
+    subscribedLotIdsRef.current.delete(lotId);
+    socketRef.current?.emit("lot.unsubscribe", { lotId });
+  }, []);
 
   const [returnRouteAfterLogin, setReturnRouteAfterLogin] = useState<
     string | null
@@ -438,7 +501,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const refreshLotBids = async (lotId: string): Promise<void> => {
+  /**
+   * Recarrega a lista de lotes direto da API — o estado oficial do leilão.
+   * Usada após qualquer mutação (lance, cancelamento, publicação, evento
+   * realtime) para que `currentLeaderBidderId` e `currentPriceCents` fiquem
+   * sempre coerentes com o servidor.
+   */
+  const refreshLots = useCallback(async (): Promise<void> => {
+    try {
+      const response = await apiGet<ApiLotsResponse[]>(
+        currentUser?.role === "LEILOEIRO" ? "/seller/lots" : "/lots",
+      );
+
+      setLots(mapApiLots(response));
+    } catch (error) {
+      console.error("Não foi possível recarregar os lotes:", error);
+    }
+  }, [currentUser?.role]);
+
+  const refreshLotBids = useCallback(async (lotId: string): Promise<void> => {
     const response = await apiGet<ApiPublicLotResponse>(
       `/lots/${encodeURIComponent(lotId)}`,
     );
@@ -448,7 +529,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       [lotId]: response.bids.map(bid => ({
         id: bid.id,
         lotId,
-        // A API pública omite o identificador real do licitante.
         bidderId: "",
         pseudonym: bid.bidderAlias,
         amountCents: bid.amountCents,
@@ -456,23 +536,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         status: "ACCEPTED",
       })),
     }));
-  };
+  }, []);
 
-  const refreshLotAudit = async (lotId: string): Promise<void> => {
+  const refreshLotAudit = useCallback(async (lotId: string): Promise<void> => {
     const response = await apiGet<ApiAuditEvent[]>(
       `/audit/lots/${encodeURIComponent(lotId)}`,
     );
+
     setAuditEvents(previous => {
       const current = new Map(
         previous.map(event => [`${event.lotId}:${event.sequence}`, event]),
       );
+
       response.map(mapAuditEvent).forEach(event => {
         current.set(`${event.lotId}:${event.sequence}`, event);
       });
+
       return [...current.values()].sort((a, b) => a.sequence - b.sequence);
     });
-  };
-
+  }, []);
   const refreshMyBids = async (): Promise<void> => {
     if (!currentUser || currentUser.role !== "LICITANTE") {
       setMyBids([]);
@@ -497,7 +579,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       const snapshot = lot.itemSnapshot;
       const bidder = win.winningBid?.bidder;
 
-      // Só exibimos comprovantes efetivamente emitidos.
       if (!receipt || !bidder) {
         return [];
       }
@@ -755,9 +836,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       active = false;
     };
-
-    // A sessão é restaurada quando o provider é montado.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -800,6 +878,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       ...(token ? { auth: { token } } : {}),
     });
 
+    socketRef.current = socket;
+
+    socket.on("bid.outbid", () => {
+      window.dispatchEvent(new CustomEvent("lance:notifications-changed"));
+    });
+    socket.on("auction.won", () => {
+      window.dispatchEvent(new CustomEvent("lance:notifications-changed"));
+    });
+    socket.on("lot.canceled", () => {
+      window.dispatchEvent(new CustomEvent("lance:notifications-changed"));
+    });
+
     socket.on("wallet.updated", () => {
       if (currentUser) {
         void refreshWallet().catch(error => {
@@ -809,10 +899,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     socket.on("connect", () => {
+      for (const lotId of subscribedLotIdsRef.current) {
+        socket.emit("lot.subscribe", { lotId });
+      }
+      void loadLots();
+      void loadAuditEvents();
+
       if (currentUser) {
         void refreshWallet().catch(error => {
           console.error("Não foi possível sincronizar a carteira:", error);
         });
+      }
+
+      if (currentUser?.role === "LICITANTE") {
+        void refreshMyWins().catch(error => {
+          console.error(
+            "Não foi possível sincronizar os leilões ganhos:",
+            error,
+          );
+        });
+
+        void apiGet<ApiMyBidResponse[]>("/me/bids")
+          .then(response => {
+            if (active) setMyBids(response);
+          })
+          .catch(error => {
+            if (active) {
+              console.error("Não foi possível sincronizar meus lances:", error);
+            }
+          });
       }
     });
 
@@ -843,58 +958,79 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     socket.on("bid.placed", event => {
-      void loadLots();
-      void loadAuditEvents();
+      const payload = event as {
+        lotId?: string;
+        amountCents?: number;
+        currentPriceCents?: number;
+        bidderPseudonym?: string | null;
+        endsAt?: string | null;
+      };
 
-      // Atualiza o histórico público do lote que recebeu o lance.
-      const payload = event as { lotId?: string };
+      if (!payload.lotId) return;
 
-      if (payload.lotId) {
-        void apiGet<ApiPublicLotResponse>(
-          `/lots/${encodeURIComponent(payload.lotId)}`,
-        )
-          .then(response => {
-            if (!active) return;
+      const { lotId } = payload;
 
-            setBidsByLot(previous => ({
-              ...previous,
-              [payload.lotId as string]: response.bids.map(bid => ({
-                id: bid.id,
-                lotId: payload.lotId as string,
-                bidderId: "",
-                pseudonym: bid.bidderAlias,
-                amountCents: bid.amountCents,
-                createdAt: bid.createdAt,
-                status: "ACCEPTED",
-              })),
-            }));
-          })
-          .catch(error => {
-            if (active) {
-              console.error(
-                "Não foi possível atualizar o histórico de lances:",
-                error,
-              );
-            }
-          });
+      // O evento NÃO é a fonte de verdade: aplicamos uma projeção otimista
+      // (preço e líder público) e em seguida recarregamos o estado oficial
+      // da API. Sem isso, o `currentLeaderBidderId` fica desatualizado e o
+      // licitante recebe "você já é o líder" por engano até dar refresh.
+      if (
+        typeof payload.currentPriceCents === "number" ||
+        typeof payload.amountCents === "number" ||
+        typeof payload.endsAt === "string"
+      ) {
+        const nextPrice =
+          payload.currentPriceCents ?? payload.amountCents ?? null;
+
+        setLots(previousLots =>
+          previousLots.map(lot =>
+            lot.id === lotId
+              ? {
+                  ...lot,
+                  currentBidCents:
+                    nextPrice !== null
+                      ? Math.max(lot.currentBidCents, nextPrice)
+                      : lot.currentBidCents,
+                  currentLeaderPseudonym:
+                    typeof payload.bidderPseudonym === "string"
+                      ? payload.bidderPseudonym
+                      : lot.currentLeaderPseudonym,
+                  endsAt:
+                    typeof payload.endsAt === "string"
+                      ? payload.endsAt
+                      : lot.endsAt,
+                }
+              : lot,
+          ),
+        );
       }
 
-      // Atualiza o histórico privado quando outro lance é registrado.
+      // Sincroniza o estado oficial (inclui o líder real do lote).
+      void loadLots();
+
+      void refreshLotBids(lotId).catch(error => {
+        if (active) {
+          console.error(
+            "Não foi possível atualizar o histórico de lances:",
+            error,
+          );
+        }
+      });
+
       if (currentUser?.role === "LICITANTE") {
-        void apiGet<ApiMyBidResponse[]>("/me/bids")
-          .then(response => {
-            if (active) setMyBids(response);
-          })
-          .catch(error => {
-            if (active) {
-              console.error("Falha ao atualizar meus lances:", error);
-            }
-          });
+        void refreshMyBids().catch(error => {
+          if (active) {
+            console.error("Não foi possível atualizar meus lances:", error);
+          }
+        });
       }
     });
 
     return () => {
       active = false;
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
       socket.disconnect();
     };
   }, [currentUser?.id, currentUser?.role]);
@@ -1058,6 +1194,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       refreshLotBids(lotId),
       refreshMyBids(),
       refreshWallet(),
+      refreshLots(),
     ]);
 
     syncResults.forEach((syncResult, index) => {
@@ -1091,6 +1228,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   };
 
+  /**
+   * Edita um lote ainda não iniciado.
+   * O backend registra cada alteração na trilha de auditoria (LOT_UPDATED),
+   * com o valor anterior e o novo — é isso que aparece no histórico público.
+   */
+  const updateLot = async (
+    lotId: string,
+    patch: LotEditPatch,
+  ): Promise<void> => {
+    try {
+      const updated = await apiPatch<ApiLotsResponse>(
+        `/lots/${encodeURIComponent(lotId)}`,
+        patch,
+      );
+
+      setLots(previous =>
+        previous.map(lot =>
+          lot.id === lotId
+            ? updated.itemSnapshot
+              ? mapApiLots([updated])[0]
+              : ({ ...lot, ...patch } as typeof lot)
+            : lot,
+        ),
+      );
+
+      await refreshLots();
+
+      addNotification({
+        title: "Lote atualizado",
+        message: "As alterações foram registradas na auditoria.",
+        type: "success",
+      });
+    } catch (error) {
+      addNotification({
+        title: "Não foi possível salvar",
+        message: error instanceof Error ? error.message : "Tente novamente.",
+        type: "error",
+      });
+
+      throw error;
+    }
+  };
+
   const publishLot = async (lotId: string): Promise<void> => {
     try {
       const published = await apiPost<ApiLotsResponse>(
@@ -1105,7 +1285,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
       addNotification({
         title: "Lote publicado",
-        message: "O lote foi aberto ao vivo e persistido pela API.",
+        message: "O lote foi aberto ao vivo",
         type: "success",
       });
     } catch (error) {
@@ -1171,8 +1351,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         bidsByLot,
         myBids,
         refreshLotBids,
+        refreshLots,
         refreshLotAudit,
         refreshMyBids,
+        subscribeToLot,
+        unsubscribeFromLot,
 
         wallet,
         transactions,
@@ -1184,6 +1367,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         authenticateApiUser,
 
         placeBid,
+        updateLot,
         publishLot,
         cancelLot,
 
