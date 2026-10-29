@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../infrastructure/database/prisma.service';
 import { WalletTransactionType } from '../../generated/prisma/enums';
+import { appendAuditEvent } from '../audit/audit-chain';
 
 @Injectable()
 export class WalletService {
@@ -107,6 +108,14 @@ export class WalletService {
             referenceId: true,
             createdAt: true,
           },
+        });
+
+        // Auditoria: depósito simulado entra na cadeia de hashes.
+        await appendAuditEvent(tx, 'WALLET_DEPOSITED', 'WALLET', wallet.id, {
+          walletId: wallet.id,
+          userId,
+          transactionId: transaction.id,
+          amountCents,
         });
 
         await tx.outboxEvent.create({

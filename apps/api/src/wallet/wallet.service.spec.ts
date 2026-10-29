@@ -21,6 +21,17 @@ describe('WalletService', () => {
       findUnique: jest.Mock;
       update: jest.Mock;
     };
+    outboxEvent: {
+      create: jest.Mock;
+    };
+    auditChainState: {
+      findUniqueOrThrow: jest.Mock;
+      update: jest.Mock;
+    };
+    auditEvent: {
+      create: jest.Mock;
+    };
+    $queryRaw: jest.Mock;
   };
 
   const userId = 'user-1';
@@ -36,6 +47,20 @@ describe('WalletService', () => {
         findUnique: jest.fn().mockResolvedValue({ id: 'wallet-1' }),
         update: jest.fn().mockResolvedValue({ balanceCents: 5000 }),
       },
+      outboxEvent: {
+        create: jest.fn().mockResolvedValue({ id: 'outbox-1' }),
+      },
+      auditChainState: {
+        findUniqueOrThrow: jest.fn().mockResolvedValue({
+          lastSequence: 0n,
+          lastEventHash: null,
+        }),
+        update: jest.fn().mockResolvedValue({}),
+      },
+      auditEvent: {
+        create: jest.fn().mockResolvedValue({ id: 'audit-1', sequence: 1n }),
+      },
+      $queryRaw: jest.fn().mockResolvedValue([{ id: 'global' }]),
     };
 
     prisma = {
