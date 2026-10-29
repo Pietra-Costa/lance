@@ -11,6 +11,53 @@ services:
       - "5432:5432"
     volumes:
       - lance_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lance -d lance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: lance-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://lance:lance_dev@postgres:5432/lance?schema=public
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-apenas-para-docker-local-nao-use-em-producao}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-senhaDemoForte2026}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:8080}
+      PORT: 4000
+      NODE_ENV: production
+    ports:
+      - "4000:4000"
+    # Aplica as migrations versionadas antes de subir a API.
+    # Nunca usa `migrate reset` nem migration destrutiva automatica.
+    command: sh -c "npx prisma migrate deploy --schema prisma/schema.prisma && node dist/src/main.js"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+    container_name: lance-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
 
 volumes:
   lance_postgres_data:
