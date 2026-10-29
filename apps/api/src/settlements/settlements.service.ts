@@ -341,7 +341,7 @@ export class SettlementsService {
               idempotencyKey: `settlement:${settlement.id}:winner-debit`,
               referenceType: 'AUCTION_SETTLEMENT',
               referenceId: settlement.id,
-              description: 'DÃ©bito por arremate simulado',
+              description: 'Débito por arremate simulado',
             },
             {
               walletId: sellerWallet.id,
@@ -350,7 +350,7 @@ export class SettlementsService {
               idempotencyKey: `settlement:${settlement.id}:seller-credit`,
               referenceType: 'AUCTION_SETTLEMENT',
               referenceId: settlement.id,
-              description: 'CrÃ©dito por lote arrematado',
+              description: 'Crédito por lote arrematado',
             },
           ],
           skipDuplicates: true,
