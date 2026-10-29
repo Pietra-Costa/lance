@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { createHash } from 'crypto';
 import {
   BidReservationStatus,
@@ -11,6 +6,8 @@ import {
   UserRole,
 } from '../../generated/prisma/enums';
 import { PrismaService } from '../infrastructure/database/prisma.service';
+import { bidRejection } from './bid-rejection';
+import { AuthService } from '../auth/auth.service';
 import { appendAuditEvent } from '../audit/audit-chain';
 
 function isSerializationConflict(error: unknown): boolean {
@@ -48,7 +45,7 @@ export class BidsService {
     idempotencyKey: string,
   ) {
     if (!Number.isSafeInteger(amountCents) || amountCents <= 0) {
-      throw new ConflictException('Valor de lance inválido.');
+      throw bidRejection.invalidAmount(amountCents);
     }
 
     const requestHash = createHash('sha256')
@@ -69,7 +66,7 @@ export class BidsService {
             `;
 
             if (lockedLots.length === 0) {
-              throw new NotFoundException('Lote não encontrado.');
+              throw bidRejection.lotNotFound();
             }
 
             const existingRequest = await tx.bidRequest.findUnique({
@@ -86,15 +83,11 @@ export class BidsService {
                 existingRequest.lotId !== lotId ||
                 existingRequest.requestHash !== requestHash
               ) {
-                throw new ConflictException(
-                  'Esta chave de idempotência já foi usada com outros dados.',
-                );
+                throw bidRejection.idempotencyKeyReused();
               }
 
               if (!existingRequest.response) {
-                throw new ConflictException(
-                  'A solicitação anterior não possui um resultado disponível.',
-                );
+                throw bidRejection.idempotencyPending();
               }
 
               return existingRequest.response;
@@ -123,17 +116,28 @@ export class BidsService {
             });
 
             if (!lot) {
-              throw new NotFoundException('Lote não encontrado.');
+              throw bidRejection.lotNotFound();
             }
 
-            if (
-              lot.status !== LotStatus.LIVE ||
-              lot.startsAt > now ||
-              lot.endsAt <= now
-            ) {
-              throw new ConflictException(
-                'Este lote não está aceitando lances.',
-              );
+            // Recusas com motivo específico (Verzel: mensagem por motivo).
+            if (lot.status === LotStatus.CANCELED) {
+              throw bidRejection.notLive();
+            }
+
+            if (lot.status === LotStatus.ENDED) {
+              throw bidRejection.ended(lot.endsAt);
+            }
+
+            if (lot.status === LotStatus.SCHEDULED || lot.startsAt > now) {
+              throw bidRejection.notStarted(lot.startsAt);
+            }
+
+            if (lot.status !== LotStatus.LIVE) {
+              throw bidRejection.notLive();
+            }
+
+            if (lot.endsAt <= now) {
+              throw bidRejection.ended(lot.endsAt);
             }
 
             const bidder = await tx.user.findUnique({
@@ -146,15 +150,16 @@ export class BidsService {
             }
 
             if (bidder.role !== UserRole.LICITANTE) {
-              throw new ForbiddenException(
-                'Somente licitantes podem dar lances.',
-              );
+              throw bidRejection.invalidRole();
             }
 
             if (lot.sellerId === bidderId) {
-              throw new ForbiddenException(
-                'O vendedor não pode dar lances no próprio lote.',
-              );
+              throw bidRejection.sellerCannotBid();
+            }
+
+            // O líder não pode cobrir o próprio lance.
+            if (lot.currentLeaderId === bidderId) {
+              throw bidRejection.alreadyLeading(lot.currentPriceCents);
             }
 
             const minimumBid =
@@ -163,15 +168,11 @@ export class BidsService {
                 : lot.currentPriceCents + lot.minIncrementCents;
 
             if (amountCents < minimumBid) {
-              throw new ConflictException(
-                `O lance mínimo é ${minimumBid} centavos.`,
-              );
+              throw bidRejection.belowMinimum(minimumBid, amountCents);
             }
 
             if (lot.reservations.length > 1) {
-              throw new ConflictException(
-                'O lote possui reservas ativas inconsistentes.',
-              );
+              throw bidRejection.reservationInconsistent();
             }
 
             const previousReservation = lot.reservations[0];
@@ -185,9 +186,7 @@ export class BidsService {
               });
 
               if (!previousWallet) {
-                throw new ConflictException(
-                  'Não foi possível identificar o titular da reserva anterior.',
-                );
+                throw bidRejection.reservationInconsistent();
               }
 
               previousBidderId = previousWallet.userId;
@@ -209,15 +208,29 @@ export class BidsService {
               });
 
               if (released.count !== 1) {
-                throw new ConflictException(
-                  'Não foi possível liberar a reserva anterior.',
-                );
+                throw bidRejection.reservationInconsistent();
               }
 
               await tx.bidReservation.update({
                 where: { id: previousReservation.id },
                 data: { status: BidReservationStatus.RELEASED },
               });
+
+              // Notifica o líder superado (evento BID_OUTBID).
+              // Não notifica quando o próprio licitante cobre o seu lance.
+              if (previousBidderId && previousBidderId !== bidderId) {
+                await tx.notification.create({
+                  data: {
+                    userId: previousBidderId,
+                    type: 'BID_OUTBID',
+                    payload: {
+                      lotId,
+                      amountCents,
+                      outbidAt: now.toISOString(),
+                    },
+                  },
+                });
+              }
             }
 
             const wallet = await tx.wallet.findUnique({
@@ -233,9 +246,7 @@ export class BidsService {
             const availableCents = wallet.balanceCents - wallet.reservedCents;
 
             if (availableCents < amountCents) {
-              throw new ConflictException(
-                'Saldo disponível insuficiente para cobrir o lance integral.',
-              );
+              throw bidRejection.insufficientFunds(availableCents, amountCents);
             }
 
             const updatedWallet = await tx.wallet.updateMany({
@@ -251,9 +262,7 @@ export class BidsService {
             });
 
             if (updatedWallet.count !== 1) {
-              throw new ConflictException(
-                'O saldo mudou durante a operação. Tente novamente.',
-              );
+              throw bidRejection.concurrencyConflict();
             }
 
             const bid = await tx.bid.create({
@@ -297,24 +306,32 @@ export class BidsService {
             const shouldExtendAuction =
               lot.endsAt.getTime() - now.getTime() <= 120_000;
 
+            // Anti-sniping: nos últimos 2 minutos, o fim passa a ser
+            // (instante do lance + 2 minutos). Nunca encurta o prazo.
+            const newEndsAt = shouldExtendAuction
+              ? new Date(now.getTime() + 120_000)
+              : lot.endsAt;
+
             await tx.lot.update({
               where: { id: lotId },
               data: {
                 currentLeaderId: bidderId,
                 currentPriceCents: amountCents,
-                ...(shouldExtendAuction
-                  ? {
-                      endsAt: new Date(now.getTime() + 120_000),
-                    }
-                  : {}),
+                endsAt: newEndsAt,
               },
             });
 
+            // Payload do evento: `bidderId` é interno (fica na auditoria) e
+            // `bidderPseudonym` é o que pode ser publicado para os clientes.
             const eventPayload = {
               bidId: bid.id,
               lotId,
               bidderId,
+              bidderPseudonym: AuthService.publicPseudonym(bidderId),
               amountCents,
+              currentPriceCents: amountCents,
+              endsAt: newEndsAt.toISOString(),
+              currentLeaderId: bidderId,
               reservationId: reservation.id,
               previousReservationId: previousReservation?.id ?? null,
             };
@@ -366,9 +383,7 @@ export class BidsService {
             continue;
           }
 
-          throw new ConflictException(
-            'Não foi possível registrar o lance devido a um conflito de concorrência. Tente novamente.',
-          );
+          throw bidRejection.concurrencyConflict();
         }
 
         const isUniqueConstraintConflict =
@@ -392,9 +407,7 @@ export class BidsService {
               existingRequest.lotId !== lotId ||
               existingRequest.requestHash !== requestHash
             ) {
-              throw new ConflictException(
-                'Esta chave de idempotência já foi usada com outros dados.',
-              );
+              throw bidRejection.idempotencyKeyReused();
             }
 
             if (existingRequest.response) {
@@ -405,9 +418,7 @@ export class BidsService {
               continue;
             }
 
-            throw new ConflictException(
-              'A solicitação anterior ainda não possui um resultado disponível.',
-            );
+            throw bidRejection.idempotencyPending();
           }
         }
 
@@ -415,6 +426,6 @@ export class BidsService {
       }
     }
 
-    throw new ConflictException('Não foi possível registrar o lance.');
+    throw bidRejection.concurrencyConflict();
   }
 }

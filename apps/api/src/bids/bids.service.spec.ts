@@ -1,4 +1,5 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
+import { BidRejectionException } from './bid-rejection';
 import { createHash } from 'crypto';
 import { BidsService } from './bids.service';
 import { PrismaService } from '../infrastructure/database/prisma.service';
@@ -58,7 +59,7 @@ describe('BidsService', () => {
 
       await expect(
         service.createBid('bidder-1', 'lot-inexistente', 1000, 'test-key-4'),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(BidRejectionException);
     });
 
     it('deve retornar a resposta armazenada ao repetir a mesma requisição', async () => {
