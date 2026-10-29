@@ -12,10 +12,20 @@ export interface ExternalCatalogItem {
   attributes: Record<string, unknown>;
 }
 
+export interface CatalogSearchOptions {
+  /** Deslocamento na lista de resultados (paginação). */
+  offset?: number;
+  /** Quantidade máxima de itens retornados por página. */
+  limit?: number;
+}
+
 export interface CatalogSourceAdapter {
   readonly source: CatalogSource;
 
-  search(query: string): Promise<ExternalCatalogItem[]>;
+  search(
+    query: string,
+    options?: CatalogSearchOptions,
+  ): Promise<ExternalCatalogItem[]>;
 
   getById(externalId: string): Promise<ExternalCatalogItem | null>;
 }

@@ -1,4 +1,5 @@
 import {
+  CatalogSearchOptions,
   CatalogSourceAdapter,
   ExternalCatalogItem,
 } from '../../domain/catalog-source-adapter';
@@ -30,18 +31,24 @@ export class TheMetAdapter implements CatalogSourceAdapter {
   private readonly baseUrl =
     'https://collectionapi.metmuseum.org/public/collection/v1';
 
-  async search(query: string): Promise<ExternalCatalogItem[]> {
+  async search(
+    query: string,
+    options?: CatalogSearchOptions,
+  ): Promise<ExternalCatalogItem[]> {
     const normalizedQuery = query.trim();
 
-    if (!normalizedQuery) {
-      return [];
-    }
+    // Listagem sem termo: o Met permite q=* para varrer o acervo com imagem.
+    const effectiveQuery = normalizedQuery || '*';
+    const offset = Math.max(0, options?.offset ?? 0);
+    const limit = Math.min(40, Math.max(1, options?.limit ?? 10));
 
     const searchUrl = new URL(
       'https://collectionapi.metmuseum.org/public/collection/v1.1/search',
     );
-    searchUrl.searchParams.set('q', normalizedQuery);
+    searchUrl.searchParams.set('q', effectiveQuery);
     searchUrl.searchParams.set('hasImages', 'true');
+    searchUrl.searchParams.set('offset', String(offset));
+    searchUrl.searchParams.set('limit', String(limit));
 
     const searchResponse = await fetch(searchUrl);
 
@@ -51,7 +58,7 @@ export class TheMetAdapter implements CatalogSourceAdapter {
 
     const searchData = (await searchResponse.json()) as TheMetSearchResponse;
 
-    const objectIDs = (searchData.objectIDs ?? []).slice(0, 10);
+    const objectIDs = (searchData.objectIDs ?? []).slice(0, limit);
 
     const results = await Promise.all(
       objectIDs.map((id) => this.getById(String(id))),

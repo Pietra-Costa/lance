@@ -1,4 +1,5 @@
 import {
+  CatalogSearchOptions,
   CatalogSourceAdapter,
   ExternalCatalogItem,
 } from '../../domain/catalog-source-adapter';
@@ -38,16 +39,25 @@ export class ArticAdapter implements CatalogSourceAdapter {
     'main_reference_number',
   ].join(',');
 
-  async search(query: string): Promise<ExternalCatalogItem[]> {
+  async search(
+    query: string,
+    options?: CatalogSearchOptions,
+  ): Promise<ExternalCatalogItem[]> {
     const normalizedQuery = query.trim();
-
-    if (!normalizedQuery) {
-      return [];
-    }
+    const offset = Math.max(0, options?.offset ?? 0);
+    const limit = Math.min(40, Math.max(1, options?.limit ?? 10));
 
     const url = new URL(`${this.baseUrl}/artworks/search`);
-    url.searchParams.set('q', normalizedQuery);
-    url.searchParams.set('limit', '10');
+
+    // Sem termo: o AIC lista o acervo público com imagem.
+    if (normalizedQuery) {
+      url.searchParams.set('q', normalizedQuery);
+    } else {
+      url.searchParams.set('q', 'art');
+    }
+
+    url.searchParams.set('limit', String(limit));
+    url.searchParams.set('page', String(Math.floor(offset / limit) + 1));
     url.searchParams.set('fields', this.fields);
 
     const response = await fetch(url);

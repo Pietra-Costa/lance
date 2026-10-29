@@ -43,23 +43,44 @@ describe('CatalogSearchService', () => {
 
     const result = await service.search(' vase ');
 
-    expect(theMetAdapter.search).toHaveBeenCalledWith('vase');
-    expect(articAdapter.search).toHaveBeenCalledWith('vase');
-    expect(result).toEqual({
-      items: [theMetItem],
-      failedSources: [],
+    expect(theMetAdapter.search).toHaveBeenCalledWith('vase', {
+      offset: 0,
+      limit: 20,
     });
+    expect(articAdapter.search).toHaveBeenCalledWith('vase', {
+      offset: 0,
+      limit: 20,
+    });
+    expect(result.items).toEqual([theMetItem]);
+    expect(result.failedSources).toEqual([]);
+    expect(result.sources).toEqual(['THE_MET']);
+    expect(result.hasMore).toBe(false);
   });
 
-  it('deve retornar listas vazias para uma consulta vazia', async () => {
+  it('lista o acervo quando a consulta está vazia', async () => {
+    theMetAdapter.search.mockResolvedValue([theMetItem]);
+    articAdapter.search.mockResolvedValue([]);
+
     const result = await service.search('   ');
 
-    expect(result).toEqual({
-      items: [],
-      failedSources: [],
+    expect(theMetAdapter.search).toHaveBeenCalledWith('', {
+      offset: 0,
+      limit: 20,
     });
-    expect(theMetAdapter.search).not.toHaveBeenCalled();
-    expect(articAdapter.search).not.toHaveBeenCalled();
+    expect(result.items).toEqual([theMetItem]);
+    expect(result.failedSources).toEqual([]);
+  });
+
+  it('repassa offset e limit para as fontes', async () => {
+    theMetAdapter.search.mockResolvedValue([]);
+    articAdapter.search.mockResolvedValue([]);
+
+    await service.search('vase', { offset: 40, limit: 10 });
+
+    expect(theMetAdapter.search).toHaveBeenCalledWith('vase', {
+      offset: 40,
+      limit: 10,
+    });
   });
 
   it('deve preservar resultados quando uma fonte falha', async () => {
@@ -82,9 +103,7 @@ describe('CatalogSearchService', () => {
 
     const result = await service.search('vase');
 
-    expect(result).toEqual({
-      items: [],
-      failedSources: ['THE_MET', 'ARTIC'],
-    });
+    expect(result.items).toEqual([]);
+    expect(result.failedSources).toEqual(['THE_MET', 'ARTIC']);
   });
 });

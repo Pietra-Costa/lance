@@ -84,11 +84,18 @@ describe('ArticAdapter', () => {
     );
   });
 
-  it('deve retornar lista vazia quando a busca é vazia', async () => {
+  it('lista o acervo quando a busca está vazia (paginação)', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ objectIDs: [], data: [], count: 0 }),
+    });
+
     const result = await adapter.search('   ');
 
     expect(result).toEqual([]);
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
   it('deve mapear os resultados da busca', async () => {

@@ -1,4 +1,5 @@
 ﻿import {
+  CatalogSearchOptions,
   CatalogSourceAdapter,
   ExternalCatalogItem,
 } from '../../domain/catalog-source-adapter';
@@ -36,17 +37,20 @@ export class MusicBrainzAdapter implements CatalogSourceAdapter {
 
   private readonly coverArtArchive = new CoverArtArchiveAdapter();
 
-  async search(query: string): Promise<ExternalCatalogItem[]> {
+  async search(
+    query: string,
+    options?: CatalogSearchOptions,
+  ): Promise<ExternalCatalogItem[]> {
     const normalizedQuery = query.trim();
-
-    if (!normalizedQuery) {
-      return [];
-    }
+    const offset = Math.max(0, options?.offset ?? 0);
+    const limit = Math.min(40, Math.max(1, options?.limit ?? 10));
 
     const url = new URL(`${this.baseUrl}/release-group`);
-    url.searchParams.set('query', normalizedQuery);
+    // Sem termo: varredura ampla por lançamentos com capa.
+    url.searchParams.set('query', normalizedQuery || 'type:album');
     url.searchParams.set('fmt', 'json');
-    url.searchParams.set('limit', '10');
+    url.searchParams.set('limit', String(limit));
+    url.searchParams.set('offset', String(offset));
 
     const response = await fetch(url, {
       headers: {
