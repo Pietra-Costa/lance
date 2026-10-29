@@ -8,8 +8,8 @@ const Section: React.FC<{
   children: React.ReactNode;
   icon?: React.ReactNode;
 }> = ({ title, children, icon }) => (
-  <section className="bg-white rounded-2xl border border-border-subtle p-6 sm:p-8 space-y-3 shadow-2xs">
-    <h2 className="font-heading font-bold text-lg text-brand-primary flex items-center gap-2">
+  <section className="bg-surface-card rounded-2xl border border-border-subtle p-6 sm:p-8 space-y-3 shadow-2xs">
+    <h2 className="font-heading font-bold text-lg text-brand-interactive flex items-center gap-2">
       {icon}
       {title}
     </h2>
@@ -23,7 +23,7 @@ const RuleList: React.FC<{ items: React.ReactNode[] }> = ({ items }) => (
   <ul className="space-y-2">
     {items.map((item, index) => (
       <li key={index} className="flex gap-2">
-        <span className="text-accent-gold shrink-0 mt-0.5">—</span>
+        <span className="text-accent-gold-ink shrink-0 mt-0.5">—</span>
         <span>{item}</span>
       </li>
     ))}
@@ -42,19 +42,19 @@ const PageShell: React.FC<{
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <button
         onClick={() => navigateTo("/")}
-        className="inline-flex items-center gap-1.5 text-xs text-text-secondary hover:text-brand-primary cursor-pointer"
+        className="inline-flex items-center gap-1.5 text-xs text-text-secondary hover:text-brand-interactive cursor-pointer"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Voltar para a vitrine
       </button>
 
-      <header className="bg-brand-deep text-surface-base rounded-2xl p-7 sm:p-9 space-y-3">
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded bg-brand-primary text-accent-gold border border-accent-gold/30">
+      <header className="bg-brand-deep text-brand-on-dark rounded-2xl p-7 sm:p-9 space-y-3">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded bg-brand-primary text-accent-gold-ink border border-accent-gold/30">
           <ShieldCheck className="w-3 h-3" />
           {eyebrow}
         </span>
         <h1 className="font-heading font-bold text-2xl sm:text-3xl">{title}</h1>
-        <p className="text-xs sm:text-sm text-surface-base/75 leading-relaxed max-w-2xl">
+        <p className="text-xs sm:text-sm text-brand-on-dark/75 leading-relaxed max-w-2xl">
           {intro}
         </p>
       </header>
@@ -250,7 +250,7 @@ export const ReservationPolicyPage: React.FC = () => (
       icon={<Wallet className="w-4 h-4" />}
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-border-subtle bg-[#FAF7F2] p-3">
+        <div className="rounded-xl border border-border-subtle bg-surface-subtle p-3">
           <span className="text-[10px] text-text-secondary block">Saldo total</span>
           <span className="text-[11px]">Tudo o que já foi depositado.</span>
         </div>
@@ -267,7 +267,7 @@ export const ReservationPolicyPage: React.FC = () => (
           </span>
         </div>
       </div>
-      <p className="font-semibold text-brand-primary">
+      <p className="font-semibold text-brand-interactive">
         Disponível = Total − Comprometido. O lance só é aceito se couber no
         disponível.
       </p>

@@ -119,45 +119,45 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
         `}
       </style>
 
-      <div className="agreement-enter relative flex max-h-dvh w-full flex-col overflow-hidden border border-[#D9CFBA] bg-[#F8F5EE] shadow-[0_30px_100px_rgba(0,0,0,0.35)] sm:max-h-[92vh] sm:max-w-3xl sm:rounded-2xl">
-        <div className="relative shrink-0 border-b border-[#D9CFBA] bg-brand-deep px-5 py-5 text-surface-base sm:px-8 sm:py-6">
+      <div className="agreement-enter relative flex max-h-dvh w-full flex-col overflow-hidden border border-border-subtle bg-surface-subtle shadow-[0_30px_100px_rgba(0,0,0,0.35)] sm:max-h-[92vh] sm:max-w-3xl sm:rounded-2xl">
+        <div className="relative shrink-0 border-b border-border-subtle bg-brand-deep px-5 py-5 text-brand-on-dark sm:px-8 sm:py-6">
           <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-accent-gold/10 to-transparent" />
 
           <div className="relative flex items-center justify-between gap-3">
             <Logo variant="dark" size="sm" />
 
             <div className="flex items-center gap-2 rounded border border-accent-gold/30 bg-black/10 px-2.5 py-1.5">
-              <FileText className="h-3.5 w-3.5 text-accent-gold" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-accent-gold sm:text-[10px]">
+              <FileText className="h-3.5 w-3.5 text-accent-gold-ink" />
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-accent-gold-ink sm:text-[10px]">
                 Documento oficial
               </span>
             </div>
           </div>
 
           <div className="relative mt-5 flex items-start gap-3 sm:mt-7">
-            <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-accent-gold/25 bg-white/5 text-accent-gold">
+            <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-accent-gold/25 bg-surface-card/5 text-accent-gold-ink">
               <ShieldAlert className="h-4 w-4" />
             </div>
 
             <div>
-              <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-accent-gold/80">
+              <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-accent-gold-ink">
                 Habilitação de leiloeiro
               </p>
               <h2 className="max-w-xl font-heading text-xl font-semibold leading-tight tracking-tight sm:text-2xl">
                 Termo de Responsabilidade e Condução de Pregão
               </h2>
-              <p className="mt-2 max-w-xl text-xs leading-5 text-surface-base/65 sm:text-sm">
+              <p className="mt-2 max-w-xl text-xs leading-5 text-brand-on-dark/65 sm:text-sm">
                 Leia as condições de habilitação para criação de lotes,
                 importação de catálogo e abertura de leilões.
               </p>
             </div>
           </div>
 
-          <div className="relative mt-5 flex items-center justify-between border-t border-white/10 pt-3">
-            <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-surface-base/45">
+          <div className="relative mt-5 flex items-center justify-between border-t border-invert pt-3">
+            <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-brand-on-dark/45">
               LANCE · TERMO DO LEILOEIRO
             </span>
-            <span className="font-mono text-[9px] text-surface-base/45">
+            <span className="font-mono text-[9px] text-brand-on-dark/45">
               VERSÃO 1.0
             </span>
           </div>
@@ -165,40 +165,40 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
 
         <div
           onScroll={handleScroll}
-          className="relative min-h-0 flex-1 overflow-y-auto bg-[#F8F5EE] px-5 py-5 font-body text-xs leading-6 text-[#393D35] sm:px-9 sm:py-7 sm:text-[13px]"
+          className="relative min-h-0 flex-1 overflow-y-auto bg-surface-subtle px-5 py-5 font-body text-xs leading-6 text-text-primary sm:px-9 sm:py-7 sm:text-[13px]"
         >
-          <div className="pointer-events-none absolute inset-y-0 left-3 w-px bg-[#E7DFD0] sm:left-5" />
+          <div className="pointer-events-none absolute inset-y-0 left-3 w-px bg-surface-muted sm:left-5" />
 
-          <div className="relative mb-6 border border-[#DED5C4] bg-white/70 p-4 sm:p-5">
+          <div className="relative mb-6 border border-accent-gold bg-surface-card/70 p-4 sm:p-5">
             <div className="flex items-start gap-3">
-              <Lock className="mt-1 h-4 w-4 shrink-0 text-brand-primary" />
+              <Lock className="mt-1 h-4 w-4 shrink-0 text-brand-interactive" />
               <div className="min-w-0 flex-1">
                 <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
                   Identificação do responsável
                 </p>
-                <p className="mt-1 break-words font-heading text-base font-semibold text-brand-primary sm:text-lg">
+                <p className="mt-1 break-words font-heading text-base font-semibold text-brand-interactive sm:text-lg">
                   {currentUser?.name || "Leiloeiro autenticado"}
                 </p>
                 <p className="mt-1 text-[10px] leading-4 text-text-secondary">
                   Usuário autenticado na plataforma Lance
                 </p>
               </div>
-              <div className="hidden border border-[#D9CFBA] px-2 py-1 font-mono text-[8px] uppercase tracking-wider text-text-secondary sm:block">
+              <div className="hidden border border-border-subtle border-border-subtle px-2 py-1 font-mono text-[8px] uppercase tracking-wider text-text-secondary sm:block">
                 Identificado
               </div>
             </div>
           </div>
 
           <div className="mb-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[#D9CFBA]" />
+            <span className="h-px flex-1 bg-border-subtle" />
             <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-secondary">
               Condições de responsabilidade
             </span>
-            <span className="h-px flex-1 bg-[#D9CFBA]" />
+            <span className="h-px flex-1 bg-border-subtle" />
           </div>
 
           <section className="mb-6">
-            <h3 className="mb-2 font-heading text-sm font-bold text-brand-primary sm:text-base">
+            <h3 className="mb-2 font-heading text-sm font-bold text-brand-interactive sm:text-base">
               01. Objeto e exclusividade de papéis
             </h3>
             <p>
@@ -211,7 +211,7 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
           </section>
 
           <section className="mb-6">
-            <h3 className="mb-2 font-heading text-sm font-bold text-brand-primary sm:text-base">
+            <h3 className="mb-2 font-heading text-sm font-bold text-brand-interactive sm:text-base">
               02. Importação e snapshots imutáveis
             </h3>
             <p>
@@ -225,7 +225,7 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
           </section>
 
           <section className="mb-6">
-            <h3 className="mb-2 font-heading text-sm font-bold text-brand-primary sm:text-base">
+            <h3 className="mb-2 font-heading text-sm font-bold text-brand-interactive sm:text-base">
               03. Verificação de direitos e procedência de imagens
             </h3>
             <p>
@@ -238,7 +238,7 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
           </section>
 
           <section className="mb-6">
-            <h3 className="mb-2 font-heading text-sm font-bold text-brand-primary sm:text-base">
+            <h3 className="mb-2 font-heading text-sm font-bold text-brand-interactive sm:text-base">
               04. Regras de encerramento e anti-sniping
             </h3>
             <p>
@@ -250,9 +250,9 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
             </p>
           </section>
 
-          <div className="border-l-2 border-accent-gold bg-[#EEE7D8] p-4 text-[#514833]">
+          <div className="border-l-2 border-accent-gold bg-surface-muted p-4 text-text-secondary">
             <div className="mb-2 flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 shrink-0 text-[#927642]" />
+              <ShieldAlert className="h-4 w-4 shrink-0 text-accent-gold-ink" />
               <strong className="text-[10px] uppercase tracking-[0.12em]">
                 Registro de auditoria
               </strong>
@@ -264,7 +264,7 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
             </p>
           </div>
 
-          <div className="mt-7 flex items-center gap-3 border-t border-dashed border-[#D9CFBA] pt-4">
+          <div className="mt-7 flex items-center gap-3 border-t border-dashed border-border-subtle pt-4">
             <FileText className="h-4 w-4 shrink-0 text-text-secondary/60" />
             <p className="text-[10px] leading-4 text-text-secondary">
               A confirmação eletrônica registra sua concordância com as
@@ -273,9 +273,9 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
           </div>
 
           {isStamping && (
-            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-hidden bg-[#F8F5EE]/15">
-              <div className="agreement-stamp relative -rotate-12 border-[3px] border-[#A7352A] px-5 py-3 text-center text-[#A7352A] opacity-0 sm:px-8 sm:py-4">
-                <div className="agreement-stamp-ink absolute inset-1 border border-[#A7352A]/70" />
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-hidden bg-surface-subtle/15">
+              <div className="agreement-stamp relative -rotate-12 border-[3px] border-semantic-error px-5 py-3 text-center text-semantic-error opacity-0 sm:px-8 sm:py-4">
+                <div className="agreement-stamp-ink absolute inset-1 border border-border-subtle border-semantic-error/70" />
                 <div className="agreement-stamp-ink relative flex items-center justify-center gap-2">
                   <Check className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={3} />
                   <span className="font-mono text-lg font-black tracking-[0.12em] sm:text-2xl">
@@ -290,7 +290,7 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
           )}
         </div>
 
-        <div className="relative z-30 shrink-0 border-t border-[#D9CFBA] bg-white px-5 py-4 sm:px-8 sm:py-5">
+        <div className="relative z-30 shrink-0 border-t border-border-subtle bg-surface-card px-5 py-4 sm:px-8 sm:py-5">
           <label className="flex cursor-pointer items-start gap-3">
             <input
               type="checkbox"
@@ -312,7 +312,7 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
                 type="button"
                 onClick={onClose}
                 disabled={isStamping}
-                className="rounded-lg px-4 py-3 text-xs font-medium text-text-secondary transition-colors hover:bg-[#F8F5EE] disabled:opacity-40 sm:py-3"
+                className="rounded-lg px-4 py-3 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-subtle disabled:opacity-40 sm:py-3"
               >
                 Decidir depois
               </button>
@@ -328,12 +328,12 @@ export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
             >
               {isStamping ? (
                 <>
-                  <Stamp className="h-4 w-4 animate-pulse text-accent-gold" />
+                  <Stamp className="h-4 w-4 animate-pulse text-accent-gold-ink" />
                   <span>Formalizando documento...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-4 w-4 text-accent-gold" />
+                  <CheckCircle2 className="h-4 w-4 text-accent-gold-ink" />
                   <span>Formalizar e assinar termo</span>
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </>

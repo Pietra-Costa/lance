@@ -55,7 +55,7 @@ const SettlementResultCell: React.FC<{ lot: Lot }> = ({ lot }) => {
           <CheckCircle2 className="h-3.5 w-3.5" />
           Arrematado
         </span>
-        <span className="block font-mono text-sm font-bold text-brand-primary">
+        <span className="block font-mono text-sm font-bold text-brand-interactive">
           {formatBRL(settlement.amountCents)}
         </span>
         {settlement.settledAt && (
@@ -172,7 +172,7 @@ export const AuctioneerArea: React.FC = () => {
       label: "Lotes encerrados",
       value: endedCount,
       description: "Pregões finalizados",
-      iconColor: "text-brand-primary",
+      iconColor: "text-brand-interactive",
       iconBackground: "bg-brand-primary/8",
       accent: "border-l-brand-primary",
     },
@@ -192,10 +192,10 @@ export const AuctioneerArea: React.FC = () => {
       {!isAgreementSigned && <SellerAgreementModal />}
 
       <div className="mx-auto w-full max-w-[1440px] space-y-6 px-4 py-5 sm:space-y-8 sm:px-6 sm:py-8 lg:px-8">
-        <section className="relative isolate overflow-hidden rounded-2xl bg-brand-deep text-surface-base shadow-lg shadow-brand-deep/10 sm:rounded-3xl">
+        <section className="relative isolate overflow-hidden rounded-2xl bg-brand-deep text-brand-on-dark shadow-lg shadow-brand-deep/10 sm:rounded-3xl">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -right-20 -top-28 -z-10 h-72 w-72 rounded-full border border-accent-gold/15 sm:-right-12 sm:-top-36 sm:h-96 sm:w-96"
+            className="pointer-events-none absolute -right-20 -top-28 -z-10 h-72 w-72 rounded-full border border-border-subtle border-accent-gold/15 sm:-right-12 sm:-top-36 sm:h-96 sm:w-96"
           />
           <div
             aria-hidden="true"
@@ -205,11 +205,11 @@ export const AuctioneerArea: React.FC = () => {
           <div className="relative flex flex-col gap-6 p-5 sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:p-10">
             <div className="min-w-0 flex-1">
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/30 bg-accent-gold/10 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.17em] text-accent-gold sm:text-[10px]">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/30 bg-accent-gold/10 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.17em] text-accent-gold-ink sm:text-[10px]">
                   <Gavel className="h-3.5 w-3.5" />
                   Painel operacional
                 </span>
-                <span className="inline-flex items-center gap-1.5 text-[10px] text-surface-base/60 sm:text-xs">
+                <span className="inline-flex items-center gap-1.5 text-[10px] text-brand-on-dark/75 sm:text-xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" />
                   Leiloeiro autenticado
                 </span>
@@ -219,21 +219,21 @@ export const AuctioneerArea: React.FC = () => {
                 Olá, {currentUser?.name || "Leiloeiro"}
               </h1>
 
-              <p className="mt-2 max-w-xl text-xs leading-6 text-surface-base/65 sm:text-sm sm:leading-7">
+              <p className="mt-2 max-w-xl text-xs leading-6 text-brand-on-dark/65 sm:text-sm sm:leading-7">
                 Gerencie seus lotes, acompanhe os pregões e monitore os
                 resultados das suas operações em um só lugar.
               </p>
 
-              <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] text-surface-base/55 sm:text-xs">
+              <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] text-brand-on-dark/55 sm:text-xs">
                 <span className="inline-flex items-center gap-1.5">
-                  <Layers className="h-3.5 w-3.5 text-accent-gold" />
+                  <Layers className="h-3.5 w-3.5 text-accent-gold-ink" />
                   {myLots.length}{" "}
                   {myLots.length === 1
                     ? "lote cadastrado"
                     : "lotes cadastrados"}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-accent-gold" />
+                  <ShieldCheck className="h-3.5 w-3.5 text-accent-gold-ink" />
                   Operações auditáveis
                 </span>
               </div>
@@ -241,7 +241,7 @@ export const AuctioneerArea: React.FC = () => {
 
             <button
               onClick={() => navigateTo("/leiloeiro/lotes/novo")}
-              className="group inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2.5 rounded-xl bg-accent-gold px-5 py-3 text-sm font-semibold text-brand-deep shadow-md shadow-black/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d6b979] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep sm:w-auto sm:px-6"
+              className="group inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2.5 rounded-xl bg-accent-gold px-5 py-3 text-sm font-semibold text-brand-deep shadow-md shadow-black/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 focus-visible:ring-offset-brand-deep sm:w-auto sm:px-6"
             >
               <PlusCircle className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
               Criar novo lote
@@ -249,20 +249,20 @@ export const AuctioneerArea: React.FC = () => {
             </button>
           </div>
 
-          <div className="relative grid grid-cols-3 border-t border-white/10 bg-black/10">
+          <div className="relative grid grid-cols-3 border-t border-invert bg-black/10">
             <div className="px-3 py-3.5 text-center sm:px-5 sm:py-4">
               <p className="font-mono text-lg font-bold text-white sm:text-2xl">
                 {liveCount}
               </p>
-              <p className="mt-1 text-[9px] uppercase tracking-wider text-surface-base/55 sm:text-[10px]">
+              <p className="mt-1 text-[9px] uppercase tracking-wider text-brand-on-dark/55 sm:text-[10px]">
                 Ao vivo
               </p>
             </div>
-            <div className="border-x border-white/10 px-3 py-3.5 text-center sm:px-5 sm:py-4">
+            <div className="border-x border-invert px-3 py-3.5 text-center sm:px-5 sm:py-4">
               <p className="font-mono text-lg font-bold text-white sm:text-2xl">
                 {scheduledCount}
               </p>
-              <p className="mt-1 text-[9px] uppercase tracking-wider text-surface-base/55 sm:text-[10px]">
+              <p className="mt-1 text-[9px] uppercase tracking-wider text-brand-on-dark/55 sm:text-[10px]">
                 Agendados
               </p>
             </div>
@@ -270,7 +270,7 @@ export const AuctioneerArea: React.FC = () => {
               <p className="font-mono text-lg font-bold text-white sm:text-2xl">
                 {endedCount}
               </p>
-              <p className="mt-1 text-[9px] uppercase tracking-wider text-surface-base/55 sm:text-[10px]">
+              <p className="mt-1 text-[9px] uppercase tracking-wider text-brand-on-dark/55 sm:text-[10px]">
                 Encerrados
               </p>
             </div>
@@ -282,10 +282,10 @@ export const AuctioneerArea: React.FC = () => {
             return (
               <div
                 key={stat.label}
-                className={`relative min-w-0 overflow-hidden rounded-2xl border border-border-subtle border-l-[3px] ${stat.accent} bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5`}
+                className={`relative min-w-0 overflow-hidden rounded-2xl border border-border-subtle border-l-[3px] ${stat.accent} bg-surface-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5`}
               >
                 <p
-                  className={`mt-4 break-words font-heading font-bold tracking-tight text-brand-primary ${
+                  className={`mt-4 break-words font-heading font-bold tracking-tight text-brand-interactive ${
                     stat.monetary
                       ? "text-lg sm:text-2xl"
                       : "text-2xl sm:text-3xl"
@@ -302,16 +302,16 @@ export const AuctioneerArea: React.FC = () => {
           })}
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-border-subtle bg-white shadow-sm sm:rounded-3xl">
+        <section className="overflow-hidden rounded-2xl border border-border-subtle bg-surface-card shadow-sm sm:rounded-3xl">
           <div className="border-b border-border-subtle p-4 sm:p-6 lg:p-7">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary/8 text-brand-primary">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary/8 text-brand-interactive">
                     <Layers className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="font-heading text-base font-bold text-brand-primary sm:text-lg">
+                    <h2 className="font-heading text-base font-bold text-brand-interactive sm:text-lg">
                       Gestão de lotes
                     </h2>
                     <p className="mt-0.5 text-[10px] text-text-secondary sm:text-xs">
@@ -329,7 +329,7 @@ export const AuctioneerArea: React.FC = () => {
                   onChange={e => setSearchTerm(e.target.value)}
                   placeholder="Buscar por lote, código ou categoria"
                   aria-label="Buscar lotes"
-                  className="h-11 w-full rounded-xl border border-border-subtle bg-surface-base/50 pl-9 pr-3 text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary/70 focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/10"
+                  className="h-11 w-full rounded-xl border border-border-subtle bg-surface-base/50 pl-9 pr-3 text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary/70 focus:border-brand-primary focus:bg-surface-card focus:ring-4 focus:ring-brand-primary/10"
                 />
               </div>
             </div>
@@ -348,7 +348,7 @@ export const AuctioneerArea: React.FC = () => {
                       className={`shrink-0 rounded-lg px-3 py-2 text-[10px] font-semibold transition-colors sm:text-xs ${
                         isActive
                           ? "bg-brand-primary text-white shadow-sm"
-                          : "border border-border-subtle bg-white text-text-secondary hover:border-brand-primary/30 hover:text-brand-primary"
+                          : "border border-border-subtle bg-surface-card text-text-secondary hover:border-brand-primary/30 hover:text-brand-interactive"
                       }`}
                     >
                       {filter.label}
@@ -388,7 +388,7 @@ export const AuctioneerArea: React.FC = () => {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border-subtle bg-surface-base text-text-secondary">
                 <Package className="h-6 w-6" />
               </div>
-              <h3 className="mt-4 font-heading text-base font-semibold text-brand-primary">
+              <h3 className="mt-4 font-heading text-base font-semibold text-brand-interactive">
                 {myLots.length === 0
                   ? "Você ainda não tem lotes"
                   : "Nenhum lote encontrado"}
@@ -412,7 +412,7 @@ export const AuctioneerArea: React.FC = () => {
                     setSelectedStatusFilter("ALL");
                     setSearchTerm("");
                   }}
-                  className="mt-4 rounded-lg px-4 py-2 text-xs font-semibold text-brand-primary transition-colors hover:bg-brand-primary/5"
+                  className="mt-4 rounded-lg px-4 py-2 text-xs font-semibold text-brand-interactive transition-colors hover:bg-brand-primary/5"
                 >
                   Limpar filtros
                 </button>
@@ -436,7 +436,7 @@ export const AuctioneerArea: React.FC = () => {
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-[10px] font-bold text-brand-primary">
+                          <span className="font-mono text-[10px] font-bold text-brand-interactive">
                             {lot.code}
                           </span>
                           <LotStatusBadge status={lot.status} size="sm" />
@@ -461,7 +461,7 @@ export const AuctioneerArea: React.FC = () => {
                         <span className="text-[10px] text-text-secondary">
                           Lance atual
                         </span>
-                        <p className="mt-1 break-words font-mono text-sm font-bold text-brand-primary">
+                        <p className="mt-1 break-words font-mono text-sm font-bold text-brand-interactive">
                           {formatBRL(
                             lot.currentBidCents || lot.startingPriceCents,
                           )}
@@ -476,7 +476,7 @@ export const AuctioneerArea: React.FC = () => {
                         <span className="text-[10px] text-text-secondary">
                           Líder atual
                         </span>
-                        <p className="mt-1 truncate font-mono text-xs font-semibold text-brand-primary">
+                        <p className="mt-1 truncate font-mono text-xs font-semibold text-brand-interactive">
                           {lot.currentLeaderPseudonym || "—"}
                         </p>
                         <p className="mt-1 text-[10px] text-text-secondary">
@@ -486,7 +486,7 @@ export const AuctioneerArea: React.FC = () => {
                     </div>
 
                     {lot.settlement && (
-                      <div className="mt-3 rounded-xl border border-border-subtle bg-white p-3">
+                      <div className="mt-3 rounded-xl border border-border-subtle bg-surface-card p-3">
                         <p className="mb-2 text-[9px] font-semibold uppercase tracking-wider text-text-secondary">
                           Resultado do pregão
                         </p>
@@ -497,7 +497,7 @@ export const AuctioneerArea: React.FC = () => {
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <button
                         onClick={() => navigateTo(`/lotes/${lot.id}`)}
-                        className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-border-strong px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-base"
+                        className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-border-subtle border-border-strong px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-surface-base"
                       >
                         <Eye className="h-3.5 w-3.5" />
                         Ver sala
@@ -506,7 +506,7 @@ export const AuctioneerArea: React.FC = () => {
                       {lot.status === "SCHEDULED" && (
                         <button
                           onClick={() => setEditLotId(lot.id)}
-                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-brand-primary/25 bg-brand-primary/5 px-3 py-2 text-xs font-semibold text-brand-primary transition-colors hover:bg-brand-primary/10"
+                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-brand-primary/25 bg-brand-primary/5 px-3 py-2 text-xs font-semibold text-brand-interactive transition-colors hover:bg-brand-primary/10"
                         >
                           <FileText className="h-3.5 w-3.5" />
                           Editar lote
@@ -526,7 +526,7 @@ export const AuctioneerArea: React.FC = () => {
                       {lot.status === "LIVE" && (
                         <button
                           onClick={() => setCancelModalLotId(lot.id)}
-                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-semantic-error/30 px-3 py-2 text-xs font-semibold text-semantic-error transition-colors hover:bg-semantic-error-bg"
+                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-border-subtle border-semantic-error/30 px-3 py-2 text-xs font-semibold text-semantic-error transition-colors hover:bg-semantic-error-bg"
                         >
                           <XCircle className="h-3.5 w-3.5" />
                           Cancelar lote
@@ -572,7 +572,7 @@ export const AuctioneerArea: React.FC = () => {
                               />
                             </div>
                             <div className="min-w-0 max-w-[220px]">
-                              <span className="font-mono text-[10px] font-bold text-brand-primary">
+                              <span className="font-mono text-[10px] font-bold text-brand-interactive">
                                 {lot.code}
                               </span>
                               <h3 className="mt-1 truncate font-heading text-xs font-semibold text-text-primary">
@@ -600,7 +600,7 @@ export const AuctioneerArea: React.FC = () => {
                         </td>
 
                         <td className="whitespace-nowrap px-4 py-4">
-                          <p className="font-mono font-bold text-brand-primary">
+                          <p className="font-mono font-bold text-brand-interactive">
                             {formatBRL(
                               lot.currentBidCents || lot.startingPriceCents,
                             )}
@@ -612,7 +612,7 @@ export const AuctioneerArea: React.FC = () => {
                         </td>
 
                         <td className="max-w-32 px-4 py-4">
-                          <span className="block truncate font-mono text-xs font-medium text-brand-primary">
+                          <span className="block truncate font-mono text-xs font-medium text-brand-interactive">
                             {lot.currentLeaderPseudonym || "—"}
                           </span>
                         </td>
@@ -626,7 +626,7 @@ export const AuctioneerArea: React.FC = () => {
                             <button
                               onClick={() => navigateTo(`/lotes/${lot.id}`)}
                               title="Abrir sala pública de lances"
-                              className="inline-flex items-center gap-1 rounded-lg border border-border-strong px-2.5 py-2 text-[10px] font-semibold text-text-primary transition-colors hover:bg-surface-base"
+                              className="inline-flex items-center gap-1 rounded-lg border border-border-subtle border-border-strong px-2.5 py-2 text-[10px] font-semibold text-text-primary transition-colors hover:bg-surface-base"
                             >
                               <Eye className="h-3.5 w-3.5" />
                               Sala
@@ -636,7 +636,7 @@ export const AuctioneerArea: React.FC = () => {
                               <button
                                 onClick={() => setEditLotId(lot.id)}
                                 title="Editar lote antes de abrir o pregão"
-                                className="inline-flex items-center gap-1 rounded-lg border border-brand-primary/25 px-2.5 py-2 text-[10px] font-semibold text-brand-primary transition-colors hover:bg-brand-primary/5"
+                                className="inline-flex items-center gap-1 rounded-lg border border-border-subtle border-brand-primary/25 px-2.5 py-2 text-[10px] font-semibold text-brand-interactive transition-colors hover:bg-brand-primary/5"
                               >
                                 <FileText className="h-3.5 w-3.5" />
                                 Editar
@@ -658,7 +658,7 @@ export const AuctioneerArea: React.FC = () => {
                               <button
                                 onClick={() => setCancelModalLotId(lot.id)}
                                 title="Cancelar lote com justificativa formal"
-                                className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2.5 py-2 text-[10px] font-semibold text-semantic-error transition-colors hover:bg-semantic-error-bg"
+                                className="inline-flex items-center gap-1 rounded-lg border border-border-subtle border-semantic-error/30 px-2.5 py-2 text-[10px] font-semibold text-semantic-error transition-colors hover:bg-semantic-error-bg"
                               >
                                 <XCircle className="h-3.5 w-3.5" />
                                 Cancelar
@@ -684,19 +684,19 @@ export const AuctioneerArea: React.FC = () => {
                 {filteredLots.length === 1 ? "lote" : "lotes"}
               </p>
               <span className="inline-flex items-center gap-1.5 text-[10px] text-text-secondary sm:text-xs">
-                <ShieldCheck className="h-3.5 w-3.5 text-brand-primary" />
+                <ShieldCheck className="h-3.5 w-3.5 text-brand-interactive" />
                 Dados operacionais da sua conta
               </span>
             </div>
           )}
         </section>
 
-        <div className="flex items-start gap-3 rounded-2xl border border-border-subtle bg-white/70 p-4 sm:items-center sm:p-5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-primary/8 text-brand-primary">
+        <div className="flex items-start gap-3 rounded-2xl border border-border-subtle bg-surface-card/70 p-4 sm:items-center sm:p-5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-primary/8 text-brand-interactive">
             <LockKeyhole className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-brand-primary">
+            <p className="text-xs font-semibold text-brand-interactive">
               Operações com rastreabilidade
             </p>
             <p className="mt-1 text-[10px] leading-5 text-text-secondary sm:text-xs">
@@ -716,7 +716,7 @@ export const AuctioneerArea: React.FC = () => {
 
       {cancelModalLotId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
-          <div className="my-auto w-full max-w-lg overflow-hidden rounded-2xl border border-border-subtle bg-white shadow-2xl sm:rounded-3xl">
+          <div className="my-auto w-full max-w-lg overflow-hidden rounded-2xl border border-border-subtle bg-surface-card shadow-2xl sm:rounded-3xl">
             <div className="flex items-start justify-between gap-4 border-b border-border-subtle bg-semantic-error-bg/50 p-5 sm:p-6">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-semantic-error-bg text-semantic-error">
@@ -739,7 +739,7 @@ export const AuctioneerArea: React.FC = () => {
                   setCancellationReason("");
                 }}
                 aria-label="Fechar modal"
-                className="rounded-lg p-2 text-text-secondary transition-colors hover:bg-white hover:text-text-primary"
+                className="rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface-card hover:text-text-primary"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -748,7 +748,7 @@ export const AuctioneerArea: React.FC = () => {
             <div className="space-y-5 p-5 sm:p-6">
               {selectedCancelLot && (
                 <div className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface-base/60 p-3">
-                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-white">
+                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-surface-card">
                     <ItemImage
                       src={selectedCancelLot.itemSnapshot.primaryImageUrl}
                       alt={selectedCancelLot.title}
@@ -758,7 +758,7 @@ export const AuctioneerArea: React.FC = () => {
                     />
                   </div>
                   <div className="min-w-0">
-                    <span className="font-mono text-[10px] font-bold text-brand-primary">
+                    <span className="font-mono text-[10px] font-bold text-brand-interactive">
                       {selectedCancelLot.code}
                     </span>
                     <p className="mt-1 line-clamp-2 text-xs font-semibold text-text-primary">
@@ -799,7 +799,7 @@ export const AuctioneerArea: React.FC = () => {
                   value={cancellationReason}
                   onChange={e => setCancellationReason(e.target.value)}
                   placeholder="Descreva a justificativa oficial para o cancelamento..."
-                  className="w-full resize-y rounded-xl border border-border-strong bg-white p-3 text-xs leading-5 text-text-primary outline-none transition-colors placeholder:text-text-secondary/60 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10"
+                  className="w-full resize-y rounded-xl border border-border-strong bg-surface-card p-3 text-xs leading-5 text-text-primary outline-none transition-colors placeholder:text-text-secondary/60 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10"
                 />
                 <p className="text-[10px] text-text-secondary">
                   Informe um motivo claro e verificável para registro.
@@ -813,7 +813,7 @@ export const AuctioneerArea: React.FC = () => {
                     setCancelModalLotId(null);
                     setCancellationReason("");
                   }}
-                  className="min-h-11 rounded-xl border border-border-strong px-4 py-2.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-base"
+                  className="min-h-11 rounded-xl border border-border-subtle border-border-strong px-4 py-2.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-base"
                 >
                   Voltar
                 </button>
@@ -821,7 +821,7 @@ export const AuctioneerArea: React.FC = () => {
                   type="button"
                   disabled={!cancellationReason.trim()}
                   onClick={handleConfirmCancel}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-semantic-error px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#991B1B] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-semantic-error px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-semantic-error disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <XCircle className="h-4 w-4" />
                   Confirmar cancelamento

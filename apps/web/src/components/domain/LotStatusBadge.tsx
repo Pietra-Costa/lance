@@ -41,7 +41,7 @@ export const LotStatusBadge: React.FC<LotStatusBadgeProps> = ({
     case "ENDED":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-[#EFE9DB] text-text-secondary border border-border-strong ${sizeClasses} ${className}`}
+          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-surface-muted text-text-secondary border border-border-strong ${sizeClasses} ${className}`}
         >
           <CheckCircle2 className="w-3 h-3 text-text-secondary" />
           <span>Encerrado</span>

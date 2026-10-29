@@ -144,7 +144,7 @@ export const AuditPage: React.FC = () => {
           <div className="relative z-10 grid gap-10 lg:grid-cols-[1fr_300px] lg:items-end lg:gap-16">
             <div>
               <div className="mb-7 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-accent-gold">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-accent-gold-ink">
                   Transparência pública
                 </span>
                 <span className="h-px w-8 bg-border-strong" />
@@ -153,7 +153,7 @@ export const AuditPage: React.FC = () => {
                 </span>
               </div>
 
-              <h1 className="max-w-3xl font-heading text-4xl font-bold leading-[1.08] tracking-tight text-brand-primary sm:text-5xl lg:text-6xl">
+              <h1 className="max-w-3xl font-heading text-4xl font-bold leading-[1.08] tracking-tight text-brand-interactive sm:text-5xl lg:text-6xl">
                 Cada evento.
                 <br />
                 <span className="text-text-primary">
@@ -181,7 +181,7 @@ export const AuditPage: React.FC = () => {
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="font-heading text-lg font-bold text-brand-primary">
+                  <p className="font-heading text-lg font-bold text-brand-interactive">
                     {status.label}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-text-secondary">
@@ -192,7 +192,7 @@ export const AuditPage: React.FC = () => {
 
               <div className="mt-5 flex items-center gap-2 border-t border-border-subtle pt-4 text-xs text-text-secondary">
                 <ShieldCheck
-                  className="h-4 w-4 text-accent-gold"
+                  className="h-4 w-4 text-accent-gold-ink"
                   aria-hidden="true"
                 />
                 Verificação criptográfica SHA-256
@@ -203,7 +203,7 @@ export const AuditPage: React.FC = () => {
           <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-border-subtle pt-5">
             <div className="flex items-center gap-3">
               <Fingerprint
-                className="h-5 w-5 text-brand-primary"
+                className="h-5 w-5 text-brand-interactive"
                 aria-hidden="true"
               />
               <div>
@@ -220,7 +220,7 @@ export const AuditPage: React.FC = () => {
 
             <div className="flex items-center gap-3">
               <Database
-                className="h-5 w-5 text-brand-primary"
+                className="h-5 w-5 text-brand-interactive"
                 aria-hidden="true"
               />
               <div>
@@ -239,10 +239,10 @@ export const AuditPage: React.FC = () => {
         <section className="py-9">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent-gold">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent-gold-ink">
                 Consulta pública
               </span>
-              <h2 className="mt-2 font-heading text-2xl font-bold text-brand-primary sm:text-3xl">
+              <h2 className="mt-2 font-heading text-2xl font-bold text-brand-interactive sm:text-3xl">
                 Histórico de eventos
               </h2>
               <p className="mt-2 text-sm text-text-secondary">
@@ -320,7 +320,7 @@ export const AuditPage: React.FC = () => {
                           className={`font-mono text-2xl font-semibold tracking-tight sm:text-3xl ${
                             canceled
                               ? "text-semantic-warning"
-                              : "text-brand-primary"
+                              : "text-brand-interactive"
                           }`}
                         >
                           {String(ev.sequence).padStart(2, "0")}
@@ -339,14 +339,14 @@ export const AuditPage: React.FC = () => {
                                 className={`font-heading text-lg font-bold sm:text-xl ${
                                   canceled
                                     ? "text-semantic-warning"
-                                    : "text-brand-primary"
+                                    : "text-brand-interactive"
                                 }`}
                               >
                                 {eventLabel(ev.eventType)}
                               </h3>
 
                               {ev.lotCode && (
-                                <span className="border border-border-subtle px-2 py-1 font-mono text-[10px] text-text-primary">
+                                <span className="border border-border-subtle border-border-subtle px-2 py-1 font-mono text-[10px] text-text-primary">
                                   {ev.lotCode}
                                 </span>
                               )}
@@ -379,7 +379,7 @@ export const AuditPage: React.FC = () => {
                         </p>
 
                         <details className="group mt-6">
-                          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 border-y border-border-subtle py-3 text-xs font-semibold text-brand-primary transition-colors hover:text-accent-gold [&::-webkit-details-marker]:hidden">
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 border-y border-border-subtle py-3 text-xs font-semibold text-brand-interactive transition-colors hover:text-accent-gold [&::-webkit-details-marker]:hidden">
                             <span className="flex items-center gap-2">
                               <Database
                                 className="h-4 w-4"
@@ -420,11 +420,11 @@ export const AuditPage: React.FC = () => {
                               </div>
 
                               <div className="min-w-0">
-                                <h4 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-brand-primary">
+                                <h4 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-brand-interactive">
                                   Hash deste registro
                                 </h4>
 
-                                <p className="break-all border-l-2 border-brand-primary py-2 pl-4 font-mono text-[11px] font-semibold leading-6 text-brand-primary">
+                                <p className="break-all border-l-2 border-brand-primary py-2 pl-4 font-mono text-[11px] font-semibold leading-6 text-brand-interactive">
                                   {ev.hash}
                                 </p>
                               </div>
@@ -443,7 +443,7 @@ export const AuditPage: React.FC = () => {
                 className="mx-auto h-6 w-6 text-text-secondary"
                 aria-hidden="true"
               />
-              <h3 className="mt-4 font-heading text-lg font-bold text-brand-primary">
+              <h3 className="mt-4 font-heading text-lg font-bold text-brand-interactive">
                 Nenhum evento encontrado
               </h3>
               <p className="mt-2 text-sm text-text-secondary">
@@ -457,7 +457,7 @@ export const AuditPage: React.FC = () => {
                     setFilterQuery("");
                     setPage(1);
                   }}
-                  className="mt-5 text-xs font-semibold text-brand-primary underline underline-offset-4 hover:text-accent-gold"
+                  className="mt-5 text-xs font-semibold text-brand-interactive underline underline-offset-4 hover:text-accent-gold"
                 >
                   Limpar busca
                 </button>
@@ -481,7 +481,7 @@ export const AuditPage: React.FC = () => {
                 type="button"
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={safePage <= 1}
-                className="inline-flex items-center gap-2 border border-border-strong px-4 py-2.5 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 border border-border-subtle border-border-strong px-4 py-2.5 text-xs font-semibold text-brand-interactive transition-colors hover:border-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 Anterior
@@ -493,7 +493,7 @@ export const AuditPage: React.FC = () => {
                   setPage((current) => Math.min(totalPages, current + 1))
                 }
                 disabled={safePage >= totalPages}
-                className="inline-flex items-center gap-2 border border-brand-primary bg-brand-primary px-4 py-2.5 text-xs font-semibold text-surface-base transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 border border-brand-primary bg-brand-primary px-4 py-2.5 text-xs font-semibold text-brand-on-dark transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Próxima
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -505,7 +505,7 @@ export const AuditPage: React.FC = () => {
         <footer className="flex flex-col gap-4 pt-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <ShieldCheck
-              className="h-5 w-5 text-accent-gold"
+              className="h-5 w-5 text-accent-gold-ink"
               aria-hidden="true"
             />
             <p className="text-xs leading-5 text-text-secondary">

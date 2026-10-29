@@ -50,16 +50,16 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 const QUICK_DEPOSIT_AMOUNTS = [10_000, 50_000, 100_000, 500_000];
 
-const panelClass = "rounded-2xl border border-border-subtle bg-white";
+const panelClass = "rounded-2xl border border-border-subtle bg-surface-card";
 
 const eyebrowClass =
   "text-[10px] font-semibold uppercase tracking-[0.16em] text-text-secondary";
 
 const primaryButtonClass =
-  "inline-flex min-w-0 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-3 text-xs font-semibold text-surface-base transition-colors hover:bg-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A96A] disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-w-0 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-3 text-xs font-semibold text-brand-on-dark transition-colors hover:bg-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold disabled:cursor-not-allowed disabled:opacity-60";
 
 const secondaryButtonClass =
-  "inline-flex min-w-0 items-center justify-center gap-2 rounded-xl border border-border-strong bg-white px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-primary hover:bg-[#FAF7F2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A96A]";
+  "inline-flex min-w-0 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface-card px-4 py-3 text-xs font-semibold text-brand-interactive transition-colors hover:border-brand-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold";
 
 const wait = (milliseconds: number) =>
   new Promise<void>(resolve => window.setTimeout(resolve, milliseconds));
@@ -190,7 +190,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
     if (isWon) {
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/40 bg-surface-base px-2.5 py-1 text-[10px] font-semibold text-brand-primary">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/40 bg-surface-base px-2.5 py-1 text-[10px] font-semibold text-brand-interactive">
           <CheckCircle2 className="h-3.5 w-3.5" />
           Arrematado
         </span>
@@ -321,14 +321,14 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
       `}</style>
 
       <div className="mx-auto w-full min-w-0 max-w-7xl space-y-5 px-3 py-4 sm:space-y-7 sm:px-6 sm:py-9 lg:px-8">
-        <header className="relative overflow-hidden rounded-2xl bg-brand-primary text-surface-base">
-          <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border border-accent-gold/20" />
-          <div className="pointer-events-none absolute -right-4 -top-12 h-52 w-52 rounded-full border border-accent-gold/20" />
+        <header className="relative overflow-hidden rounded-2xl bg-brand-primary text-brand-on-dark">
+          <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border border-border-subtle border-accent-gold/20" />
+          <div className="pointer-events-none absolute -right-4 -top-12 h-52 w-52 rounded-full border border-border-subtle border-accent-gold/20" />
           <div className="pointer-events-none absolute bottom-0 right-24 h-40 w-40 rounded-full bg-accent-gold/5 blur-2xl" />
 
           <div className="relative grid min-w-0 gap-5 p-4 sm:gap-7 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,auto)] lg:items-end lg:p-9">
             <div className="flex min-w-0 items-center gap-3 sm:gap-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-accent-gold/50 bg-surface-base/10 text-xl font-bold text-accent-gold sm:h-18 sm:w-18 sm:text-2xl">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-accent-gold/50 bg-surface-base/10 text-xl font-bold text-accent-gold-ink sm:h-18 sm:w-18 sm:text-2xl">
                 {currentUser?.avatarUrl ? (
                   <img
                     src={currentUser.avatarUrl}
@@ -342,11 +342,11 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-gold sm:tracking-[0.2em]">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-gold-ink sm:tracking-[0.2em]">
                     Área do licitante
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-surface-base">
-                    <ShieldCheck className="h-3 w-3 text-accent-gold" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-invert bg-surface-card/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-brand-on-dark">
+                    <ShieldCheck className="h-3 w-3 text-accent-gold-ink" />
                     Homologado
                   </span>
                 </div>
@@ -355,15 +355,15 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   {currentUser?.name || "Área do Licitante"}
                 </h1>
 
-                <p className="mt-1 break-all text-xs text-surface-base/65">
+                <p className="mt-1 break-all text-xs text-brand-on-dark/65">
                   {currentUser?.email}
                 </p>
               </div>
             </div>
 
-            <div className="grid min-w-0 grid-cols-2 divide-x divide-white/15 rounded-xl border border-white/15 bg-black/10 lg:min-w-85">
+            <div className="grid min-w-0 grid-cols-2 divide-x divide-white/15 rounded-xl border border-invert bg-black/10 lg:min-w-85">
               <div className="min-w-0 p-3 sm:p-5">
-                <span className="text-[9px] font-semibold uppercase tracking-wider text-surface-base/60 sm:tracking-[0.15em]">
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-brand-on-dark/75 sm:tracking-[0.15em]">
                   Saldo disponí­vel
                 </span>
                 <p className="mt-2 break-all font-heading text-sm font-semibold tabular-nums sm:text-xl">
@@ -371,7 +371,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </p>
               </div>
               <div className="min-w-0 p-3 sm:p-5">
-                <span className="text-[9px] font-semibold uppercase tracking-wider text-surface-base/60 sm:tracking-[0.15em]">
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-brand-on-dark/75 sm:tracking-[0.15em]">
                   Em reserva
                 </span>
                 <p className="mt-2 break-all font-heading text-sm font-semibold tabular-nums sm:text-xl">
@@ -392,7 +392,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
             </label>
 
             <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-accent-gold">
+              <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-accent-gold-ink">
                 <SelectedTabIcon className="h-4 w-4" />
               </div>
 
@@ -400,7 +400,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 id="bidder-tab-select"
                 value={activeTab}
                 onChange={(event) => setActiveTab(event.target.value as Tab)}
-                className="w-full appearance-none rounded-xl border border-border-strong bg-white py-4 pl-11 pr-11 text-sm font-semibold text-brand-primary shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
+                className="w-full appearance-none rounded-xl border border-border-strong bg-surface-card py-4 pl-11 pr-11 text-sm font-semibold text-brand-interactive shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
               >
                 {tabs.map(({ id, label }) => {
                   const count =
@@ -441,13 +441,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     aria-current={selected ? "page" : undefined}
                     className={`relative inline-flex shrink-0 items-center gap-2 px-4 py-4 text-xs font-semibold transition-colors ${
                       selected
-                        ? "text-brand-primary"
+                        ? "text-brand-interactive"
                         : "text-text-secondary hover:text-text-primary"
                     }`}
                   >
                     <Icon
                       className={`h-4 w-4 ${
-                        selected ? "text-brand-primary" : "text-text-secondary"
+                        selected ? "text-brand-interactive" : "text-text-secondary"
                       }`}
                     />
                     <span>{label}</span>
@@ -455,7 +455,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                       <span
                         className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${
                           selected
-                            ? "bg-brand-primary text-surface-base"
+                            ? "bg-brand-primary text-brand-on-dark"
                             : "bg-border-subtle text-text-secondary"
                         }`}
                       >
@@ -478,7 +478,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className={eyebrowClass}>Seu painel</p>
-                  <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                  <h2 className="mt-1 font-heading text-xl font-semibold text-brand-interactive sm:text-2xl">
                     Visão geral
                   </h2>
                 </div>
@@ -488,11 +488,11 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               </div>
 
               <div className="grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 xl:grid-cols-4">
-                <div className="min-w-0 rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                <div className="min-w-0 rounded-2xl border border-border-subtle bg-surface-card p-4 sm:p-5">
                   <span className="text-xs leading-relaxed text-text-secondary">
                     Lotes liderados
                   </span>
-                  <p className="mt-4 font-heading text-3xl font-semibold tabular-nums text-brand-primary">
+                  <p className="mt-4 font-heading text-3xl font-semibold tabular-nums text-brand-interactive">
                     {leadingLots.length}
                   </p>
                   <p className="mt-1 text-[10px] text-text-secondary">
@@ -500,7 +500,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   </p>
                 </div>
 
-                <div className="min-w-0 rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                <div className="min-w-0 rounded-2xl border border-border-subtle bg-surface-card p-4 sm:p-5">
                   <span className="text-xs leading-relaxed text-text-secondary">
                     Lances superados
                   </span>
@@ -512,11 +512,11 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   </p>
                 </div>
 
-                <div className="min-w-0 rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                <div className="min-w-0 rounded-2xl border border-border-subtle bg-surface-card p-4 sm:p-5">
                   <span className="text-xs leading-relaxed text-text-secondary">
                     Arrematados
                   </span>
-                  <p className="mt-4 font-heading text-3xl font-semibold tabular-nums text-brand-primary">
+                  <p className="mt-4 font-heading text-3xl font-semibold tabular-nums text-brand-interactive">
                     {wonReceipts.length}
                   </p>
                   <p className="mt-1 text-[10px] text-text-secondary">
@@ -524,9 +524,9 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   </p>
                 </div>
 
-                <div className="min-w-0 rounded-2xl border border-accent-gold/50 bg-brand-primary p-4 text-surface-base sm:p-5">
+                <div className="min-w-0 rounded-2xl border border-accent-gold/50 bg-brand-primary p-4 text-brand-on-dark sm:p-5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-accent-gold">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-card/10 text-accent-gold-ink">
                       <WalletIcon className="h-4 w-4" />
                     </span>
                   </div>
@@ -540,10 +540,10 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               </div>
             </section>
 
-            <section className="flex min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border-subtle bg-white p-4 sm:flex-row sm:items-center sm:p-6">
+            <section className="flex min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border-subtle bg-surface-card p-4 sm:flex-row sm:items-center sm:p-6">
               <div className="min-w-0">
                 <p className={eyebrowClass}>Acesso rápido</p>
-                <h3 className="mt-1 font-heading text-lg font-semibold text-brand-primary">
+                <h3 className="mt-1 font-heading text-lg font-semibold text-brand-interactive">
                   O que deseja fazer?
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-text-secondary">
@@ -579,13 +579,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
                   <p className={eyebrowClass}>Pregões em andamento</p>
-                  <h3 className="mt-1 font-heading text-lg font-semibold text-brand-primary sm:text-xl">
+                  <h3 className="mt-1 font-heading text-lg font-semibold text-brand-interactive sm:text-xl">
                     Lotes sob sua ldierança
                   </h3>
                 </div>
                 <button
                   onClick={() => setActiveTab("lances")}
-                  className="shrink-0 text-xs font-semibold text-brand-primary underline decoration-accent-gold underline-offset-4 hover:text-brand-deep"
+                  className="shrink-0 text-xs font-semibold text-brand-interactive underline decoration-accent-gold underline-offset-4 hover:text-brand-deep"
                 >
                   Ver meus lances
                 </button>
@@ -596,7 +596,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   {leadingLots.map((lot) => (
                     <article
                       key={lot.id}
-                      className="flex min-w-0 flex-col gap-3 rounded-2xl border border-semantic-success/25 bg-white p-4 transition-colors hover:border-semantic-success/50 min-[480px]:flex-row min-[480px]:items-center min-[480px]:gap-4"
+                      className="flex min-w-0 flex-col gap-3 rounded-2xl border border-semantic-success/25 bg-surface-card p-4 transition-colors hover:border-semantic-success/50 min-[480px]:flex-row min-[480px]:items-center min-[480px]:gap-4"
                     >
                       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-base">
                         <ItemImage
@@ -629,8 +629,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </div>
               ) : (
                 <div className={`${panelClass} px-5 py-12 text-center`}>
-                  <Gavel className="mx-auto h-7 w-7 text-accent-gold" />
-                  <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                  <Gavel className="mx-auto h-7 w-7 text-accent-gold-ink" />
+                  <p className="mt-3 font-heading text-base font-semibold text-brand-interactive">
                     Nenhum lote sob sua liderança
                   </p>
                   <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-text-secondary">
@@ -656,14 +656,14 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <p className={eyebrowClass}>Sua atividade</p>
               <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                  <h2 className="font-heading text-xl font-semibold text-brand-interactive sm:text-2xl">
                     Histórico de lances
                   </h2>
                   <p className="mt-1 text-xs leading-relaxed text-text-secondary">
                     Acompanhe sua posição e os valores atuais de cada lote.
                   </p>
                 </div>
-                <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-primary">
+                <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-interactive">
                   {myBidsLots.length}{" "}
                   {myBidsLots.length === 1 ? "lote" : "lotes"}
                 </span>
@@ -704,7 +704,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border-subtle pt-3 sm:border-0 sm:pt-0">
                       <div className="min-w-0">
                         <span className={eyebrowClass}>Lance atual</span>
-                        <p className="mt-1 wrap-break-word font-heading text-base font-semibold text-brand-primary">
+                        <p className="mt-1 wrap-break-word font-heading text-base font-semibold text-brand-interactive">
                           {formatBRL(lot.currentBidCents)}
                         </p>
                       </div>
@@ -721,8 +721,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               </div>
             ) : (
               <div className="px-5 py-14 text-center">
-                <History className="mx-auto h-7 w-7 text-accent-gold" />
-                <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                <History className="mx-auto h-7 w-7 text-accent-gold-ink" />
+                <p className="mt-3 font-heading text-base font-semibold text-brand-interactive">
                   Nenhum lance registrado
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
@@ -744,7 +744,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           <section className="min-w-0 space-y-5">
             <div>
               <p className={eyebrowClass}>Histórico de aquisições</p>
-              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-interactive sm:text-2xl">
                 Arrematados e comprovantes
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-text-secondary">
@@ -784,24 +784,24 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     <div className="grid min-w-0 grid-cols-1 gap-3 p-4 min-[420px]:grid-cols-2 sm:gap-4 sm:p-5">
                       <div className="min-w-0">
                         <span className={eyebrowClass}>Valor final</span>
-                        <p className="mt-1 wrap-break-word font-heading text-base font-semibold tabular-nums text-brand-primary sm:text-lg">
+                        <p className="mt-1 wrap-break-word font-heading text-base font-semibold tabular-nums text-brand-interactive sm:text-lg">
                           {formatBRL(rec.finalPriceCents)}
                         </p>
                       </div>
                       <div className="min-w-0 min-[420px]:text-right">
                         <span className={eyebrowClass}>Verificação</span>
-                        <p className="mt-2 break-all font-mono text-xs font-semibold text-brand-primary">
+                        <p className="mt-2 break-all font-mono text-xs font-semibold text-brand-interactive">
                           {rec.verificationCode}
                         </p>
                       </div>
                     </div>
 
-                    <div className="border-t border-border-subtle bg-[#FAF7F2] p-4 sm:px-5">
+                    <div className="border-t border-border-subtle bg-surface-subtle p-4 sm:px-5">
                       <button
                         onClick={() => setSelectedReceiptForModal(rec)}
                         className={`${primaryButtonClass} w-full`}
                       >
-                        <FileCheck className="h-4 w-4 shrink-0 text-accent-gold" />
+                        <FileCheck className="h-4 w-4 shrink-0 text-accent-gold-ink" />
                         Visualizar comprovante oficial
                       </button>
                     </div>
@@ -810,8 +810,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               </div>
             ) : (
               <div className={`${panelClass} px-5 py-14 text-center`}>
-                <FileCheck className="mx-auto h-7 w-7 text-accent-gold" />
-                <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                <FileCheck className="mx-auto h-7 w-7 text-accent-gold-ink" />
+                <p className="mt-3 font-heading text-base font-semibold text-brand-interactive">
                   Nenhum lote arrematado
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
@@ -832,7 +832,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           <section className="min-w-0 space-y-5">
             <div>
               <p className={eyebrowClass}>Gestão financeira</p>
-              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-interactive sm:text-2xl">
                 Sua carteira
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-text-secondary">
@@ -841,10 +841,10 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               </p>
             </div>
 
-            <div className="min-w-0 overflow-hidden rounded-2xl border border-accent-gold/50 bg-brand-primary text-surface-base">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-accent-gold/50 bg-brand-primary text-brand-on-dark">
               <div className="flex min-w-0 flex-col gap-5 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-7">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 text-accent-gold">
+                  <div className="flex items-center gap-2 text-accent-gold-ink">
                     <WalletIcon className="h-5 w-5 shrink-0" />
                     <span className="text-[10px] font-semibold uppercase tracking-[0.14em] sm:tracking-[0.18em]">
                       Saldo total em custódia
@@ -859,22 +859,22 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </div>
                 <button
                   onClick={openDepositModal}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-gold px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:bg-[#D8BC82] sm:w-auto sm:shrink-0"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-gold px-4 py-3 text-xs font-semibold text-brand-interactive transition-colors hover:bg-accent-gold sm:w-auto sm:shrink-0"
                 >
                   <Plus className="h-4 w-4" />
                   Depositar saldo
                 </button>
               </div>
 
-              <div className="grid min-w-0 grid-cols-1 divide-y divide-white/10 border-t border-white/15 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+              <div className="grid min-w-0 grid-cols-1 divide-y divide-white/10 border-t border-invert sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
                 <div className="min-w-0 p-4 sm:p-5">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
                     Disponível
                   </span>
-                  <p className="mt-2 break-all font-heading text-lg font-semibold tabular-nums text-surface-base sm:text-xl">
+                  <p className="mt-2 break-all font-heading text-lg font-semibold tabular-nums text-brand-on-dark sm:text-xl">
                     {formatBRL(wallet.availableCents)}
                   </p>
-                  <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="mt-3 h-1 overflow-hidden rounded-full bg-surface-card/10">
                     <div
                       className="h-full rounded-full bg-accent-gold"
                       style={{
@@ -896,7 +896,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
                     Reservado
                   </span>
-                  <p className="mt-2 break-all font-heading text-lg font-semibold tabular-nums text-accent-gold sm:text-xl">
+                  <p className="mt-2 break-all font-heading text-lg font-semibold tabular-nums text-accent-gold-ink sm:text-xl">
                     {formatBRL(wallet.reservedCents)}
                   </p>
                   <p className="mt-2 text-[10px] leading-relaxed text-white/50">
@@ -908,7 +908,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
                     Depósitos
                   </span>
-                  <p className="mt-2 font-heading text-xl font-semibold text-surface-base">
+                  <p className="mt-2 font-heading text-xl font-semibold text-brand-on-dark">
                     Simulados
                   </p>
                   <p className="mt-2 text-[10px] leading-relaxed text-white/50">
@@ -920,11 +920,11 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
             <div className={`${panelClass} p-4 sm:p-6`}>
               <div className="flex min-w-0 items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-base text-brand-primary">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-base text-brand-interactive">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-heading text-sm font-semibold text-brand-primary">
+                  <h3 className="font-heading text-sm font-semibold text-brand-interactive">
                     Como funcionam as reservas
                   </h3>
                   <p className="mt-1 text-xs leading-relaxed text-text-secondary">
@@ -951,14 +951,14 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <p className={eyebrowClass}>Movimentação da carteira</p>
               <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                  <h2 className="font-heading text-xl font-semibold text-brand-interactive sm:text-2xl">
                     Extrato de transações
                   </h2>
                   <p className="mt-1 max-w-2xl text-xs leading-relaxed text-text-secondary">
                     Registro de depósitos, bloqueios e liberações de reservas.
                   </p>
                 </div>
-                <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-primary">
+                <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-interactive">
                   {transactions.length}{" "}
                   {transactions.length === 1 ? "registro" : "registros"}
                 </span>
@@ -967,8 +967,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
             {transactions.length === 0 ? (
               <div className="px-5 py-14 text-center">
-                <History className="mx-auto h-7 w-7 text-accent-gold" />
-                <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                <History className="mx-auto h-7 w-7 text-accent-gold-ink" />
+                <p className="mt-3 font-heading text-base font-semibold text-brand-interactive">
                   Nenhuma movimentação registrada
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
@@ -989,7 +989,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                             ? "bg-semantic-success-bg text-semantic-success"
                             : tx.type === "RESERVATION_HOLD"
                               ? "bg-semantic-warning-bg text-semantic-warning"
-                              : "bg-surface-base text-brand-primary"
+                              : "bg-surface-base text-brand-interactive"
                         }`}
                       >
                         {tx.type === "DEPOSIT" ? (
@@ -1004,7 +1004,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                           {tx.description}
                         </p>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
-                          <span className="rounded-md border border-border-subtle bg-[#FAF7F2] px-2 py-1 font-mono text-[9px] text-text-secondary">
+                          <span className="rounded-md border border-border-subtle bg-surface-subtle px-2 py-1 font-mono text-[9px] text-text-secondary">
                             {tx.type}
                           </span>
                           <span className="text-[10px] text-text-secondary">
@@ -1040,7 +1040,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           <section className="min-w-0 space-y-5">
             <div>
               <p className={eyebrowClass}>Conta e permissões</p>
-              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-interactive sm:text-2xl">
                 Dados cadastrais
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-text-secondary">
@@ -1049,8 +1049,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
             </div>
 
             <div className={`${panelClass} min-w-0 overflow-hidden`}>
-              <div className="flex min-w-0 items-center gap-3 border-b border-border-subtle bg-[#FAF7F2] p-4 sm:gap-4 sm:p-7">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-primary font-heading text-lg font-semibold text-accent-gold">
+              <div className="flex min-w-0 items-center gap-3 border-b border-border-subtle bg-surface-subtle p-4 sm:gap-4 sm:p-7">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-primary font-heading text-lg font-semibold text-accent-gold-ink">
                   {currentUser?.avatarUrl ? (
                     <img
                       src={currentUser.avatarUrl}
@@ -1063,7 +1063,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="wrap-break-word font-heading text-base font-semibold text-brand-primary sm:text-lg">
+                  <h3 className="wrap-break-word font-heading text-base font-semibold text-brand-interactive sm:text-lg">
                     {currentUser?.name}
                   </h3>
                   <p className="mt-1 text-xs text-text-secondary">
@@ -1092,7 +1092,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </div>
                 <div className="min-w-0 p-4 sm:border-r sm:p-6">
                   <span className={eyebrowClass}>Pseudônimo público</span>
-                  <p className="mt-2 wrap-break-word font-mono text-sm font-semibold text-brand-primary">
+                  <p className="mt-2 wrap-break-word font-mono text-sm font-semibold text-brand-interactive">
                     {currentUser?.publicPseudonym || "â€”"}
                   </p>
                 </div>
@@ -1107,11 +1107,11 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
             <div className={`${panelClass} p-4 sm:p-6`}>
               <div className="flex min-w-0 items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-base text-brand-primary">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-base text-brand-interactive">
                   <Lock className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-heading text-sm font-semibold text-brand-primary">
+                  <h3 className="font-heading text-sm font-semibold text-brand-interactive">
                     Exclusividade de papéis
                   </h3>
                   <p className="mt-2 text-xs leading-relaxed text-text-secondary">
@@ -1140,13 +1140,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               role="dialog"
               aria-modal="true"
               aria-labelledby="deposit-title"
-              className="deposit-content-animation my-auto max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-accent-gold/40 bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)]"
+              className="deposit-content-animation my-auto max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-accent-gold/40 bg-surface-card shadow-2xl sm:max-h-[calc(100dvh-2rem)]"
             >
-              <div className="relative overflow-hidden bg-brand-primary px-4 py-4 text-surface-base sm:px-6 sm:py-5">
-                <div className="pointer-events-none absolute -right-8 -top-12 h-36 w-36 rounded-full border border-accent-gold/20" />
+              <div className="relative overflow-hidden bg-brand-primary px-4 py-4 text-brand-on-dark sm:px-6 sm:py-5">
+                <div className="pointer-events-none absolute -right-8 -top-12 h-36 w-36 rounded-full border border-border-subtle border-accent-gold/20" />
                 <div className="relative flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-gold/30 bg-white/5 text-accent-gold">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-gold/30 bg-surface-card/5 text-accent-gold-ink">
                       <WalletIcon className="h-5 w-5" />
                     </div>
                     <h2
@@ -1171,7 +1171,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   <button
                     onClick={closeDepositModal}
                     disabled={depositSubmitting}
-                    className="shrink-0 rounded-lg p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    className="shrink-0 rounded-lg p-2 text-white/70 transition-colors hover:bg-surface-card/10 hover:text-white disabled:opacity-50"
                     aria-label="Fechar"
                   >
                     <X className="h-4 w-4" />
@@ -1186,7 +1186,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
                       Transferência simulada
                     </p>
-                    <p className="mt-2 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-primary sm:text-3xl">
+                    <p className="mt-2 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-interactive sm:text-3xl">
                       {formatBRL(completedDepositCents)}
                     </p>
                     <p className="mt-2 text-xs text-text-secondary">
@@ -1199,7 +1199,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   <div className="relative mt-8">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex w-17 shrink-0 flex-col items-center gap-3 text-center sm:w-24">
-                        <div className="deposit-bank-animation flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-gold/50 bg-surface-base text-brand-primary sm:h-16 sm:w-16">
+                        <div className="deposit-bank-animation flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-gold/50 bg-surface-base text-brand-interactive sm:h-16 sm:w-16">
                           <Building2 className="h-5 w-5 sm:h-7 sm:w-7" />
                         </div>
                         <div>
@@ -1227,7 +1227,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                         />
 
                         {depositStage === "transferring" && (
-                          <div className="deposit-coin-animation absolute top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-accent-gold bg-white text-brand-primary shadow-md sm:h-8 sm:w-8">
+                          <div className="deposit-coin-animation absolute top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-accent-gold bg-surface-card text-brand-interactive shadow-md sm:h-8 sm:w-8">
                             <CircleDollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
                           </div>
                         )}
@@ -1238,7 +1238,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition-colors duration-500 sm:h-16 sm:w-16 ${
                             depositStage === "transferring"
                               ? "deposit-wallet-animation border-semantic-success/40 bg-semantic-success-bg text-semantic-success"
-                              : "border-border-subtle bg-[#FAF7F2] text-text-secondary"
+                              : "border-border-subtle bg-surface-subtle text-text-secondary"
                           }`}
                         >
                           <WalletIcon className="h-5 w-5 sm:h-7 sm:w-7" />
@@ -1255,8 +1255,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     </div>
                   </div>
 
-                  <div className="mt-7 flex items-center justify-center gap-2 rounded-xl border border-border-subtle bg-[#FAF7F2] px-3 py-3 sm:mt-8 sm:px-4">
-                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-brand-primary" />
+                  <div className="mt-7 flex items-center justify-center gap-2 rounded-xl border border-border-subtle bg-surface-subtle px-3 py-3 sm:mt-8 sm:px-4">
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-brand-interactive" />
                     <span className="text-center text-xs font-medium text-text-secondary">
                       {depositStage === "connecting"
                         ? "Validando solicitação"
@@ -1281,13 +1281,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-semantic-success">
                       Operação confirmada
                     </p>
-                    <h3 className="mt-2 font-heading text-2xl font-semibold text-brand-primary">
+                    <h3 className="mt-2 font-heading text-2xl font-semibold text-brand-interactive">
                       Saldo adicionado
                     </h3>
                     <p className="mt-2 text-sm text-text-secondary">
                       O valor foi creditado à sua carteira.
                     </p>
-                    <p className="mt-5 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-primary sm:text-3xl">
+                    <p className="mt-5 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-interactive sm:text-3xl">
                       +{formatBRL(completedDepositCents)}
                     </p>
                   </div>
@@ -1299,14 +1299,14 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </div>
               ) : (
                 <div className="space-y-5 p-4 sm:p-6">
-                  <div className="rounded-xl border border-border-subtle bg-[#FAF7F2] p-3">
+                  <div className="rounded-xl border border-border-subtle bg-surface-subtle p-3">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
                         Saldo disponível atual
                       </span>
-                      <WalletIcon className="h-4 w-4 shrink-0 text-brand-primary" />
+                      <WalletIcon className="h-4 w-4 shrink-0 text-brand-interactive" />
                     </div>
-                    <p className="mt-1 wrap-break-word font-heading text-lg font-semibold tabular-nums text-brand-primary sm:text-xl">
+                    <p className="mt-1 wrap-break-word font-heading text-lg font-semibold tabular-nums text-brand-interactive sm:text-xl">
                       {formatBRL(wallet.availableCents)}
                     </p>
                   </div>
@@ -1319,7 +1319,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                       Valor do depósito
                     </label>
 
-                    <div className="flex min-w-0 items-center rounded-xl border border-border-strong bg-white transition-colors focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/10">
+                    <div className="flex min-w-0 items-center rounded-xl border border-border-strong bg-surface-card transition-colors focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/10">
                       <span className="shrink-0 border-r border-border-subtle px-3 py-3 text-sm font-semibold text-text-secondary">
                         R$
                       </span>
@@ -1337,7 +1337,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                           }
                         }}
                         placeholder="0,00"
-                        className="min-w-0 flex-1 rounded-r-xl bg-transparent px-3 py-3 font-mono text-base text-brand-primary outline-none placeholder:text-border-strong"
+                        className="min-w-0 flex-1 rounded-r-xl bg-transparent px-3 py-3 font-mono text-base text-brand-interactive outline-none placeholder:text-border-strong"
                         autoFocus
                       />
                     </div>
@@ -1362,8 +1362,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                             disabled={depositSubmitting}
                             className={`min-w-0 rounded-xl border px-2 py-3 text-xs font-semibold transition-colors sm:px-3 ${
                               depositAmount === quickAmount
-                                ? "border-brand-primary bg-brand-primary/5 text-brand-primary"
-                                : "border-border-subtle bg-white text-text-secondary hover:border-accent-gold hover:text-brand-primary"
+                                ? "border-brand-primary bg-brand-primary/5 text-brand-interactive"
+                                : "border-border-subtle bg-surface-card text-text-secondary hover:border-accent-gold hover:text-brand-interactive"
                             }`}
                           >
                             {formatBRL(cents)}

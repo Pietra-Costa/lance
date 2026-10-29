@@ -62,11 +62,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 15 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className="bg-white rounded-none sm:rounded-2xl max-w-2xl w-full border border-border-subtle shadow-2xl sm:my-6 flex flex-col max-h-dvh sm:max-h-[92vh] overflow-hidden"
+        className="bg-surface-card rounded-none sm:rounded-2xl max-w-2xl w-full border border-border-subtle shadow-2xl sm:my-6 flex flex-col max-h-dvh sm:max-h-[92vh] overflow-hidden"
       >
-        <div className="bg-brand-deep text-surface-base px-4 sm:px-6 py-3 flex items-center justify-between gap-2 shrink-0 print:hidden">
+        <div className="bg-brand-deep text-brand-on-dark px-4 sm:px-6 py-3 flex items-center justify-between gap-2 shrink-0 print:hidden">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-accent-gold" />
+            <ShieldCheck className="w-4 h-4 text-accent-gold-ink" />
             <span className="font-heading font-medium text-xs tracking-wide">
               Comprovante Oficial de Arremate · Lance
             </span>
@@ -74,14 +74,14 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-2.5 py-1 rounded bg-brand-primary hover:bg-brand-primary/80 text-xs text-surface-base flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded bg-brand-primary hover:bg-brand-primary/80 text-xs text-brand-on-dark flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Imprimir / Salvar PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1 rounded text-white/80 hover:text-white hover:bg-white/10"
+              className="p-1 rounded text-white/80 hover:text-white hover:bg-surface-card/10"
               aria-label="Fechar"
             >
               <X className="w-5 h-5" />
@@ -103,7 +103,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 readOnly
                 value={shareUrl}
                 onFocus={event => event.currentTarget.select()}
-                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-border-strong bg-white text-[11px] font-mono text-brand-primary"
+                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-border-strong bg-surface-card text-[11px] font-mono text-brand-interactive"
               />
               <button
                 onClick={handleCopyLink}
@@ -125,7 +125,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 href={shareUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="px-3 py-1.5 rounded-lg border border-border-strong bg-white text-[11px] font-semibold text-brand-primary flex items-center gap-1.5 hover:border-brand-primary transition-colors shrink-0"
+                className="px-3 py-1.5 rounded-lg border border-border-strong bg-surface-card text-[11px] font-semibold text-brand-interactive flex items-center gap-1.5 hover:border-brand-primary transition-colors shrink-0"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Abrir</span>
@@ -135,9 +135,9 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain">
-          <div className="p-4 sm:p-8 bg-[#FAF7F2] relative border-4 sm:border-8 border-double border-border-subtle m-2 sm:m-4 rounded-lg sm:rounded-xl">
+          <div className="p-4 sm:p-8 bg-surface-subtle relative border-4 sm:border-8 border-double border-border-subtle m-2 sm:m-4 rounded-lg sm:rounded-xl">
             <div className="absolute inset-0 flex items-center justify-center opacity-4 pointer-events-none">
-              <span className="font-heading font-black text-9xl tracking-tighter text-brand-primary">
+              <span className="font-heading font-black text-9xl tracking-tighter text-brand-interactive">
                 LANCE
               </span>
             </div>
@@ -148,14 +148,14 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 <span className="text-[10px] font-mono tracking-widest uppercase text-text-secondary block">
                   CÓDIGO DE AUTENTICIDADE
                 </span>
-                <span className="font-mono font-bold text-sm text-brand-primary bg-white px-2.5 py-1 rounded border border-border-subtle">
+                <span className="font-mono font-bold text-sm text-brand-interactive bg-surface-card px-2.5 py-1 rounded border border-border-subtle">
                   {receipt.verificationCode}
                 </span>
               </div>
             </div>
 
             <div className="my-6 text-center space-y-1">
-              <h2 className="font-heading font-bold text-2xl text-brand-primary tracking-tight">
+              <h2 className="font-heading font-bold text-2xl text-brand-interactive tracking-tight">
                 Certificado de Arrematação Demonstrativo
               </h2>
               <p className="text-xs text-text-secondary">
@@ -164,13 +164,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </p>
             </div>
 
-            <div className="bg-white rounded-xl border border-border-subtle overflow-hidden p-6 space-y-4 shadow-2xs">
+            <div className="bg-surface-card rounded-xl border border-border-subtle overflow-hidden p-6 space-y-4 shadow-2xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className="text-text-secondary block text-[11px]">
                     Código do Lote:
                   </span>
-                  <span className="font-mono font-bold text-brand-primary text-sm">
+                  <span className="font-mono font-bold text-brand-interactive text-sm">
                     {receipt.lotCode}
                   </span>
                 </div>
@@ -197,7 +197,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                   <span className="text-text-secondary block text-[11px]">
                     Licitante Vencedor:
                   </span>
-                  <span className="font-mono font-semibold text-brand-primary">
+                  <span className="font-mono font-semibold text-brand-interactive">
                     {receipt.winnerPseudonym}
                   </span>
                   <span className="text-[10px] text-text-secondary block">
@@ -218,7 +218,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                   <span className="text-text-secondary block text-[11px]">
                     Valor de Arremate:
                   </span>
-                  <span className="font-heading font-bold text-base text-brand-primary">
+                  <span className="font-heading font-bold text-base text-brand-interactive">
                     {formatBRL(receipt.finalPriceCents)}
                   </span>
                 </div>
@@ -249,11 +249,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             {/* Verification footer — apenas o que a plataforma realmente faz */}
             <div className="mt-8 pt-6 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white rounded-lg border border-border-subtle p-1 flex items-center justify-center">
-                  <QrCode className="w-10 h-10 text-brand-primary" />
+                <div className="w-12 h-12 bg-surface-card rounded-lg border border-border-subtle p-1 flex items-center justify-center">
+                  <QrCode className="w-10 h-10 text-brand-interactive" />
                 </div>
                 <div className="text-[10px] text-text-secondary">
-                  <p className="font-mono text-brand-primary font-bold">
+                  <p className="font-mono text-brand-interactive font-bold">
                     VERIFICAÇÃO PÚBLICA
                   </p>
                   <p>Consulte este código em {shareUrl}</p>
@@ -265,7 +265,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
               <div className="text-center sm:text-right">
                 <div className="w-48 h-0.5 bg-border-strong mb-1"></div>
-                <p className="text-[11px] font-semibold text-brand-primary">
+                <p className="text-[11px] font-semibold text-brand-interactive">
                   Lance Casa de Leilões Digitais
                 </p>
                 <p className="text-[10px] text-text-secondary">

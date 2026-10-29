@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme } from "../../theme/useTheme";
 
 export interface LogoProps {
   variant?: "light" | "dark" | "isolated" | "monochrome";
@@ -13,16 +14,19 @@ export const Logo: React.FC<LogoProps> = ({
   className = "",
   onClick,
 }) => {
+  const { resolved } = useTheme();
   const isDark = variant === "dark";
+  // No tema escuro o símbolo verde some no fundo; usa a versão clara.
+  const useLightSymbol = isDark || resolved === "dark";
   const isMono = variant === "monochrome";
   const isIsolated = variant === "isolated";
 
   const textColor = isDark
-    ? "text-surface-base"
+    ? "text-brand-on-dark"
     : isMono
       ? "text-text-primary"
-      : "text-brand-primary";
-  const subtitleColor = isDark ? "text-surface-base/70" : "text-text-secondary";
+      : "text-brand-interactive";
+  const subtitleColor = isDark ? "text-brand-on-dark/80" : "text-text-secondary";
 
   const sizeDimensions = {
     sm: {
@@ -55,7 +59,7 @@ export const Logo: React.FC<LogoProps> = ({
       } ${className}`}
     >
       <img
-        src="/assets/green.png"
+        src={useLightSymbol ? "/assets/white.png" : "/assets/green.png"}
         alt="Símbolo Lance"
         className={`${sizeDimensions.imgHeight} w-auto object-contain shrink-0 transition-transform group-hover:scale-105`}
       />

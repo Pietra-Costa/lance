@@ -146,15 +146,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({
         aria-hidden="true"
         className="pointer-events-none absolute -bottom-48 -left-40 -z-10 h-120 w-120 rounded-full bg-brand-primary/10 blur-3xl"
       />
-      <div className="grid h-full w-full grid-cols-1 bg-white lg:grid-cols-[0.85fr_1.15fr]">
-        <aside className="relative isolate flex min-h-0 flex-col overflow-hidden bg-brand-deep px-5 py-5 text-surface-base sm:px-8 sm:py-7 lg:min-h-dvh lg:justify-between lg:px-12 lg:py-10 xl:px-16 xl:py-12">
+      <div className="grid h-full w-full grid-cols-1 bg-surface-card lg:grid-cols-[0.85fr_1.15fr]">
+        <aside className="relative isolate flex min-h-0 flex-col overflow-hidden bg-brand-deep px-5 py-5 text-brand-on-dark sm:px-8 sm:py-7 lg:min-h-dvh lg:justify-between lg:px-12 lg:py-10 xl:px-16 xl:py-12">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full border border-white/10"
+            className="pointer-events-none absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full border border-border-subtle border-invert"
           />
           <div
             aria-hidden="true"
-            className="lance-orbit pointer-events-none absolute -right-12 top-8 -z-10 hidden h-64 w-64 rounded-full border border-accent-gold/20 sm:block lg:top-16"
+            className="lance-orbit pointer-events-none absolute -right-12 top-8 -z-10 hidden h-64 w-64 rounded-full border border-border-subtle border-accent-gold/20 sm:block lg:top-16"
           />
           <div
             aria-hidden="true"
@@ -165,19 +165,19 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             <Logo variant="light" size="lg" />
 
             <div className="mt-5 max-w-md sm:mt-8 lg:mt-16">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/6 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-accent-gold sm:mb-5 sm:text-[10px]">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-invert bg-surface-card/6 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-accent-gold-ink sm:mb-5 sm:text-[10px]">
                 <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 Uma nova experiência
               </div>
 
               <h2 className="font-heading text-2xl font-medium leading-tight tracking-tight sm:text-3xl lg:text-5xl lg:leading-[1.15]">
                 Grandes oportunidades
-                <span className="ml-1 font-normal italic text-accent-gold sm:mt-1 sm:block">
+                <span className="ml-1 font-normal italic text-accent-gold-ink sm:mt-1 sm:block">
                   começam aqui.
                 </span>
               </h2>
 
-              <p className="mt-3 max-w-sm text-xs leading-5 text-surface-base/70 sm:mt-4 sm:text-sm sm:leading-6 lg:mt-5 lg:text-base lg:leading-7">
+              <p className="mt-3 max-w-sm text-xs leading-5 text-brand-on-dark/80 sm:mt-4 sm:text-sm sm:leading-6 lg:mt-5 lg:text-base lg:leading-7">
                 Um espaço para descobrir peças singulares, participar de
                 disputas e conduzir negócios com mais transparência.
               </p>
@@ -186,30 +186,30 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
           <div className="relative z-10 mt-6 hidden lg:block">
             <div className="max-w-xs border-l border-accent-gold/50 pl-4">
-              <p className="font-heading text-lg italic text-surface-base/90">
+              <p className="font-heading text-lg italic text-brand-on-dark/90">
                 O valor está nos detalhes.
               </p>
-              <p className="mt-1 text-xs leading-5 text-surface-base/50">
+              <p className="mt-1 text-xs leading-5 text-brand-on-dark/80">
                 Encontre o próximo lote que merece a sua atenção.
               </p>
             </div>
 
-            <div className="mt-8 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-surface-base/40">
+            <div className="mt-8 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-brand-on-dark/40">
               <span className="h-px w-8 bg-accent-gold/60" />
               Lance · Casa de Leilões
             </div>
           </div>
 
-          <div className="relative z-10 mt-4 hidden items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-surface-base/45 max-[380px]:flex sm:flex lg:hidden">
+          <div className="relative z-10 mt-4 hidden items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-brand-on-dark/45 max-[380px]:flex sm:flex lg:hidden">
             <LockKeyhole className="h-3 w-3" />
             Acesso à plataforma Lance
           </div>
         </aside>
         {/* Formulário */}
-        <section className="flex min-w-0 items-center justify-center bg-white px-5 py-7 sm:px-8 sm:py-9 lg:min-h-dvh lg:px-10 lg:py-8 xl:px-16">
+        <section className="flex min-w-0 items-center justify-center bg-surface-card px-5 py-7 sm:px-8 sm:py-9 lg:min-h-dvh lg:px-10 lg:py-8 xl:px-16">
           <div key={mode} className="lance-fade-up w-full max-w-md">
             <div className="mb-6 sm:mb-8">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/5 text-brand-primary sm:mb-4 sm:h-11 sm:w-11 sm:rounded-2xl">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/5 text-brand-interactive sm:mb-4 sm:h-11 sm:w-11 sm:rounded-2xl">
                 {mode === "login" ? (
                   <LockKeyhole className="h-5 w-5" strokeWidth={1.7} />
                 ) : (
@@ -217,13 +217,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 )}
               </div>
 
-              <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-accent-gold sm:mb-2 sm:text-[10px]">
+              <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-accent-gold-ink sm:mb-2 sm:text-[10px]">
                 {mode === "login"
                   ? "Bem-vindo de volta"
                   : "Faça parte da Lance"}
               </p>
 
-              <h1 className="font-heading text-2xl font-semibold tracking-tight text-brand-primary sm:text-3xl lg:text-4xl">
+              <h1 className="font-heading text-2xl font-semibold tracking-tight text-brand-interactive sm:text-3xl lg:text-4xl">
                 {mode === "login" ? "Acesse sua conta" : "Crie sua conta"}
               </h1>
 
@@ -266,7 +266,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     minLength={2}
                     maxLength={100}
                     disabled={isLoading}
-                    className="w-full rounded-xl border border-border-strong bg-surface-base/30 px-3.5 py-3 text-sm text-text-primary outline-none transition duration-200 placeholder:text-text-secondary/60 hover:border-brand-primary/40 focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/10 disabled:opacity-60 sm:px-4 sm:py-3.5"
+                    className="w-full rounded-xl border border-border-strong bg-surface-base/30 px-3.5 py-3 text-sm text-text-primary outline-none transition duration-200 placeholder:text-text-secondary/60 hover:border-brand-primary/40 focus:border-brand-primary focus:bg-surface-card focus:ring-4 focus:ring-brand-primary/10 disabled:opacity-60 sm:px-4 sm:py-3.5"
                   />
                 </div>
               )}
@@ -288,7 +288,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   required
                   maxLength={254}
                   disabled={isLoading}
-                  className="w-full rounded-xl border border-border-strong bg-surface-base/30 px-3.5 py-3 text-sm text-text-primary outline-none transition duration-200 placeholder:text-text-secondary/60 hover:border-brand-primary/40 focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/10 disabled:opacity-60 sm:px-4 sm:py-3.5"
+                  className="w-full rounded-xl border border-border-strong bg-surface-base/30 px-3.5 py-3 text-sm text-text-primary outline-none transition duration-200 placeholder:text-text-secondary/60 hover:border-brand-primary/40 focus:border-brand-primary focus:bg-surface-card focus:ring-4 focus:ring-brand-primary/10 disabled:opacity-60 sm:px-4 sm:py-3.5"
                 />
               </div>
 
@@ -321,12 +321,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     minLength={mode === "register" ? 8 : 1}
                     maxLength={20}
                     disabled={isLoading}
-                    className="w-full rounded-xl border border-border-strong bg-surface-base/30 px-3.5 py-3 pr-12 text-sm text-text-primary outline-none transition duration-200 placeholder:text-text-secondary/60 hover:border-brand-primary/40 focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/10 disabled:opacity-60 sm:px-4 sm:py-3.5"
+                    className="w-full rounded-xl border border-border-strong bg-surface-base/30 px-3.5 py-3 pr-12 text-sm text-text-primary outline-none transition duration-200 placeholder:text-text-secondary/60 hover:border-brand-primary/40 focus:border-brand-primary focus:bg-surface-card focus:ring-4 focus:ring-brand-primary/10 disabled:opacity-60 sm:px-4 sm:py-3.5"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(previous => !previous)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-text-secondary transition-colors hover:bg-brand-primary/5 hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-text-secondary transition-colors hover:bg-brand-primary/5 hover:text-brand-interactive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                     aria-label={showPassword ? "Ocultar senha" : "Exibir senha"}
                     disabled={isLoading}
                   >
@@ -354,14 +354,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                       className={`group rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-3.5 ${
                         selectedRole === "LICITANTE"
                           ? "border-brand-primary bg-brand-primary/5 shadow-sm shadow-brand-primary/5"
-                          : "border-border-subtle bg-white hover:border-brand-primary/30"
+                          : "border-border-subtle bg-surface-card hover:border-brand-primary/30"
                       }`}
                     >
                       <span
                         className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg transition-colors sm:mb-3 sm:h-9 sm:w-9 sm:rounded-xl ${
                           selectedRole === "LICITANTE"
                             ? "bg-brand-primary text-white"
-                            : "bg-surface-base text-text-secondary group-hover:text-brand-primary"
+                            : "bg-surface-base text-text-secondary group-hover:text-brand-interactive"
                         }`}
                       >
                         <UserCheck className="h-4 w-4" />
@@ -382,14 +382,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                       className={`group rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-3.5 ${
                         selectedRole === "LEILOEIRO"
                           ? "border-brand-primary bg-brand-primary/5 shadow-sm shadow-brand-primary/5"
-                          : "border-border-subtle bg-white hover:border-brand-primary/30"
+                          : "border-border-subtle bg-surface-card hover:border-brand-primary/30"
                       }`}
                     >
                       <span
                         className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg transition-colors sm:mb-3 sm:h-9 sm:w-9 sm:rounded-xl ${
                           selectedRole === "LEILOEIRO"
                             ? "bg-brand-primary text-white"
-                            : "bg-surface-base text-text-secondary group-hover:text-brand-primary"
+                            : "bg-surface-base text-text-secondary group-hover:text-brand-interactive"
                         }`}
                       >
                         <ShieldCheck className="h-4 w-4" />
@@ -451,7 +451,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     setErrorMsg(null);
                   }}
                   disabled={isLoading}
-                  className="font-semibold text-brand-primary underline-offset-4 transition-colors hover:text-brand-deep hover:underline disabled:opacity-60"
+                  className="font-semibold text-brand-interactive underline-offset-4 transition-colors hover:text-brand-deep hover:underline disabled:opacity-60"
                 >
                   {mode === "login"
                     ? "Cadastre-se gratuitamente"

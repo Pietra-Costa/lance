@@ -114,7 +114,7 @@ const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#EFE9DB] flex flex-col font-body w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-surface-muted flex flex-col font-body w-full max-w-full overflow-x-hidden">
       <div
         className={`flex-1 flex flex-col justify-between bg-surface-base transition-all duration-300 w-full ${getFrameContainerClass()}`}
       >
@@ -160,7 +160,7 @@ const MainAppContent: React.FC = () => {
                   ? "bg-semantic-warning-bg border-semantic-warning/30 text-semantic-warning"
                   : notif.type === "error"
                     ? "bg-semantic-error-bg border-semantic-error/30 text-semantic-error"
-                    : "bg-white border-border-strong text-text-primary"
+                    : "bg-surface-card border-border-strong text-text-primary"
             }`}
           >
             <div className="flex items-start gap-2.5">
@@ -174,7 +174,7 @@ const MainAppContent: React.FC = () => {
                 <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
               )}
               {notif.type === "info" && (
-                <Info className="w-4 h-4 text-brand-primary shrink-0 mt-0.5" />
+                <Info className="w-4 h-4 text-brand-interactive shrink-0 mt-0.5" />
               )}
 
               <div>

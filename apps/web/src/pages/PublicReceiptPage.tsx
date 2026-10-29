@@ -106,7 +106,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 space-y-5 text-center">
         <ShieldAlert className="w-10 h-10 text-semantic-warning mx-auto" />
-        <h1 className="font-heading font-bold text-2xl text-brand-primary">
+        <h1 className="font-heading font-bold text-2xl text-brand-interactive">
           Comprovante não encontrado
         </h1>
         <p className="text-xs text-text-secondary max-w-md mx-auto leading-relaxed">
@@ -139,16 +139,16 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
     <div className="max-w-3xl mx-auto px-4 py-10 space-y-6">
       <button
         onClick={() => navigateTo("/")}
-        className="inline-flex items-center gap-1.5 text-xs text-text-secondary hover:text-brand-primary cursor-pointer"
+        className="inline-flex items-center gap-1.5 text-xs text-text-secondary hover:text-brand-interactive cursor-pointer"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Voltar para a vitrine
       </button>
 
-      <div className="bg-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
-        <div className="bg-brand-deep text-surface-base px-6 py-4 flex items-center justify-between gap-3">
+      <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+        <div className="bg-brand-deep text-brand-on-dark px-6 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-accent-gold" />
+            <ShieldCheck className="w-4 h-4 text-accent-gold-ink" />
             <span className="text-xs font-semibold">
               Comprovante verificado · {houseName}
             </span>
@@ -176,7 +176,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
               <span className="text-[10px] font-mono uppercase tracking-widest text-text-secondary block">
                 Código de verificação
               </span>
-              <span className="font-mono font-bold text-sm text-brand-primary bg-[#FAF7F2] px-2.5 py-1 rounded border border-border-subtle inline-block mt-1">
+              <span className="font-mono font-bold text-sm text-brand-interactive bg-surface-subtle px-2.5 py-1 rounded border border-border-subtle inline-block mt-1">
                 {receipt.verificationCode}
               </span>
             </div>
@@ -184,7 +184,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div className="sm:col-span-1">
-              <div className="w-full aspect-square rounded-xl border border-border-subtle overflow-hidden">
+              <div className="w-full aspect-square rounded-xl border border-border-subtle border-border-subtle overflow-hidden">
                 <ItemImage
                   src={imageUrl}
                   alt={title}
@@ -210,7 +210,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
                   <span className="text-text-secondary block text-[11px]">
                     Valor de arremate
                   </span>
-                  <span className="font-heading font-bold text-base text-brand-primary">
+                  <span className="font-heading font-bold text-base text-brand-interactive">
                     {formatBRL(amountCents)}
                   </span>
                 </div>
@@ -218,7 +218,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
                   <span className="text-text-secondary block text-[11px]">
                     Licitante vencedor
                   </span>
-                  <span className="font-mono font-semibold text-brand-primary">
+                  <span className="font-mono font-semibold text-brand-interactive">
                     {winnerPseudonym}
                   </span>
                 </div>

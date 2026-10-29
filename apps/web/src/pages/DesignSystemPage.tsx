@@ -60,22 +60,21 @@ export const DesignSystemPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Required Prototype Notice Banner */}
-      <div className="p-4 rounded-2xl bg-brand-deep text-surface-base border border-accent-gold/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+      <div className="p-4 rounded-2xl bg-brand-deep text-brand-on-dark border border-accent-gold/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-brand-primary text-accent-gold border border-accent-gold/30">
+          <div className="p-2 rounded-xl bg-brand-primary text-accent-gold-ink border border-accent-gold/30">
             <Code2 className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-heading font-bold text-sm text-surface-base">
+              <span className="font-heading font-bold text-sm text-brand-on-dark">
                 Design System · Lance Casa de Leilões
               </span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-gold text-brand-deep uppercase">
                 v1.1 Oficial
               </span>
             </div>
-            <p className="text-[11px] text-surface-base/70 font-mono">
+            <p className="text-[11px] text-brand-on-dark/80 font-mono">
               Área interna de protótipo — não incluir no produto final
             </p>
           </div>
@@ -83,7 +82,7 @@ export const DesignSystemPage: React.FC = () => {
 
         <button
           onClick={() => navigateTo("/")}
-          className="px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-primary/80 text-surface-base text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+          className="px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-primary/80 text-brand-on-dark text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
         >
           <span>Retornar ao Site Público</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -91,19 +90,19 @@ export const DesignSystemPage: React.FC = () => {
       </div>
 
       {/* Mobile Section Nav (lg:hidden) */}
-      <div className="lg:hidden bg-white p-3 rounded-2xl border border-border-subtle shadow-xs space-y-2">
+      <div className="lg:hidden bg-surface-card p-3 rounded-2xl border border-border-subtle shadow-xs space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-[10px] uppercase font-mono font-bold text-text-secondary">
             Seção do Design System:
           </span>
           <select
             value={activeSection}
-            onChange={(e) => {
+            onChange={e => {
               setActiveSection(e.target.value);
             }}
-            className="text-xs bg-[#FAF7F2] border border-border-strong rounded-lg px-2.5 py-1 text-brand-primary font-semibold"
+            className="text-xs bg-surface-subtle border border-border-strong rounded-lg px-2.5 py-1 text-brand-interactive font-semibold"
           >
-            {sections.map((s) => (
+            {sections.map(s => (
               <option key={s.id} value={s.id}>
                 {s.name}
               </option>
@@ -112,7 +111,7 @@ export const DesignSystemPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          {sections.map((s) => {
+          {sections.map(s => {
             const isSelected = activeSection === s.id;
             return (
               <button
@@ -120,8 +119,8 @@ export const DesignSystemPage: React.FC = () => {
                 onClick={() => setActiveSection(s.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-brand-primary text-surface-base font-semibold"
-                    : "bg-[#FAF7F2] text-text-secondary hover:text-text-primary"
+                    ? "bg-brand-primary text-brand-on-dark font-semibold"
+                    : "bg-surface-subtle text-text-secondary hover:text-text-primary"
                 }`}
               >
                 {s.name}
@@ -134,11 +133,11 @@ export const DesignSystemPage: React.FC = () => {
       {/* Main Two-Column Layout: Sidebar Nav + Content */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Desktop Navigation Sidebar (hidden lg:block) */}
-        <aside className="hidden lg:block lg:col-span-3 bg-white p-4 rounded-2xl border border-border-subtle shadow-xs space-y-1 lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
+        <aside className="hidden lg:block lg:col-span-3 bg-surface-card p-4 rounded-2xl border border-border-subtle shadow-xs space-y-1 lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
           <span className="text-[10px] uppercase font-mono font-bold text-text-secondary px-3 pb-2 block">
             SUMÁRIO DO SISTEMA
           </span>
-          {sections.map((s) => {
+          {sections.map(s => {
             const Icon = s.icon;
             const isSelected = activeSection === s.id;
             return (
@@ -150,8 +149,8 @@ export const DesignSystemPage: React.FC = () => {
                 }}
                 className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2.5 cursor-pointer ${
                   isSelected
-                    ? "bg-brand-primary text-surface-base font-semibold shadow-xs"
-                    : "text-text-secondary hover:bg-[#FAF7F2] hover:text-text-primary"
+                    ? "bg-brand-primary text-brand-on-dark font-semibold shadow-xs"
+                    : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
                 }`}
               >
                 <Icon
@@ -167,12 +166,12 @@ export const DesignSystemPage: React.FC = () => {
         <main className="lg:col-span-9 space-y-10">
           {/* 1. Visão Geral */}
           {activeSection === "overview" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.1
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Visão Geral & Princípios do Sistema
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -182,8 +181,8 @@ export const DesignSystemPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-[#FAF7F2] border border-border-subtle space-y-2">
-                  <h4 className="font-heading font-bold text-sm text-brand-primary">
+                <div className="p-4 rounded-xl bg-surface-subtle border border-border-subtle space-y-2">
+                  <h4 className="font-heading font-bold text-sm text-brand-interactive">
                     1. Clareza
                   </h4>
                   <p className="text-xs text-text-secondary leading-relaxed">
@@ -191,8 +190,8 @@ export const DesignSystemPage: React.FC = () => {
                     rebuscados ou letramento excessivo.
                   </p>
                 </div>
-                <div className="p-4 rounded-xl bg-[#FAF7F2] border border-border-subtle space-y-2">
-                  <h4 className="font-heading font-bold text-sm text-brand-primary">
+                <div className="p-4 rounded-xl bg-surface-subtle border border-border-subtle space-y-2">
+                  <h4 className="font-heading font-bold text-sm text-brand-interactive">
                     2. Confiança
                   </h4>
                   <p className="text-xs text-text-secondary leading-relaxed">
@@ -200,8 +199,8 @@ export const DesignSystemPage: React.FC = () => {
                     comunicados com precisão transacional.
                   </p>
                 </div>
-                <div className="p-4 rounded-xl bg-[#FAF7F2] border border-border-subtle space-y-2">
-                  <h4 className="font-heading font-bold text-sm text-brand-primary">
+                <div className="p-4 rounded-xl bg-surface-subtle border border-border-subtle space-y-2">
+                  <h4 className="font-heading font-bold text-sm text-brand-interactive">
                     3. Descoberta
                   </h4>
                   <p className="text-xs text-text-secondary leading-relaxed">
@@ -226,12 +225,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 2. Logotipo */}
           {activeSection === "logo" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.2
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Logotipo Oficial — 4 Variantes
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -246,7 +245,7 @@ export const DesignSystemPage: React.FC = () => {
                   <span className="text-[10px] font-mono font-bold text-text-secondary block">
                     VARIANTE 1: PRINCIPAL (Fundo Claro)
                   </span>
-                  <div className="p-4 bg-white/60 rounded-xl flex items-center justify-center">
+                  <div className="p-4 bg-surface-card/60 rounded-xl flex items-center justify-center">
                     <Logo variant="light" size="lg" />
                   </div>
                   <p className="text-[11px] text-text-secondary">
@@ -257,7 +256,7 @@ export const DesignSystemPage: React.FC = () => {
 
                 {/* Variant 2 */}
                 <div className="p-6 rounded-2xl bg-brand-deep border border-brand-primary space-y-3 text-white">
-                  <span className="text-[10px] font-mono font-bold text-accent-gold block">
+                  <span className="text-[10px] font-mono font-bold text-accent-gold-ink block">
                     VARIANTE 2: FUNDO ESCURO (Verde Profundo)
                   </span>
                   <div className="p-4 bg-black/20 rounded-xl flex items-center justify-center">
@@ -270,11 +269,11 @@ export const DesignSystemPage: React.FC = () => {
                 </div>
 
                 {/* Variant 3 */}
-                <div className="p-6 rounded-2xl bg-[#FAF7F2] border border-border-subtle space-y-3">
+                <div className="p-6 rounded-2xl bg-surface-subtle border border-border-subtle space-y-3">
                   <span className="text-[10px] font-mono font-bold text-text-secondary block">
                     VARIANTE 3: SÍMBOLO ISOLADO
                   </span>
-                  <div className="p-4 bg-white rounded-xl flex items-center justify-center">
+                  <div className="p-4 bg-surface-card rounded-xl flex items-center justify-center">
                     <Logo variant="isolated" size="xl" />
                   </div>
                   <p className="text-[11px] text-text-secondary">
@@ -284,11 +283,11 @@ export const DesignSystemPage: React.FC = () => {
                 </div>
 
                 {/* Variant 4 */}
-                <div className="p-6 rounded-2xl bg-white border border-border-subtle space-y-3">
+                <div className="p-6 rounded-2xl bg-surface-card border border-border-subtle space-y-3">
                   <span className="text-[10px] font-mono font-bold text-text-secondary block">
                     VARIANTE 4: MONOCROMÁTICA (Grafite)
                   </span>
-                  <div className="p-4 bg-[#FAF7F2] rounded-xl flex items-center justify-center">
+                  <div className="p-4 bg-surface-subtle rounded-xl flex items-center justify-center">
                     <Logo variant="monochrome" size="lg" />
                   </div>
                   <p className="text-[11px] text-text-secondary">
@@ -302,12 +301,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 3. Cores & Tokens */}
           {activeSection === "colors" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.3
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Paleta Cromática Oficial & Tokens Semânticos
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -318,7 +317,7 @@ export const DesignSystemPage: React.FC = () => {
 
               {/* Brand Colors */}
               <div className="space-y-3">
-                <h3 className="font-heading font-bold text-sm text-brand-primary">
+                <h3 className="font-heading font-bold text-sm text-brand-interactive">
                   Cores Primárias da Marca
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -377,10 +376,10 @@ export const DesignSystemPage: React.FC = () => {
                       text: "#0A2B22",
                       contrast: "5.2:1 (AA)",
                     },
-                  ].map((color) => (
+                  ].map(color => (
                     <div
                       key={color.hex}
-                      className="rounded-xl border border-border-subtle overflow-hidden bg-white shadow-2xs"
+                      className="rounded-xl border border-border-subtle overflow-hidden bg-surface-card shadow-2xs"
                     >
                       <div
                         className="h-20 p-3 flex flex-col justify-end"
@@ -397,7 +396,7 @@ export const DesignSystemPage: React.FC = () => {
                         <p className="text-[11px] text-text-secondary">
                           {color.role}
                         </p>
-                        <span className="text-[10px] text-brand-primary font-mono font-medium block">
+                        <span className="text-[10px] text-brand-interactive font-mono font-medium block">
                           Contraste: {color.contrast}
                         </span>
                       </div>
@@ -408,7 +407,7 @@ export const DesignSystemPage: React.FC = () => {
 
               {/* Semantic States */}
               <div className="space-y-3 pt-4 border-t border-border-subtle">
-                <h3 className="font-heading font-bold text-sm text-brand-primary">
+                <h3 className="font-heading font-bold text-sm text-brand-interactive">
                   Tokens Semânticos de Interface
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -432,7 +431,7 @@ export const DesignSystemPage: React.FC = () => {
                       #B91C1C / #FEE2E2
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#EFF6FF] border border-[#1D4ED8]/30 text-[#1D4ED8]">
+                  <div className="p-3 rounded-xl bg-semantic-info-bg border border-semantic-info/30 text-semantic-info">
                     <span className="font-bold block">Informativo</span>
                     <span className="font-mono text-[10px]">
                       #1D4ED8 / #EFF6FF
@@ -445,12 +444,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 4. Tipografia */}
           {activeSection === "typography" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.4
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Tipografia Oficial: Sora & Inter
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -460,17 +459,17 @@ export const DesignSystemPage: React.FC = () => {
               </div>
 
               <div className="space-y-6">
-                <div className="p-4 bg-[#FAF7F2] rounded-xl border border-border-subtle space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-primary">
+                <div className="p-4 bg-surface-subtle rounded-xl border border-border-subtle space-y-2">
+                  <span className="text-xs font-mono font-bold text-brand-interactive">
                     DISPLAY (Sora Bold 48px)
                   </span>
-                  <p className="font-heading font-bold text-4xl text-brand-primary leading-tight">
+                  <p className="font-heading font-bold text-4xl text-brand-interactive leading-tight">
                     Arte, objetos de coleção e discos.
                   </p>
                 </div>
 
-                <div className="p-4 bg-white rounded-xl border border-border-subtle space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-primary">
+                <div className="p-4 bg-surface-card rounded-xl border border-border-subtle space-y-2">
+                  <span className="text-xs font-mono font-bold text-brand-interactive">
                     H1 (Sora Semibold 32px)
                   </span>
                   <p className="font-heading font-semibold text-2xl text-text-primary">
@@ -478,8 +477,8 @@ export const DesignSystemPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-white rounded-xl border border-border-subtle space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-primary">
+                <div className="p-4 bg-surface-card rounded-xl border border-border-subtle space-y-2">
+                  <span className="text-xs font-mono font-bold text-brand-interactive">
                     H2 (Sora Medium 24px)
                   </span>
                   <p className="font-heading font-medium text-xl text-text-primary">
@@ -487,11 +486,11 @@ export const DesignSystemPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-white rounded-xl border border-border-subtle space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-primary">
+                <div className="p-4 bg-surface-card rounded-xl border border-border-subtle space-y-2">
+                  <span className="text-xs font-mono font-bold text-brand-interactive">
                     VALOR MONETÁRIO BRL (Inter Bold 24px / Sora Numbers)
                   </span>
-                  <p className="font-heading font-bold text-2xl text-brand-primary">
+                  <p className="font-heading font-bold text-2xl text-brand-interactive">
                     R$ 18.000,00{" "}
                     <span className="text-xs text-text-secondary font-normal">
                       (Lance atual)
@@ -499,8 +498,8 @@ export const DesignSystemPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-white rounded-xl border border-border-subtle space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-primary">
+                <div className="p-4 bg-surface-card rounded-xl border border-border-subtle space-y-2">
+                  <span className="text-xs font-mono font-bold text-brand-interactive">
                     BODY (Inter Regular 16px / line-height 24px)
                   </span>
                   <p className="font-body text-base text-text-primary leading-relaxed max-w-2xl">
@@ -511,8 +510,8 @@ export const DesignSystemPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-white rounded-xl border border-border-subtle space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-primary">
+                <div className="p-4 bg-surface-card rounded-xl border border-border-subtle space-y-2">
+                  <span className="text-xs font-mono font-bold text-brand-interactive">
                     METADATA & PSEUDÔNIMO (Inter Medium 12px)
                   </span>
                   <p className="font-mono text-xs text-text-secondary">
@@ -525,12 +524,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 7. Botões */}
           {activeSection === "buttons" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.7
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Matriz de Botões & Estados
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -542,7 +541,7 @@ export const DesignSystemPage: React.FC = () => {
               <div className="space-y-6 text-xs">
                 {/* Primary */}
                 <div className="space-y-2">
-                  <span className="font-bold text-brand-primary block">
+                  <span className="font-bold text-brand-interactive block">
                     Primary Button (Verde Lance)
                   </span>
                   <div className="flex flex-wrap items-center gap-3">
@@ -560,14 +559,14 @@ export const DesignSystemPage: React.FC = () => {
 
                 {/* Secondary */}
                 <div className="space-y-2">
-                  <span className="font-bold text-brand-primary block">
+                  <span className="font-bold text-brand-interactive block">
                     Secondary Button (Borda Neutra)
                   </span>
                   <div className="flex flex-wrap items-center gap-3">
-                    <button className="px-5 py-2.5 rounded-xl border border-border-strong bg-white text-text-primary font-semibold hover:bg-[#FAF7F2] cursor-pointer">
+                    <button className="px-5 py-2.5 rounded-xl border border-border-strong bg-surface-card text-text-primary font-semibold hover:bg-surface-subtle cursor-pointer">
                       Ver detalhes
                     </button>
-                    <button className="px-5 py-2.5 rounded-xl border border-border-strong bg-white text-text-primary font-semibold opacity-50 cursor-not-allowed">
+                    <button className="px-5 py-2.5 rounded-xl border border-border-strong bg-surface-card text-text-primary font-semibold opacity-50 cursor-not-allowed">
                       Disabled
                     </button>
                   </div>
@@ -579,10 +578,10 @@ export const DesignSystemPage: React.FC = () => {
                     Destructive Button
                   </span>
                   <div className="flex flex-wrap items-center gap-3">
-                    <button className="px-5 py-2.5 rounded-xl bg-semantic-error text-white font-semibold hover:bg-[#991B1B] cursor-pointer">
+                    <button className="px-5 py-2.5 rounded-xl bg-semantic-error text-white font-semibold hover:bg-semantic-error cursor-pointer">
                       Cancelar Lote
                     </button>
-                    <button className="px-5 py-2.5 rounded-xl border border-semantic-error/40 text-semantic-error font-semibold hover:bg-semantic-error-bg cursor-pointer">
+                    <button className="px-5 py-2.5 rounded-xl border border-border-subtle border-semantic-error/40 text-semantic-error font-semibold hover:bg-semantic-error-bg cursor-pointer">
                       Cancelar Oferta
                     </button>
                   </div>
@@ -593,12 +592,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 9. Componentes de Domínio */}
           {activeSection === "domain" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.9
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Componentes de Domínio de Leilões
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -609,7 +608,7 @@ export const DesignSystemPage: React.FC = () => {
 
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-bold text-xs text-brand-primary mb-2">
+                  <h4 className="font-bold text-xs text-brand-interactive mb-2">
                     LotStatusBadge
                   </h4>
                   <div className="flex flex-wrap gap-3">
@@ -621,7 +620,7 @@ export const DesignSystemPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-xs text-brand-primary mb-2">
+                  <h4 className="font-bold text-xs text-brand-interactive mb-2">
                     CountdownTimer (com Alerta Anti-sniping)
                   </h4>
                   <div className="flex flex-wrap gap-4 items-center">
@@ -639,17 +638,17 @@ export const DesignSystemPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-xs text-brand-primary mb-2">
+                  <h4 className="font-bold text-xs text-brand-interactive mb-2">
                     AnonymousBidder
                   </h4>
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="font-mono bg-[#FAF7F2] border border-border-subtle px-3 py-1 rounded-lg text-brand-primary font-bold">
+                    <span className="font-mono bg-surface-subtle border border-border-subtle px-3 py-1 rounded-lg text-brand-interactive font-bold">
                       Licitante •••• 4821 (Você)
                     </span>
-                    <span className="font-mono bg-[#FAF7F2] border border-border-subtle px-3 py-1 rounded-lg text-text-secondary">
+                    <span className="font-mono bg-surface-subtle border border-border-subtle px-3 py-1 rounded-lg text-text-secondary">
                       Licitante •••• 1904
                     </span>
-                    <span className="font-mono bg-[#FAF7F2] border border-border-subtle px-3 py-1 rounded-lg text-text-secondary">
+                    <span className="font-mono bg-surface-subtle border border-border-subtle px-3 py-1 rounded-lg text-text-secondary">
                       Licitante •••• 6310
                     </span>
                   </div>
@@ -660,12 +659,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 11. Tokens CSS */}
           {activeSection === "tokens" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.12
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Mapeamento de Tokens & Variáveis CSS
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -676,7 +675,7 @@ export const DesignSystemPage: React.FC = () => {
 
               <div className="overflow-x-auto text-xs">
                 <table className="w-full text-left">
-                  <thead className="bg-[#FAF7F2] border-b border-border-subtle text-text-secondary">
+                  <thead className="bg-surface-subtle border-b border-border-subtle text-text-secondary">
                     <tr>
                       <th className="py-2.5 px-3">Token Semântico</th>
                       <th className="py-2.5 px-3">CSS Variable</th>
@@ -686,7 +685,7 @@ export const DesignSystemPage: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-border-subtle font-mono text-[11px]">
                     <tr>
-                      <td className="py-2.5 px-3 font-semibold text-brand-primary">
+                      <td className="py-2.5 px-3 font-semibold text-brand-interactive">
                         color.brand.primary
                       </td>
                       <td className="py-2.5 px-3">--color-brand-primary</td>
@@ -696,7 +695,7 @@ export const DesignSystemPage: React.FC = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-3 font-semibold text-brand-primary">
+                      <td className="py-2.5 px-3 font-semibold text-brand-interactive">
                         color.brand.deep
                       </td>
                       <td className="py-2.5 px-3">--color-brand-deep</td>
@@ -706,7 +705,7 @@ export const DesignSystemPage: React.FC = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-3 font-semibold text-brand-primary">
+                      <td className="py-2.5 px-3 font-semibold text-brand-interactive">
                         color.surface.base
                       </td>
                       <td className="py-2.5 px-3">--color-surface-base</td>
@@ -716,7 +715,7 @@ export const DesignSystemPage: React.FC = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-3 font-semibold text-brand-primary">
+                      <td className="py-2.5 px-3 font-semibold text-brand-interactive">
                         color.accent.gold
                       </td>
                       <td className="py-2.5 px-3">--color-accent-gold</td>
@@ -726,7 +725,7 @@ export const DesignSystemPage: React.FC = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-3 font-semibold text-brand-primary">
+                      <td className="py-2.5 px-3 font-semibold text-brand-interactive">
                         font.heading
                       </td>
                       <td className="py-2.5 px-3">--font-heading</td>
@@ -736,7 +735,7 @@ export const DesignSystemPage: React.FC = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 px-3 font-semibold text-brand-primary">
+                      <td className="py-2.5 px-3 font-semibold text-brand-interactive">
                         font.body
                       </td>
                       <td className="py-2.5 px-3">--font-body</td>
@@ -753,12 +752,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 13. Rotas */}
           {activeSection === "routes" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.14
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Inventário Completo de Rotas
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -851,16 +850,16 @@ export const DesignSystemPage: React.FC = () => {
                     purpose:
                       "Documentação viva do sistema de design e componentes",
                   },
-                ].map((r) => (
+                ].map(r => (
                   <div
                     key={r.path}
                     className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-brand-primary text-xs">
+                      <span className="font-mono font-bold text-brand-interactive text-xs">
                         {r.path}
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#FAF7F2] border border-border-strong">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-subtle border border-border-strong">
                         {r.role}
                       </span>
                     </div>
@@ -875,12 +874,12 @@ export const DesignSystemPage: React.FC = () => {
 
           {/* 15. Pendências */}
           {activeSection === "pendings" && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
-                <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
+                <span className="text-[10px] font-mono text-accent-gold-ink font-bold uppercase">
                   SEÇÃO 15.15 / CAPÍTULO 43
                 </span>
-                <h2 className="font-heading font-bold text-2xl text-brand-primary">
+                <h2 className="font-heading font-bold text-2xl text-brand-interactive">
                   Decisões Arquiteturais & Pendências de Homologação
                 </h2>
                 <p className="text-xs text-text-secondary">
@@ -912,9 +911,9 @@ export const DesignSystemPage: React.FC = () => {
                 ].map((item, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-xl bg-[#FAF7F2] border border-border-subtle space-y-1"
+                    className="p-4 rounded-xl bg-surface-subtle border border-border-subtle space-y-1"
                   >
-                    <span className="font-bold text-brand-primary block">
+                    <span className="font-bold text-brand-interactive block">
                       {item.title}
                     </span>
                     <p className="text-text-secondary leading-relaxed">
@@ -938,8 +937,8 @@ export const DesignSystemPage: React.FC = () => {
             "routes",
             "pendings",
           ].includes(activeSection) && (
-            <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-4">
-              <h3 className="font-heading font-bold text-xl text-brand-primary">
+            <section className="bg-surface-card p-8 rounded-2xl border border-border-subtle space-y-4">
+              <h3 className="font-heading font-bold text-xl text-brand-interactive">
                 Documentação de {activeSection}
               </h3>
               <p className="text-xs text-text-secondary">
@@ -953,4 +952,3 @@ export const DesignSystemPage: React.FC = () => {
     </div>
   );
 };
-

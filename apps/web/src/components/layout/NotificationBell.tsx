@@ -157,9 +157,9 @@ export const NotificationBell: React.FC = () => {
       <button
         onClick={handleOpen}
         className={`relative flex items-center justify-center w-9 h-9 rounded-lg
-          text-text-primary/80 hover:text-brand-primary hover:bg-surface-base
+          text-text-primary/80 hover:text-brand-interactive hover:bg-surface-base
           transition-colors cursor-pointer
-          ${open ? "bg-surface-base text-brand-primary" : ""}`}
+          ${open ? "bg-surface-base text-brand-interactive" : ""}`}
         aria-label={`Notificações${
           unreadCount > 0 ? ` (${unreadCount} não lidas)` : ""
         }`}
@@ -178,14 +178,11 @@ export const NotificationBell: React.FC = () => {
 
       {open && (
         <div
-          className="absolute right-0 mt-2 w-80 bg-white border border-border-subtle
-            rounded-xl shadow-lg overflow-hidden z-50 origin-top-right
-            animate-[dropdown-enter_180ms_cubic-bezier(0.16,1,0.3,1)_both]
-            motion-reduce:animate-none"
+          className="absolute right-0 mt-2 w-80 bg-surface-card border border-border-subtle rounded-xl shadow-lg overflow-hidden z-50 origin-top-right animate-[dropdown-enter_180ms_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:animate-none"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-surface-base">
             <div>
-              <p className="text-xs font-semibold text-brand-primary">
+              <p className="text-xs font-semibold text-brand-interactive">
                 Notificações
               </p>
 
@@ -201,8 +198,7 @@ export const NotificationBell: React.FC = () => {
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
-                className="text-[11px] text-text-secondary hover:text-brand-primary
-                  flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="text-[11px] text-text-secondary hover:text-brand-interactive flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <CheckCheck className="w-3.5 h-3.5" strokeWidth={1.7} />
                 Marcar como lidas
@@ -250,7 +246,7 @@ export const NotificationBell: React.FC = () => {
 
                       <div className="flex items-center gap-2 shrink-0">
                         {!item.readAt && (
-                          <span className="text-[9px] font-medium text-brand-primary">
+                          <span className="text-[9px] font-medium text-brand-interactive">
                             NOVA
                           </span>
                         )}

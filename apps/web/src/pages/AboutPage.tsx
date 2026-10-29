@@ -90,9 +90,9 @@ export const AboutPage: React.FC = () => {
 
           <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-10 lg:gap-20 items-end">
             <div>
-              <h1 className="font-heading text-5xl sm:text-6xl lg:text-8xl font-medium tracking-[-0.055em] leading-[0.98] text-brand-primary">
+              <h1 className="font-heading text-5xl sm:text-6xl lg:text-8xl font-medium tracking-[-0.055em] leading-[0.98] text-brand-interactive">
                 O que é
-                <br />a Lance<span className="text-accent-gold">?</span>
+                <br />a Lance<span className="text-accent-gold-ink">?</span>
               </h1>
 
               <p className="mt-8 max-w-2xl text-sm sm:text-base leading-7 text-text-secondary">
@@ -106,7 +106,7 @@ export const AboutPage: React.FC = () => {
               <div className="mt-8 flex flex-wrap items-center gap-5">
                 <button
                   onClick={() => navigateTo("/lotes")}
-                  className="inline-flex items-center gap-3 bg-brand-primary text-surface-base px-5 py-3.5 text-xs font-semibold hover:bg-brand-deep transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-3 bg-brand-primary text-brand-on-dark px-5 py-3.5 text-xs font-semibold hover:bg-brand-deep transition-colors cursor-pointer"
                 >
                   Explorar lotes
                   <ArrowUpRight className="w-4 h-4" />
@@ -114,7 +114,7 @@ export const AboutPage: React.FC = () => {
 
                 <button
                   onClick={() => navigateTo("/auditoria")}
-                  className="inline-flex items-center gap-2 text-xs font-semibold text-brand-primary border-b border-accent-gold pb-2 hover:text-text-secondary transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-brand-interactive border-b border-accent-gold pb-2 hover:text-text-secondary transition-colors cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   Ver auditoria
@@ -127,13 +127,13 @@ export const AboutPage: React.FC = () => {
                 <span className="text-[10px] uppercase tracking-[0.2em] text-text-secondary">
                   Princípio da plataforma
                 </span>
-                <p className="font-heading text-2xl sm:text-3xl leading-snug text-brand-primary mt-4">
+                <p className="font-heading text-2xl sm:text-3xl leading-snug text-brand-interactive mt-4">
                   Disputa pública.
                   <br />
                   Histórico verificável.
                 </p>
                 <div className="mt-6 flex items-center gap-3 text-xs text-text-secondary">
-                  <ShieldCheck className="w-5 h-5 text-accent-gold shrink-0" />
+                  <ShieldCheck className="w-5 h-5 text-accent-gold-ink shrink-0" />
                   Auditoria com integridade verificável
                 </div>
               </div>
@@ -151,10 +151,10 @@ export const AboutPage: React.FC = () => {
         <section className="py-16 sm:py-20 lg:py-24 border-b border-border-subtle">
           <div className="grid lg:grid-cols-[0.7fr_1.3fr] gap-10 lg:gap-20">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.22em] text-accent-gold font-semibold">
+              <span className="text-[10px] uppercase tracking-[0.22em] text-accent-gold-ink font-semibold">
                 01 / Participação
               </span>
-              <h2 className="font-heading text-3xl sm:text-4xl text-brand-primary mt-5 leading-tight">
+              <h2 className="font-heading text-3xl sm:text-4xl text-brand-interactive mt-5 leading-tight">
                 Dois papéis,
                 <br />
                 uma regra de exclusividade
@@ -174,13 +174,13 @@ export const AboutPage: React.FC = () => {
                     key={role.number}
                     className="grid grid-cols-[2.5rem_1fr] sm:grid-cols-[3.5rem_1fr] gap-4 sm:gap-6 py-7 border-b border-border-subtle"
                   >
-                    <span className="font-mono text-xs text-accent-gold pt-1">
+                    <span className="font-mono text-xs text-accent-gold-ink pt-1">
                       {role.number}
                     </span>
                     <div>
                       <div className="flex items-center gap-3">
-                        <Icon className="w-4 h-4 text-brand-primary" />
-                        <h3 className="font-heading text-xl sm:text-2xl font-semibold text-brand-primary">
+                        <Icon className="w-4 h-4 text-brand-interactive" />
+                        <h3 className="font-heading text-xl sm:text-2xl font-semibold text-brand-interactive">
                           {role.title}
                         </h3>
                       </div>
@@ -198,10 +198,10 @@ export const AboutPage: React.FC = () => {
         <section className="py-16 sm:py-20 lg:py-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-12">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.22em] text-accent-gold font-semibold">
+              <span className="text-[10px] uppercase tracking-[0.22em] text-accent-gold-ink font-semibold">
                 02 / Por dentro do pregão
               </span>
-              <h2 className="font-heading text-3xl sm:text-4xl text-brand-primary mt-5">
+              <h2 className="font-heading text-3xl sm:text-4xl text-brand-interactive mt-5">
                 Como o pregão funciona
               </h2>
             </div>
@@ -220,13 +220,13 @@ export const AboutPage: React.FC = () => {
                   key={step.number}
                   className="group grid grid-cols-[2.5rem_1fr] sm:grid-cols-[4rem_1fr_1.5fr] gap-x-4 sm:gap-x-8 gap-y-3 py-6 sm:py-8 border-b border-border-subtle"
                 >
-                  <span className="font-mono text-xs text-accent-gold pt-1">
+                  <span className="font-mono text-xs text-accent-gold-ink pt-1">
                     {step.number}
                   </span>
 
                   <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 text-brand-primary shrink-0" />
-                    <h3 className="font-heading text-lg sm:text-xl text-brand-primary">
+                    <Icon className="w-4 h-4 text-brand-interactive shrink-0" />
+                    <h3 className="font-heading text-lg sm:text-xl text-brand-interactive">
                       {step.title}
                     </h3>
                   </div>
@@ -246,7 +246,7 @@ export const AboutPage: React.FC = () => {
               <span className="text-[10px] uppercase tracking-[0.22em] text-semantic-warning font-semibold">
                 03 / Limites da plataforma
               </span>
-              <h2 className="font-heading text-3xl sm:text-4xl text-brand-primary mt-5 leading-tight">
+              <h2 className="font-heading text-3xl sm:text-4xl text-brand-interactive mt-5 leading-tight">
                 O que a Lance
                 <br />
                 não é
@@ -279,33 +279,33 @@ export const AboutPage: React.FC = () => {
         </section>
 
         <nav className="border-t border-brand-primary py-8 sm:py-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <p className="font-heading text-lg text-brand-primary">
+          <p className="font-heading text-lg text-brand-interactive">
             Consulte os documentos da plataforma.
           </p>
 
           <div className="flex flex-wrap gap-x-6 gap-y-3">
             <button
               onClick={() => navigateTo("/regras")}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-brand-primary hover:text-text-secondary transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-brand-interactive hover:text-text-secondary transition-colors cursor-pointer"
             >
               Regras gerais do pregão
-              <ArrowRight className="w-3.5 h-3.5 text-accent-gold" />
+              <ArrowRight className="w-3.5 h-3.5 text-accent-gold-ink" />
             </button>
 
             <button
               onClick={() => navigateTo("/politica-reservas")}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-brand-primary hover:text-text-secondary transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-brand-interactive hover:text-text-secondary transition-colors cursor-pointer"
             >
               Política de reservas
-              <ArrowRight className="w-3.5 h-3.5 text-accent-gold" />
+              <ArrowRight className="w-3.5 h-3.5 text-accent-gold-ink" />
             </button>
 
             <button
               onClick={() => navigateTo("/termo-leiloeiro")}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-brand-primary hover:text-text-secondary transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-brand-interactive hover:text-text-secondary transition-colors cursor-pointer"
             >
               Termo do leiloeiro
-              <ArrowRight className="w-3.5 h-3.5 text-accent-gold" />
+              <ArrowRight className="w-3.5 h-3.5 text-accent-gold-ink" />
             </button>
           </div>
         </nav>

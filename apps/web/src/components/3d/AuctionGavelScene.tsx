@@ -469,8 +469,8 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
 
       {/* Subtle Spec Tag at Top Left (Clean unboxed text) */}
       <div className="absolute top-4 left-4 z-10 pointer-events-none">
-        <div className="flex items-center gap-2 text-xs font-mono text-surface-base/70 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-xs">
-          <Sparkles className="w-3.5 h-3.5 text-accent-gold" />
+        <div className="flex items-center gap-2 text-xs font-mono text-brand-on-dark/80 bg-black/40 px-3 py-1.5 rounded-lg border border-invert backdrop-blur-xs">
+          <Sparkles className="w-3.5 h-3.5 text-accent-gold-ink" />
           <span>MOTOR 3D EM TEMPO REAL · LATÃO ESCOVADO & MOGNO</span>
         </div>
       </div>
@@ -481,7 +481,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
         <div className="flex justify-center -mb-2">
           <button
             onClick={() => setIsControlsOpen(!isControlsOpen)}
-            className="px-3 py-1 rounded-t-lg bg-black/75 hover:bg-black/90 text-[11px] font-medium text-surface-base/80 hover:text-white border-t border-x border-white/15 flex items-center gap-1 cursor-pointer transition-colors shadow-md"
+            className="px-3 py-1 rounded-t-lg bg-black/75 hover:bg-black/90 text-[11px] font-medium text-brand-on-dark/80 hover:text-white border-t border-x border-invert flex items-center gap-1 cursor-pointer transition-colors shadow-md"
             title={
               isControlsOpen
                 ? "Recolher dock de controles 3D"
@@ -504,15 +504,15 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
 
         {/* Dock Surface */}
         {isControlsOpen && (
-          <div className="bg-[#0A0D0B]/90 backdrop-blur-md border border-accent-gold/25 rounded-2xl p-2.5 sm:p-3 shadow-2xl flex flex-wrap items-center justify-between gap-2.5 text-xs text-surface-base">
+          <div className="bg-[#0A0D0B]/90 backdrop-blur-md border border-accent-gold/25 rounded-2xl p-2.5 sm:p-3 shadow-2xl flex flex-wrap items-center justify-between gap-2.5 text-xs text-brand-on-dark">
             {/* View presets */}
-            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+            <div className="flex items-center gap-1 bg-surface-card/5 p-1 rounded-xl border border-invert">
               <button
                 onClick={() => setActiveView("overview")}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
                   activeView === "overview"
                     ? "bg-brand-primary text-white shadow-xs"
-                    : "text-surface-base/70 hover:text-white"
+                    : "text-brand-on-dark/80 hover:text-white"
                 }`}
               >
                 Geral
@@ -522,7 +522,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
                   activeView === "gavel"
                     ? "bg-brand-primary text-white shadow-xs"
-                    : "text-surface-base/70 hover:text-white"
+                    : "text-brand-on-dark/80 hover:text-white"
                 }`}
               >
                 Martelo
@@ -532,7 +532,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
                   activeView === "pedestal"
                     ? "bg-brand-primary text-white shadow-xs"
-                    : "text-surface-base/70 hover:text-white"
+                    : "text-brand-on-dark/80 hover:text-white"
                 }`}
               >
                 Pedestal
@@ -541,16 +541,16 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
 
             {/* Finish Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-surface-base/60 hidden sm:inline">
+              <span className="text-[11px] text-brand-on-dark/75 hidden sm:inline">
                 Acabamento:
               </span>
-              <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+              <div className="flex items-center gap-1 bg-surface-card/5 p-1 rounded-xl border border-invert">
                 <button
                   onClick={() => setActiveFinish("gold_mahogany")}
                   className={`px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
                     activeFinish === "gold_mahogany"
                       ? "bg-accent-gold text-brand-deep font-semibold"
-                      : "text-surface-base/70 hover:text-white"
+                      : "text-brand-on-dark/80 hover:text-white"
                   }`}
                   title="Ouro & Mogno Nobre"
                 >
@@ -561,7 +561,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
                   className={`px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
                     activeFinish === "titanium_walnut"
                       ? "bg-accent-gold text-brand-deep font-semibold"
-                      : "text-surface-base/70 hover:text-white"
+                      : "text-brand-on-dark/80 hover:text-white"
                   }`}
                   title="Titânio Escovado & Nogueira"
                 >
@@ -572,7 +572,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
                   className={`px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
                     activeFinish === "bronze_antique"
                       ? "bg-accent-gold text-brand-deep font-semibold"
-                      : "text-surface-base/70 hover:text-white"
+                      : "text-brand-on-dark/80 hover:text-white"
                   }`}
                   title="Bronze Pátina Antiga"
                 >
@@ -587,7 +587,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
               className={`p-1.5 sm:px-2.5 sm:py-1 rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer text-[11px] ${
                 isAutoRotating
                   ? "bg-brand-primary text-accent-gold border-accent-gold/40"
-                  : "bg-white/5 text-surface-base/70 border-white/10 hover:text-white"
+                  : "bg-surface-card/5 text-brand-on-dark/80 border-invert hover:text-white"
               }`}
               title="Alternar rotação contínua"
             >

@@ -77,7 +77,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
           <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-text-secondary">
             Catálogo de lotes
           </span>
-          <h2 className="mt-4 font-heading text-3xl font-bold text-brand-primary">
+          <h2 className="mt-4 font-heading text-3xl font-bold text-brand-interactive">
             Lote não encontrado
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-text-secondary">
@@ -86,7 +86,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
           </p>
           <button
             onClick={() => navigateTo("/lotes")}
-            className="mt-8 inline-flex cursor-pointer items-center gap-3 bg-brand-primary px-5 py-3 text-xs font-semibold text-surface-base transition-colors hover:bg-brand-deep"
+            className="mt-8 inline-flex cursor-pointer items-center gap-3 bg-brand-primary px-5 py-3 text-xs font-semibold text-brand-on-dark transition-colors hover:bg-brand-deep"
           >
             Voltar ao Catálogo de Lotes
             <ArrowUpRight className="h-4 w-4" />
@@ -134,7 +134,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
     <section className="border border-border-subtle bg-surface-base">
       <div className="border-b border-border-subtle px-5 py-5 sm:px-7">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <span className="font-mono text-xs font-semibold text-brand-primary">
+          <span className="font-mono text-xs font-semibold text-brand-interactive">
             {lot.code}
           </span>
           <span className="text-[10px] uppercase tracking-[0.16em] text-text-secondary">
@@ -142,7 +142,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
           </span>
         </div>
 
-        <h1 className="font-heading text-2xl font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl">
+        <h1 className="font-heading text-2xl font-bold leading-tight tracking-tight text-brand-interactive sm:text-3xl">
           {lot.title}
         </h1>
       </div>
@@ -180,7 +180,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
         ) : lot.status === "LIVE" && lot.currentLeaderPseudonym ? (
           <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border-subtle py-3 text-xs">
             <span className="text-text-secondary">Líder atual do pregão</span>
-            <span className="border border-border-subtle bg-surface-muted px-3 py-1 font-mono font-bold text-brand-primary">
+            <span className="border border-border-subtle bg-surface-muted px-3 py-1 font-mono font-bold text-brand-interactive">
               {lot.currentLeaderPseudonym}
             </span>
           </div>
@@ -191,7 +191,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
             {lot.bidCount > 0 ? "Lance atual" : "Lance inicial"}
           </span>
 
-          <p className="mt-2 wrap-break-word font-heading text-3xl font-bold tracking-tight text-brand-primary sm:text-4xl">
+          <p className="mt-2 wrap-break-word font-heading text-3xl font-bold tracking-tight text-brand-interactive sm:text-4xl">
             {formatBRL(lot.currentBidCents || lot.startingPriceCents)}
           </p>
 
@@ -209,7 +209,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
               <span className="block text-[10px] leading-4 text-text-secondary">
                 Próximo mínimo válido
               </span>
-              <span className="mt-1 block wrap-break-word font-mono text-sm font-bold text-brand-primary">
+              <span className="mt-1 block wrap-break-word font-mono text-sm font-bold text-brand-interactive">
                 {formatBRL(minNextBid)}
               </span>
             </div>
@@ -253,15 +253,15 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
             ) : (
               <button
                 onClick={handleOpenBidModal}
-                className="group flex w-full cursor-pointer items-center justify-between gap-3 bg-brand-primary px-5 py-4 text-left text-surface-base transition-colors hover:bg-brand-deep"
+                className="group flex w-full cursor-pointer items-center justify-between gap-3 bg-brand-primary px-5 py-4 text-left text-brand-on-dark transition-colors hover:bg-brand-deep"
               >
                 <span className="flex items-center gap-3">
-                  <Gavel className="h-5 w-5 shrink-0 text-accent-gold" />
+                  <Gavel className="h-5 w-5 shrink-0 text-accent-gold-ink" />
                   <span>
                     <span className="block text-sm font-semibold">
                       Dar um lance
                     </span>
-                    <span className="mt-1 block text-[11px] text-surface-base/75">
+                    <span className="mt-1 block text-[11px] text-brand-on-dark/75">
                       A partir de {formatBRL(minNextBid)}
                     </span>
                   </span>
@@ -284,13 +284,13 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
         ) : lot.status === "ENDED" ? (
           <div className="space-y-4">
             <div className="border-l-2 border-semantic-success bg-surface-muted p-4 text-xs leading-5">
-              <p className="flex items-center gap-2 font-bold text-brand-primary">
+              <p className="flex items-center gap-2 font-bold text-brand-interactive">
                 <CheckCircle2 className="h-4 w-4 text-semantic-success" />
                 Pregão encerrado
               </p>
               <p className="mt-2 text-text-secondary">
                 Lote homologado. Valor final de arremate:{" "}
-                <strong className="text-brand-primary">
+                <strong className="text-brand-interactive">
                   {formatBRL(lot.currentBidCents)}
                 </strong>
                 .
@@ -300,7 +300,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
             {lotReceipt && (
               <button
                 onClick={() => setSelectedReceiptForModal(lotReceipt)}
-                className="flex w-full cursor-pointer items-center justify-between gap-3 border border-brand-primary px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:bg-surface-muted"
+                className="flex w-full cursor-pointer items-center justify-between gap-3 border border-border-subtle border-brand-primary px-4 py-3 text-xs font-semibold text-brand-interactive transition-colors hover:bg-surface-muted"
               >
                 <span className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
@@ -364,11 +364,11 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
       <section className="border border-border-subtle bg-surface-base">
         <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center bg-surface-muted text-brand-primary">
+            <div className="flex h-9 w-9 items-center justify-center bg-surface-muted text-brand-interactive">
               <Gavel className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="font-heading text-sm font-bold text-brand-primary">
+              <h3 className="font-heading text-sm font-bold text-brand-interactive">
                 Histórico de lances
               </h3>
               <p className="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-text-secondary">
@@ -399,7 +399,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
                         entry.isCanceled
                           ? "font-mono text-semantic-error"
                           : entry.kind === "BID"
-                            ? "font-mono text-brand-primary"
+                            ? "font-mono text-brand-interactive"
                             : "font-medium text-text-primary"
                       }`}
                     >
@@ -412,7 +412,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
 
                   {entry.amountCents !== null && (
                     <div className="shrink-0 text-right">
-                      <span className="font-heading text-sm font-bold text-brand-primary">
+                      <span className="font-heading text-sm font-bold text-brand-interactive">
                         {formatBRL(entry.amountCents)}
                       </span>
                       {entry.isLeader && (
@@ -450,14 +450,14 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
         >
           <button
             onClick={() => navigateTo("/")}
-            className="shrink-0 cursor-pointer whitespace-nowrap transition-colors hover:text-brand-primary"
+            className="shrink-0 cursor-pointer whitespace-nowrap transition-colors hover:text-brand-interactive"
           >
             Início
           </button>
           <ChevronRight className="h-3 w-3 shrink-0 text-border-strong" />
           <button
             onClick={() => navigateTo("/lotes")}
-            className="shrink-0 cursor-pointer whitespace-nowrap transition-colors hover:text-brand-primary"
+            className="shrink-0 cursor-pointer whitespace-nowrap transition-colors hover:text-brand-interactive"
           >
             Catálogo
           </button>
@@ -475,7 +475,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
                 Acervo · Registro · Procedência
               </span>
             </div>
-            <h2 className="font-heading text-3xl font-bold tracking-tight text-brand-primary sm:text-4xl lg:text-5xl">
+            <h2 className="font-heading text-3xl font-bold tracking-tight text-brand-interactive sm:text-4xl lg:text-5xl">
               Detalhes do lote
             </h2>
           </div>
@@ -483,7 +483,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
             <span className="text-[10px] uppercase tracking-[0.16em] text-text-secondary">
               Identificação
             </span>
-            <span className="max-w-full break-all font-mono text-sm font-semibold text-brand-primary">
+            <span className="max-w-full break-all font-mono text-sm font-semibold text-brand-interactive">
               {lot.code}
             </span>
           </div>
@@ -514,7 +514,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
 
                   <button
                     onClick={() => setLightboxOpen(true)}
-                    className="absolute bottom-3 right-3 inline-flex cursor-pointer items-center gap-2 border border-white/20 bg-brand-deep/90 px-3 py-2 text-xs text-surface-base backdrop-blur-sm transition-colors hover:bg-brand-primary"
+                    className="absolute bottom-3 right-3 inline-flex cursor-pointer items-center gap-2 border border-invert bg-brand-deep/90 px-3 py-2 text-xs text-brand-on-dark backdrop-blur-sm transition-colors hover:bg-brand-primary"
                     title="Ampliar imagem"
                   >
                     <ZoomIn className="h-4 w-4" />
@@ -562,9 +562,9 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
             {/* Descrição e ficha técnica */}
             <section className="border-y border-border-subtle py-6 sm:py-8">
               <div className="mb-6 flex items-start gap-4">
-                <span className="font-mono text-xs text-accent-gold">01</span>
+                <span className="font-mono text-xs text-accent-gold-ink">01</span>
                 <div>
-                  <h3 className="font-heading text-xl font-bold text-brand-primary sm:text-2xl">
+                  <h3 className="font-heading text-xl font-bold text-brand-interactive sm:text-2xl">
                     Descrição do objeto
                   </h3>
                   <p className="mt-2 text-xs text-text-secondary">
@@ -581,7 +581,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
                 <div className="mt-7 grid grid-cols-1 gap-6 border-t border-border-subtle pt-6 sm:grid-cols-2">
                   {lot.specialConditions && (
                     <div>
-                      <h4 className="mb-2 text-xs font-semibold text-brand-primary">
+                      <h4 className="mb-2 text-xs font-semibold text-brand-interactive">
                         Condições especiais
                       </h4>
                       <p className="whitespace-pre-line text-xs leading-6 text-text-secondary">
@@ -591,7 +591,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
                   )}
                   {lot.sellerNotes && (
                     <div>
-                      <h4 className="mb-2 text-xs font-semibold text-brand-primary">
+                      <h4 className="mb-2 text-xs font-semibold text-brand-interactive">
                         Observações do leiloeiro
                       </h4>
                       <p className="whitespace-pre-line text-xs leading-6 text-text-secondary">
@@ -603,7 +603,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
               )}
 
               <div className="mt-8 border-t border-border-subtle pt-6">
-                <h4 className="mb-4 font-heading text-base font-semibold text-brand-primary">
+                <h4 className="mb-4 font-heading text-base font-semibold text-brand-interactive">
                   Ficha técnica
                 </h4>
                 <dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
@@ -625,7 +625,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
                     <dt className="text-xs text-text-secondary">
                       Código do lote
                     </dt>
-                    <dd className="text-right font-mono text-xs font-bold text-brand-primary">
+                    <dd className="text-right font-mono text-xs font-bold text-brand-interactive">
                       {lot.code}
                     </dd>
                   </div>
@@ -647,9 +647,9 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
             <section className="border border-border-subtle bg-surface-muted p-5 sm:p-6">
               <div className="flex flex-col gap-4 border-b border-border-subtle pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="h-5 w-5 shrink-0 text-brand-primary" />
+                  <ShieldCheck className="h-5 w-5 shrink-0 text-brand-interactive" />
                   <div>
-                    <h4 className="font-heading text-sm font-bold text-brand-primary">
+                    <h4 className="font-heading text-sm font-bold text-brand-interactive">
                       Origem do item
                     </h4>
                     <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary">
@@ -699,20 +699,20 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
             </section>
 
             {/* Auditoria: acesso com destaque visual */}
-            <section className="overflow-hidden border border-brand-primary">
-              <div className="flex items-start gap-4 bg-brand-deep p-5 text-surface-base sm:p-7">
+            <section className="overflow-hidden border border-border-subtle border-brand-primary">
+              <div className="flex items-start gap-4 bg-brand-deep p-5 text-brand-on-dark sm:p-7">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-surface-base/20 bg-surface-base/10">
-                  <Fingerprint className="h-5 w-5 text-accent-gold" />
+                  <Fingerprint className="h-5 w-5 text-accent-gold-ink" />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-gold-ink">
                     Integridade e rastreabilidade
                   </p>
                   <h3 className="mt-2 font-heading text-lg font-bold leading-snug sm:text-xl">
                     Auditoria Criptográfica do Lote
                   </h3>
-                  <p className="mt-2 text-xs leading-6 text-surface-base/75">
+                  <p className="mt-2 text-xs leading-6 text-brand-on-dark/75">
                     {lotAuditHistory.length > 0
                       ? `${lotAuditHistory.length} evento(s) registrados para este lote. Consulte hashes, descrições e verificações.`
                       : "Eventos de auditoria encadeados por hash SHA-256 e verificáveis na página de auditoria."}
@@ -722,7 +722,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
 
               <div className="flex flex-col gap-4 bg-surface-muted p-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="h-5 w-5 shrink-0 text-brand-primary" />
+                  <ShieldCheck className="h-5 w-5 shrink-0 text-brand-interactive" />
                   <div>
                     <p className="text-xs font-semibold text-text-primary">
                       Registro de verificação
@@ -739,17 +739,17 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
                 <button
                   type="button"
                   onClick={() => setAuditModalOpen(true)}
-                  className="group flex w-full cursor-pointer items-center justify-between gap-4 bg-brand-primary px-5 py-4 text-left text-surface-base transition-colors hover:bg-brand-deep sm:w-auto sm:min-w-55"
+                  className="group flex w-full cursor-pointer items-center justify-between gap-4 bg-brand-primary px-5 py-4 text-left text-brand-on-dark transition-colors hover:bg-brand-deep sm:w-auto sm:min-w-55"
                 >
                   <span>
                     <span className="block text-sm font-bold">
                       Abrir auditoria
                     </span>
-                    <span className="mt-1 block text-[10px] text-surface-base/75">
+                    <span className="mt-1 block text-[10px] text-brand-on-dark/75">
                       Consultar registro completo
                     </span>
                   </span>
-                  <ArrowUpRight className="h-5 w-5 shrink-0 text-accent-gold transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  <ArrowUpRight className="h-5 w-5 shrink-0 text-accent-gold-ink transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </button>
               </div>
             </section>
@@ -779,7 +779,7 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
           <button
             onClick={() => setLightboxOpen(false)}
             aria-label="Fechar imagem ampliada"
-            className="absolute right-4 top-4 cursor-pointer p-2 text-surface-base transition-colors hover:text-accent-gold"
+            className="absolute right-4 top-4 cursor-pointer p-2 text-brand-on-dark transition-colors hover:text-accent-gold"
           >
             <X className="h-7 w-7" />
           </button>

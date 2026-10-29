@@ -196,13 +196,13 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 const inputClassName =
-  "w-full rounded-xl border border-border-strong bg-white px-4 py-3 text-sm text-text-primary outline-none transition-all duration-200 placeholder:text-text-secondary/70 hover:border-brand-primary/50 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10";
+  "w-full rounded-xl border border-border-strong bg-surface-card px-4 py-3 text-sm text-text-primary outline-none transition-all duration-200 placeholder:text-text-secondary/70 hover:border-brand-primary/50 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10";
 
 const primaryButtonClassName =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-5 py-3 text-sm font-semibold text-surface-base shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-md focus:outline-none focus:ring-4 focus:ring-brand-primary/20 disabled:pointer-events-none disabled:opacity-50 disabled:hover:translate-y-0";
+  "inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-5 py-3 text-sm font-semibold text-brand-on-dark shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-md focus:outline-none focus:ring-4 focus:ring-brand-primary/20 disabled:pointer-events-none disabled:opacity-50 disabled:hover:translate-y-0";
 
 const secondaryButtonClassName =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-border-strong bg-white px-4 py-3 text-sm font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary hover:bg-brand-primary/5 focus:outline-none focus:ring-4 focus:ring-brand-primary/10 disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface-card px-4 py-3 text-sm font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary hover:bg-brand-primary/5 focus:outline-none focus:ring-4 focus:ring-brand-primary/10 disabled:pointer-events-none disabled:opacity-50";
 
 const SectionHeading: React.FC<{
   eyebrow?: string;
@@ -211,11 +211,11 @@ const SectionHeading: React.FC<{
 }> = ({ eyebrow, title, description }) => (
   <div className="space-y-2">
     {eyebrow && (
-      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-gold-ink">
         {eyebrow}
       </span>
     )}
-    <h2 className="font-heading text-xl font-bold tracking-tight text-brand-primary sm:text-2xl">
+    <h2 className="font-heading text-xl font-bold tracking-tight text-brand-interactive sm:text-2xl">
       {title}
     </h2>
     {description && (
@@ -283,7 +283,7 @@ const SummaryRow: React.FC<{
     <span
       className={`max-w-[65%] break-words text-right text-xs ${
         emphasized
-          ? "font-mono text-base font-bold text-brand-primary"
+          ? "font-mono text-base font-bold text-brand-interactive"
           : "font-medium text-text-primary"
       }`}
     >
@@ -563,13 +563,13 @@ export const CreateLotWizard: React.FC = () => {
   };
 
   const renderStepNavigation = () => (
-    <div className="rounded-2xl border border-border-subtle bg-white p-4 shadow-sm sm:p-5">
+    <div className="rounded-2xl border border-border-subtle bg-surface-card p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary">
             Etapa {currentStep} de 5
           </p>
-          <p className="mt-1 text-sm font-semibold text-brand-primary">
+          <p className="mt-1 text-sm font-semibold text-brand-interactive">
             {STEPS[currentStep - 1].label}
           </p>
         </div>
@@ -629,7 +629,7 @@ export const CreateLotWizard: React.FC = () => {
               <span
                 className={`mt-2 hidden text-[11px] font-semibold sm:block ${
                   isActive || isComplete
-                    ? "text-brand-primary"
+                    ? "text-brand-interactive"
                     : "text-text-secondary"
                 }`}
               >
@@ -646,21 +646,21 @@ export const CreateLotWizard: React.FC = () => {
     <main className="min-h-screen bg-surface-base">
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <header className="relative overflow-hidden rounded-3xl bg-brand-deep p-6 text-white shadow-xl shadow-brand-deep/10 sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -right-12 -top-20 h-64 w-64 rounded-full border border-white/10" />
-          <div className="pointer-events-none absolute -right-1 -top-8 h-44 w-44 rounded-full border border-accent-gold/20" />
+          <div className="pointer-events-none absolute -right-12 -top-20 h-64 w-64 rounded-full border border-border-subtle border-invert" />
+          <div className="pointer-events-none absolute -right-1 -top-8 h-44 w-44 rounded-full border border-border-subtle border-accent-gold/20" />
           <div className="pointer-events-none absolute -bottom-20 right-1/4 h-48 w-48 rounded-full bg-accent-gold/5 blur-3xl" />
 
           <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div className="max-w-2xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-gold/30 bg-white/5 px-3 py-1.5">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-gold/30 bg-surface-card/5 px-3 py-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent-gold" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-gold-ink">
                   Lance · Área do leiloeiro
                 </span>
               </div>
 
               <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                Criar novo lote<span className="text-accent-gold">.</span>
+                Criar novo lote<span className="text-accent-gold-ink">.</span>
               </h1>
 
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
@@ -672,7 +672,7 @@ export const CreateLotWizard: React.FC = () => {
             <button
               type="button"
               onClick={() => navigateTo("/leiloeiro")}
-              className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-white/20 px-4 py-3 text-xs font-semibold text-white/80 transition-all duration-200 hover:border-white/50 hover:bg-white/10 hover:text-white sm:self-auto"
+              className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-border-subtle border-invert px-4 py-3 text-xs font-semibold text-white/80 transition-all duration-200 hover:border-invert hover:bg-surface-card/10 hover:text-white sm:self-auto"
             >
               <ArrowLeft className="h-4 w-4" />
               Voltar ao painel
@@ -687,7 +687,7 @@ export const CreateLotWizard: React.FC = () => {
           className="space-y-6 transition-opacity duration-300 motion-reduce:transition-none"
         >
           {currentStep === 1 && (
-            <section className="space-y-6 rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+            <section className="space-y-6 rounded-2xl border border-border-subtle bg-surface-card p-5 shadow-sm sm:p-7">
               <SectionHeading
                 eyebrow="01 · Seleção"
                 title="Explore o acervo"
@@ -702,7 +702,7 @@ export const CreateLotWizard: React.FC = () => {
                   Buscar no catálogo
                 </label>
                 <div className="group relative">
-                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary transition-colors group-focus-within:text-brand-primary" />
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary transition-colors group-focus-within:text-brand-interactive" />
                   <input
                     id="catalog-search"
                     type="search"
@@ -715,7 +715,7 @@ export const CreateLotWizard: React.FC = () => {
                     className={`${inputClassName} pl-11`}
                   />
                   {isSearching && (
-                    <LoaderCircle className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-brand-primary" />
+                    <LoaderCircle className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-brand-interactive" />
                   )}
                 </div>
                 <p className="text-[11px] text-text-secondary">
@@ -728,7 +728,7 @@ export const CreateLotWizard: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                   <div>
-                    <h3 className="font-heading text-base font-bold text-brand-primary">
+                    <h3 className="font-heading text-base font-bold text-brand-interactive">
                       Resultados do acervo
                     </h3>
                     <p className="mt-1 text-xs text-text-secondary">
@@ -760,7 +760,7 @@ export const CreateLotWizard: React.FC = () => {
                             className={`rounded-lg border px-2.5 py-2 text-[10px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
                               isActive
                                 ? "border-brand-primary bg-brand-primary text-white"
-                                : "border-border-subtle bg-white text-text-secondary hover:border-brand-primary/50 hover:text-brand-primary"
+                                : "border-border-subtle bg-surface-card text-text-secondary hover:border-brand-primary/50 hover:text-brand-interactive"
                             }`}
                           >
                             {option.shortLabel}
@@ -783,7 +783,7 @@ export const CreateLotWizard: React.FC = () => {
                     {Array.from({ length: 4 }).map((_, index) => (
                       <div
                         key={index}
-                        className="flex animate-pulse gap-3 rounded-xl border border-border-subtle p-3"
+                        className="flex animate-pulse gap-3 rounded-xl border border-border-subtle border-border-subtle p-3"
                       >
                         <div className="h-20 w-20 shrink-0 rounded-lg bg-border-subtle" />
                         <div className="flex flex-1 flex-col justify-center gap-2">
@@ -798,10 +798,10 @@ export const CreateLotWizard: React.FC = () => {
 
                 {!isSearching && hasSearched && catalogResults.length === 0 && (
                   <div className="rounded-2xl border border-dashed border-border-strong bg-surface-base px-5 py-12 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-text-secondary shadow-sm">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-card text-text-secondary shadow-sm">
                       <Search className="h-5 w-5" />
                     </div>
-                    <h4 className="mt-4 font-heading text-base font-bold text-brand-primary">
+                    <h4 className="mt-4 font-heading text-base font-bold text-brand-interactive">
                       Nenhum resultado encontrado
                     </h4>
                     <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-text-secondary">
@@ -827,10 +827,10 @@ export const CreateLotWizard: React.FC = () => {
 
                 {!isSearching && !hasSearched && !searchError && (
                   <div className="rounded-2xl border border-dashed border-border-strong bg-surface-base px-5 py-10 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-primary shadow-sm">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-card text-brand-interactive shadow-sm">
                       <ImageIcon className="h-5 w-5" />
                     </div>
-                    <p className="mt-4 font-heading text-sm font-bold text-brand-primary">
+                    <p className="mt-4 font-heading text-sm font-bold text-brand-interactive">
                       Seu próximo lote começa aqui
                     </p>
                     <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-text-secondary">
@@ -859,7 +859,7 @@ export const CreateLotWizard: React.FC = () => {
                           className={`group relative flex min-w-0 gap-3 rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 ${
                             selected
                               ? "border-brand-primary bg-brand-primary/[0.04] ring-2 ring-brand-primary/10"
-                              : "border-border-subtle bg-white hover:border-brand-primary/40"
+                              : "border-border-subtle bg-surface-card hover:border-brand-primary/40"
                           }`}
                         >
                           <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-surface-base sm:h-28 sm:w-28">
@@ -873,10 +873,10 @@ export const CreateLotWizard: React.FC = () => {
                           </div>
 
                           <div className="flex min-w-0 flex-1 flex-col py-1">
-                            <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold-ink">
                               {mappedItem?.source ?? "Origem não identificada"}
                             </span>
-                            <h4 className="mt-1 line-clamp-2 font-heading text-sm font-bold leading-snug text-brand-primary">
+                            <h4 className="mt-1 line-clamp-2 font-heading text-sm font-bold leading-snug text-brand-interactive">
                               {item.title}
                             </h4>
                             <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
@@ -887,9 +887,9 @@ export const CreateLotWizard: React.FC = () => {
                                 {item.date ?? "Data não informada"}
                               </span>
                               {selected ? (
-                                <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-primary" />
+                                <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-interactive" />
                               ) : (
-                                <ArrowUpRight className="h-4 w-4 shrink-0 text-text-secondary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-primary" />
+                                <ArrowUpRight className="h-4 w-4 shrink-0 text-text-secondary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-interactive" />
                               )}
                             </div>
                           </div>
@@ -939,11 +939,11 @@ export const CreateLotWizard: React.FC = () => {
 
               {selectedItem && (
                 <div className="flex flex-col gap-4 rounded-2xl border border-brand-primary/15 bg-brand-primary/[0.04] p-4 sm:flex-row sm:items-center">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-brand-primary shadow-sm">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface-card text-brand-interactive shadow-sm">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-primary">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-interactive">
                       Item selecionado
                     </p>
                     <p className="mt-1 truncate font-heading text-sm font-bold text-text-primary">
@@ -978,7 +978,7 @@ export const CreateLotWizard: React.FC = () => {
           )}
 
           {currentStep === 2 && selectedItem && (
-            <section className="space-y-6 rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+            <section className="space-y-6 rounded-2xl border border-border-subtle bg-surface-card p-5 shadow-sm sm:p-7">
               <SectionHeading
                 eyebrow="02 · Verificação"
                 title="Revise a peça e sua procedência"
@@ -997,10 +997,10 @@ export const CreateLotWizard: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2 p-4">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold-ink">
                       Registro de origem
                     </span>
-                    <p className="font-heading text-base font-bold text-brand-primary">
+                    <p className="font-heading text-base font-bold text-brand-interactive">
                       {selectedItem.title}
                     </p>
                     <p className="text-xs text-text-secondary">
@@ -1010,7 +1010,7 @@ export const CreateLotWizard: React.FC = () => {
                       href={selectedItem.sourceUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 pt-2 text-xs font-semibold text-brand-primary underline decoration-brand-primary/30 underline-offset-4 transition-colors hover:decoration-brand-primary"
+                      className="inline-flex items-center gap-2 pt-2 text-xs font-semibold text-brand-interactive underline decoration-brand-primary/30 underline-offset-4 transition-colors hover:decoration-brand-primary"
                     >
                       Abrir registro original
                       <ExternalLink className="h-3.5 w-3.5" />
@@ -1023,7 +1023,7 @@ export const CreateLotWizard: React.FC = () => {
                     <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">
                       Título da obra
                     </p>
-                    <h3 className="mt-1 font-heading text-xl font-bold leading-snug text-brand-primary">
+                    <h3 className="mt-1 font-heading text-xl font-bold leading-snug text-brand-interactive">
                       {selectedItem.title}
                     </h3>
                   </div>
@@ -1064,7 +1064,7 @@ export const CreateLotWizard: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-border-subtle p-3">
+                  <div className="rounded-xl border border-border-subtle border-border-subtle p-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
                       Identificador externo
                     </p>
@@ -1077,7 +1077,7 @@ export const CreateLotWizard: React.FC = () => {
 
               <div className="space-y-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-800 shadow-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-card text-amber-800 shadow-sm">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
@@ -1092,7 +1092,7 @@ export const CreateLotWizard: React.FC = () => {
                   </div>
                 </div>
 
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200/80 bg-white/70 p-4 transition-colors hover:bg-white">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200/80 bg-surface-card/70 p-4 transition-colors hover:bg-surface-card">
                   <input
                     type="checkbox"
                     checked={verifiedRights}
@@ -1129,7 +1129,7 @@ export const CreateLotWizard: React.FC = () => {
           )}
 
           {currentStep === 3 && selectedItem && (
-            <section className="space-y-6 rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+            <section className="space-y-6 rounded-2xl border border-border-subtle bg-surface-card p-5 shadow-sm sm:p-7">
               <SectionHeading
                 eyebrow="03 · Configuração"
                 title="Defina os parâmetros do pregão"
@@ -1139,7 +1139,7 @@ export const CreateLotWizard: React.FC = () => {
               {publishError && <AlertMessage>{publishError}</AlertMessage>}
 
               <div className="flex items-center gap-4 rounded-2xl bg-surface-base p-3">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-card">
                   <ItemImage
                     src={selectedItem.primaryImageUrl}
                     alt={selectedItem.title}
@@ -1149,10 +1149,10 @@ export const CreateLotWizard: React.FC = () => {
                   />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold-ink">
                     Peça selecionada
                   </p>
-                  <p className="mt-1 truncate font-heading text-sm font-bold text-brand-primary">
+                  <p className="mt-1 truncate font-heading text-sm font-bold text-brand-interactive">
                     {selectedItem.title}
                   </p>
                   <p className="mt-1 truncate text-xs text-text-secondary">
@@ -1334,8 +1334,8 @@ export const CreateLotWizard: React.FC = () => {
 
               <div className="rounded-2xl border border-border-subtle bg-surface-base p-4 sm:p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <CircleDollarSign className="h-4 w-4 text-accent-gold" />
-                  <h3 className="text-xs font-bold text-brand-primary">
+                  <CircleDollarSign className="h-4 w-4 text-accent-gold-ink" />
+                  <h3 className="text-xs font-bold text-brand-interactive">
                     Resumo financeiro
                   </h3>
                 </div>
@@ -1387,7 +1387,7 @@ export const CreateLotWizard: React.FC = () => {
 
           {currentStep === 4 && selectedItem && (
             <section className="space-y-6">
-              <div className="rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+              <div className="rounded-2xl border border-border-subtle bg-surface-card p-5 shadow-sm sm:p-7">
                 <SectionHeading
                   eyebrow="04 · Conferência final"
                   title="Pré-visualização do lote"
@@ -1395,7 +1395,7 @@ export const CreateLotWizard: React.FC = () => {
                 />
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-border-subtle bg-white shadow-sm">
+              <div className="overflow-hidden rounded-2xl border border-border-subtle bg-surface-card shadow-sm">
                 <div className="grid grid-cols-1 lg:grid-cols-2">
                   <div className="relative min-h-64 bg-surface-base sm:min-h-80">
                     <ItemImage
@@ -1405,17 +1405,17 @@ export const CreateLotWizard: React.FC = () => {
                       className="absolute inset-0 h-full w-full object-cover"
                       showLabel={false}
                     />
-                    <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold backdrop-blur">
+                    <div className="absolute left-4 top-4 rounded-full border border-invert bg-brand-deep/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold-ink backdrop-blur">
                       Prévia do lote
                     </div>
                   </div>
 
                   <div className="space-y-6 p-5 sm:p-7 lg:p-8">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-gold">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-gold-ink">
                         {category || "Sem categoria"}
                       </p>
-                      <h2 className="mt-2 font-heading text-2xl font-bold leading-tight text-brand-primary sm:text-3xl">
+                      <h2 className="mt-2 font-heading text-2xl font-bold leading-tight text-brand-interactive sm:text-3xl">
                         {title}
                       </h2>
                       <p className="mt-2 text-xs text-text-secondary">
@@ -1427,10 +1427,10 @@ export const CreateLotWizard: React.FC = () => {
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
                         Lance inicial
                       </p>
-                      <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-accent-gold">
+                      <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-accent-gold-ink">
                         {formatBRL(Math.round(startingPriceBRL * 100))}
                       </p>
-                      <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+                      <div className="mt-4 flex items-center justify-between gap-3 border-t border-invert pt-4">
                         <span className="text-xs text-white/60">
                           Incremento mínimo
                         </span>
@@ -1442,7 +1442,7 @@ export const CreateLotWizard: React.FC = () => {
 
                     <div className="space-y-3">
                       <div className="flex items-start gap-3">
-                        <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold" />
+                        <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold-ink" />
                         <div>
                           <p className="text-xs font-semibold text-text-primary">
                             Início previsto
@@ -1455,7 +1455,7 @@ export const CreateLotWizard: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold" />
+                        <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold-ink" />
                         <div>
                           <p className="text-xs font-semibold text-text-primary">
                             Duração do pregão
@@ -1506,9 +1506,9 @@ export const CreateLotWizard: React.FC = () => {
 
                 <div className="border-t border-border-subtle bg-surface-base p-5 sm:p-7">
                   <div className="flex items-start gap-3">
-                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-primary" />
+                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-interactive" />
                     <div>
-                      <p className="text-xs font-bold text-brand-primary">
+                      <p className="text-xs font-bold text-brand-interactive">
                         Procedência revisada
                       </p>
                       <p className="mt-1 text-xs leading-relaxed text-text-secondary">
@@ -1530,11 +1530,11 @@ export const CreateLotWizard: React.FC = () => {
                   className="rounded-2xl border border-brand-primary/15 bg-brand-primary/[0.04] p-5"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-brand-primary shadow-sm">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-card text-brand-interactive shadow-sm">
                       <LoaderCircle className="h-5 w-5 animate-spin" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-brand-primary">
+                      <p className="text-sm font-bold text-brand-interactive">
                         Publicando seu lote
                       </p>
                       <p className="mt-1 text-xs leading-relaxed text-text-secondary">
@@ -1549,7 +1549,7 @@ export const CreateLotWizard: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex flex-col-reverse justify-between gap-3 rounded-2xl border border-border-subtle bg-white p-4 sm:flex-row sm:items-center sm:p-5">
+              <div className="flex flex-col-reverse justify-between gap-3 rounded-2xl border border-border-subtle bg-surface-card p-4 sm:flex-row sm:items-center sm:p-5">
                 <button
                   type="button"
                   disabled={isPublishing}
@@ -1573,7 +1573,7 @@ export const CreateLotWizard: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 text-accent-gold" />
+                      <Sparkles className="h-4 w-4 text-accent-gold-ink" />
                       Publicar lote
                     </>
                   )}
@@ -1583,20 +1583,20 @@ export const CreateLotWizard: React.FC = () => {
           )}
 
           {currentStep === 5 && selectedItem && publishedLot && (
-            <section className="overflow-hidden rounded-3xl border border-border-subtle bg-white shadow-xl shadow-brand-deep/5">
+            <section className="overflow-hidden rounded-3xl border border-border-subtle bg-surface-card shadow-xl shadow-brand-deep/5">
               <div className="relative overflow-hidden bg-brand-deep px-5 py-10 text-center text-white sm:px-10 sm:py-14">
-                <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full border border-white/10" />
-                <div className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full border border-accent-gold/20" />
+                <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full border border-border-subtle border-invert" />
+                <div className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full border border-border-subtle border-accent-gold/20" />
 
-                <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-accent-gold/30 bg-white/5 text-accent-gold shadow-lg shadow-black/10">
+                <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-accent-gold/30 bg-surface-card/5 text-accent-gold-ink shadow-lg shadow-black/10">
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
 
-                <p className="relative mt-6 text-[10px] font-bold uppercase tracking-[0.22em] text-accent-gold">
+                <p className="relative mt-6 text-[10px] font-bold uppercase tracking-[0.22em] text-accent-gold-ink">
                   Cadastro concluído
                 </p>
                 <h2 className="relative mt-2 font-heading text-3xl font-bold sm:text-4xl">
-                  Lote publicado<span className="text-accent-gold">.</span>
+                  Lote publicado<span className="text-accent-gold-ink">.</span>
                 </h2>
                 <p className="relative mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
                   A API confirmou o cadastro. Os dados do lote estão registrados
@@ -1616,10 +1616,10 @@ export const CreateLotWizard: React.FC = () => {
                     />
                   </div>
                   <div className="flex min-w-0 flex-col justify-center">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold-ink">
                       {category || "Sem categoria"}
                     </span>
-                    <h3 className="mt-1 font-heading text-xl font-bold text-brand-primary">
+                    <h3 className="mt-1 font-heading text-xl font-bold text-brand-interactive">
                       {title}
                     </h3>
                     <p className="mt-1 text-xs text-text-secondary">

@@ -38,11 +38,11 @@ export const LotAuditModal: React.FC<LotAuditModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label={`Auditoria do lote ${lotTitle}`}
-      className="bg-white w-full sm:max-w-3xl max-h-dvh sm:max-h-[90vh] sm:rounded-2xl border border-border-subtle shadow-2xl flex flex-col overflow-hidden"
+      className="bg-surface-card w-full sm:max-w-3xl max-h-dvh sm:max-h-[90vh] sm:rounded-2xl border border-border-subtle shadow-2xl flex flex-col overflow-hidden"
     >
-      <div className="bg-brand-deep text-surface-base px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0">
+      <div className="bg-brand-deep text-brand-on-dark px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <ShieldCheck className="w-4 h-4 text-accent-gold shrink-0" />
+          <ShieldCheck className="w-4 h-4 text-accent-gold-ink shrink-0" />
           <span className="text-xs font-semibold truncate">
             Auditoria do lote · {lotCode}
           </span>
@@ -50,7 +50,7 @@ export const LotAuditModal: React.FC<LotAuditModalProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded text-white/80 hover:text-white hover:bg-white/10 cursor-pointer shrink-0"
+          className="p-1 rounded text-white/80 hover:text-white hover:bg-surface-card/10 cursor-pointer shrink-0"
           aria-label="Fechar auditoria do lote"
         >
           <X className="w-4 h-4" />
@@ -76,13 +76,13 @@ export const LotAuditModal: React.FC<LotAuditModalProps> = ({
             className={`rounded-2xl border p-5 space-y-3 ${
               ev.eventType === "LOT_CANCELED"
                 ? "bg-red-50 border-red-300"
-                : "bg-[#FAF7F2] border-border-subtle"
+                : "bg-surface-subtle border-border-subtle"
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border-subtle">
               <div className="flex items-center gap-2.5">
                 <span
-                  className={`w-8 h-8 rounded-lg text-surface-base font-mono font-bold text-xs flex items-center justify-center ${
+                  className={`w-8 h-8 rounded-lg text-brand-on-dark font-mono font-bold text-xs flex items-center justify-center ${
                     ev.eventType === "LOT_CANCELED"
                       ? "bg-red-700"
                       : "bg-brand-primary"
@@ -95,7 +95,7 @@ export const LotAuditModal: React.FC<LotAuditModalProps> = ({
                     className={`font-heading font-bold text-sm ${
                       ev.eventType === "LOT_CANCELED"
                         ? "text-red-800"
-                        : "text-brand-primary"
+                        : "text-brand-interactive"
                     }`}
                   >
                     {labelFor(ev.eventType)}
@@ -117,7 +117,7 @@ export const LotAuditModal: React.FC<LotAuditModalProps> = ({
               {ev.description}
             </p>
 
-            <div className="p-3 bg-white rounded-xl border border-border-subtle text-xs">
+            <div className="p-3 bg-surface-card rounded-xl border border-border-subtle text-xs">
               <span className="text-[10px] uppercase font-mono font-bold text-text-secondary block mb-1">
                 Dados públicos do evento
               </span>
@@ -133,11 +133,11 @@ export const LotAuditModal: React.FC<LotAuditModalProps> = ({
                 </span>
                 <span className="text-text-secondary break-all">{ev.prevHash}</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-white border border-border-strong">
-                <span className="text-brand-primary font-bold block text-[10px] uppercase">
+              <div className="p-2.5 rounded-lg bg-surface-card border border-border-strong">
+                <span className="text-brand-interactive font-bold block text-[10px] uppercase">
                   Hash deste registro:
                 </span>
-                <span className="text-brand-primary font-bold break-all">
+                <span className="text-brand-interactive font-bold break-all">
                   {ev.hash}
                 </span>
               </div>

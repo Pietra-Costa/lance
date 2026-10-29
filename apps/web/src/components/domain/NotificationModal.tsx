@@ -96,7 +96,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 10 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="relative flex max-h-[min(90dvh,800px)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border-subtle bg-white shadow-2xl"
+        className="relative flex max-h-[min(90dvh,800px)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-card shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label={TITLES[type] ?? "Notificação"}
@@ -121,7 +121,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 cursor-pointer rounded p-1 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            className="shrink-0 cursor-pointer rounded p-1 text-white/80 transition-colors hover:bg-surface-card/10 hover:text-white"
             aria-label="Fechar notificação"
           >
             <X className="h-4 w-4" />
@@ -131,7 +131,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
         <div className="min-h-0 space-y-4 overflow-y-auto p-5">
           {lot ? (
             <div className="flex items-center gap-3">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-border-subtle">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-border-subtle border-border-subtle">
                 <ItemImage
                   src={lot.itemSnapshot.primaryImageUrl}
                   alt={lot.title}
@@ -142,7 +142,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
               </div>
 
               <div className="min-w-0">
-                <span className="block font-mono text-[10px] font-bold text-brand-primary">
+                <span className="block font-mono text-[10px] font-bold text-brand-interactive">
                   {lot.code}
                 </span>
 
@@ -177,18 +177,18 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 
           <dl className="grid grid-cols-2 gap-3 text-xs">
             {amountCents !== null && (
-              <div className="rounded-xl border border-border-subtle bg-[#FAF7F2] p-2.5">
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle p-2.5">
                 <dt className="block text-[10px] text-text-secondary">
                   {isCanceled ? "Saldo liberado" : "Valor do lance"}
                 </dt>
 
-                <dd className="font-heading text-sm font-bold text-brand-primary">
+                <dd className="font-heading text-sm font-bold text-brand-interactive">
                   {formatBRL(amountCents)}
                 </dd>
               </div>
             )}
 
-            <div className="rounded-xl border border-border-subtle bg-[#FAF7F2] p-2.5">
+            <div className="rounded-xl border border-border-subtle bg-surface-subtle p-2.5">
               <dt className="flex items-center gap-1 text-[10px] text-text-secondary">
                 <Clock className="h-3 w-3" />
                 Quando
@@ -211,7 +211,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-lg border border-border-subtle px-3.5 py-2 text-xs text-text-secondary transition-colors hover:bg-surface-base"
+            className="cursor-pointer rounded-lg border border-border-subtle border-border-subtle px-3.5 py-2 text-xs text-text-secondary transition-colors hover:bg-surface-base"
           >
             Fechar
           </button>

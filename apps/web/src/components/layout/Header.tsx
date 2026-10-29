@@ -15,6 +15,7 @@ import {
 import { formatBRL } from "../../logic/auctionRules";
 import { NotificationBell } from "./NotificationBell";
 import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 import { AnimatePresence, motion } from "motion/react";
 
 export const Header: React.FC = () => {
@@ -55,8 +56,8 @@ export const Header: React.FC = () => {
             onClick={() => handleNav("/lotes")}
             className={`relative py-2 transition-colors cursor-pointer ${
               isActive("/lotes")
-                ? "text-brand-primary font-semibold"
-                : "text-text-primary/80 hover:text-brand-primary"
+                ? "text-brand-interactive font-semibold"
+                : "text-text-primary/80 hover:text-brand-interactive"
             }`}
           >
             Explorar Lotes
@@ -71,8 +72,8 @@ export const Header: React.FC = () => {
             onClick={() => handleNav("/auditoria")}
             className={`relative py-2 transition-colors cursor-pointer ${
               isActive("/auditoria")
-                ? "text-brand-primary font-semibold"
-                : "text-text-primary/80 hover:text-brand-primary"
+                ? "text-brand-interactive font-semibold"
+                : "text-text-primary/80 hover:text-brand-interactive"
             }`}
           >
             Auditoria Pública
@@ -87,8 +88,8 @@ export const Header: React.FC = () => {
             onClick={() => handleNav("/sobre")}
             className={`relative py-2 transition-colors cursor-pointer ${
               isActive("/sobre")
-                ? "text-brand-primary font-semibold"
-                : "text-text-primary/80 hover:text-brand-primary"
+                ? "text-brand-interactive font-semibold"
+                : "text-text-primary/80 hover:text-brand-interactive"
             }`}
           >
             Sobre a Lance
@@ -104,15 +105,15 @@ export const Header: React.FC = () => {
           {currentUser && currentUser.role === "LICITANTE" && (
             <button
               onClick={() => handleNav("/conta/carteira")}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-subtle bg-white hover:border-border-strong transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-card hover:border-border-strong transition-colors cursor-pointer"
               title="Saldo disponível na carteira"
             >
-              <Wallet className="w-3.5 h-3.5 text-brand-primary" />
+              <Wallet className="w-3.5 h-3.5 text-brand-interactive" />
               <span className="flex flex-col items-start leading-tight">
                 <span className="text-[9px] uppercase tracking-wide text-text-secondary">
                   Disponível
                 </span>
-                <span className="text-[11px] font-bold text-brand-primary font-mono">
+                <span className="text-[11px] font-bold text-brand-interactive font-mono">
                   {formatBRL(wallet.availableCents)}
                 </span>
               </span>
@@ -123,14 +124,16 @@ export const Header: React.FC = () => {
             <NotificationBell />
           </div>
 
+          <ThemeToggle />
+
           {currentUser ? (
             <div className="relative">
               <button
                 onClick={toggleAccountMenu}
-                className="flex items-center gap-3 p-1.5 pl-3 rounded-lg border border-border-subtle bg-white hover:border-border-strong transition-all cursor-pointer shadow-xs"
+                className="flex items-center gap-3 p-1.5 pl-3 rounded-lg border border-border-subtle bg-surface-card hover:border-border-strong transition-all cursor-pointer shadow-xs"
               >
                 <div className="flex flex-col text-right leading-tight">
-                  <span className="text-xs font-semibold text-brand-primary max-w-32.5 truncate">
+                  <span className="text-xs font-semibold text-brand-interactive max-w-32.5 truncate">
                     {currentUser.name}
                   </span>
                   <span className="text-[10px] text-text-secondary uppercase font-medium tracking-wide">
@@ -140,7 +143,7 @@ export const Header: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="w-8 h-8 rounded-full bg-brand-primary text-surface-base flex items-center justify-center font-bold text-xs overflow-hidden border border-brand-primary">
+                <div className="w-8 h-8 rounded-full bg-brand-primary text-brand-on-dark flex items-center justify-center font-bold text-xs overflow-hidden border border-brand-primary">
                   {currentUser.avatarUrl ? (
                     <img
                       src={currentUser.avatarUrl}
@@ -156,23 +159,20 @@ export const Header: React.FC = () => {
 
               {accountMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-border-subtle py-2 z-50
-                  origin-top-right
-                  animate-[dropdown-enter_180ms_cubic-bezier(0.16,1,0.3,1)_both]
-                  motion-reduce:animate-none"
+                  className="absolute right-0 mt-2 w-64 bg-surface-card rounded-xl shadow-lg border border-border-subtle py-2 z-50 origin-top-right animate-[dropdown-enter_180ms_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:animate-none"
                 >
                   <div className="px-4 py-2 border-b border-border-subtle/60">
                     <p className="text-xs text-text-secondary">
                       Conectado como
                     </p>
-                    <p className="text-sm font-semibold text-brand-primary truncate">
+                    <p className="text-sm font-semibold text-brand-interactive truncate">
                       {currentUser.email}
                     </p>
                     {currentUser.role === "LICITANTE" && (
                       <div className="mt-2 p-2 bg-surface-base rounded-md text-xs">
                         <div className="flex justify-between text-text-secondary">
                           <span>Saldo Disponível:</span>
-                          <span className="font-semibold text-brand-primary">
+                          <span className="font-semibold text-brand-interactive">
                             {formatBRL(wallet.availableCents)}
                           </span>
                         </div>
@@ -186,28 +186,28 @@ export const Header: React.FC = () => {
                         onClick={() => handleNav("/conta")}
                         className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <User className="w-3.5 h-3.5 text-brand-primary" />
+                        <User className="w-3.5 h-3.5 text-brand-interactive" />
                         <span>Visão Geral da Conta</span>
                       </button>
                       <button
                         onClick={() => handleNav("/conta/lances")}
                         className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Gavel className="w-3.5 h-3.5 text-brand-primary" />
+                        <Gavel className="w-3.5 h-3.5 text-brand-interactive" />
                         <span>Meus Lances</span>
                       </button>
                       <button
                         onClick={() => handleNav("/conta/arrematados")}
                         className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <FileCheck className="w-3.5 h-3.5 text-brand-primary" />
+                        <FileCheck className="w-3.5 h-3.5 text-brand-interactive" />
                         <span>Lotes Arrematados</span>
                       </button>
                       <button
                         onClick={() => handleNav("/conta/carteira")}
                         className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Wallet className="w-3.5 h-3.5 text-brand-primary" />
+                        <Wallet className="w-3.5 h-3.5 text-brand-interactive" />
                         <span>Carteira</span>
                       </button>
                     </div>
@@ -217,25 +217,29 @@ export const Header: React.FC = () => {
                         onClick={() => handleNav("/leiloeiro")}
                         className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Layers className="w-3.5 h-3.5 text-brand-primary" />
+                        <Layers className="w-3.5 h-3.5 text-brand-interactive" />
                         <span>Painel do Leiloeiro</span>
                       </button>
                       <button
                         onClick={() => handleNav("/leiloeiro/lotes/novo")}
-                        className="w-full px-4 py-2 text-left text-xs font-semibold text-brand-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-semibold text-brand-interactive hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <PlusCircle className="w-3.5 h-3.5 text-brand-primary" />
+                        <PlusCircle className="w-3.5 h-3.5 text-brand-interactive" />
                         <span>Criar Novo Lote</span>
                       </button>
                       <button
                         onClick={() => handleNav("/leiloeiro/lotes")}
                         className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Gavel className="w-3.5 h-3.5 text-brand-primary" />
+                        <Gavel className="w-3.5 h-3.5 text-brand-interactive" />
                         <span>Gestão de Lotes</span>
                       </button>
                     </div>
                   )}
+
+                  <div className="py-1 border-t border-border-subtle/60">
+                    <ThemeToggle variant="menu" />
+                  </div>
 
                   <div className="pt-1 border-t border-border-subtle/60">
                     <button
@@ -253,13 +257,13 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleNav("/entrar")}
-                className="px-4 py-2 text-sm font-medium text-brand-primary hover:text-brand-deep transition-colors cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-brand-interactive hover:text-brand-deep transition-colors cursor-pointer"
               >
                 Entrar
               </button>
               <button
                 onClick={() => handleNav("/cadastro")}
-                className="px-4 py-2 text-sm font-semibold text-surface-base bg-brand-primary hover:text-brand-deep rounded-lg transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2 text-sm font-semibold text-brand-on-dark bg-brand-primary hover:text-brand-deep rounded-lg transition-colors cursor-pointer shadow-xs"
               >
                 Cadastrar
               </button>
@@ -268,12 +272,14 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex lg:hidden items-center gap-2">
+          <ThemeToggle />
+
           <button
             onClick={() => {
               setMobileMenuOpen((prev) => !prev);
               setAccountMenuOpen(false);
             }}
-            className="p-2 rounded-lg text-text-primary hover:bg-surface-base[#E2DDD2]/50 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
             aria-label={
               mobileMenuOpen ? "Fechar menu principal" : "Abrir menu principal"
             }
@@ -307,15 +313,15 @@ export const Header: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="lg:hidden bg-surface-base[#F5F1E7] border-b  px-4 pt-3 pb-6 space-y-4 shadow-inner"
+            className="lg:hidden bg-surface-base border-b border-border-subtle px-4 pt-3 pb-6 space-y-4 shadow-inner"
           >
             <div className="flex flex-col space-y-2">
               <button
                 onClick={() => handleNav("/lotes")}
                 className={`text-left py-2 font-medium transition-colors ${
                   isActive("/lotes")
-                    ? "text-brand-primary font-semibold"
-                    : "text-text-primary hover:text-brand-primary"
+                    ? "text-brand-interactive font-semibold"
+                    : "text-text-primary hover:text-brand-interactive"
                 }`}
               >
                 Explorar Catálogo de Lotes
@@ -325,8 +331,8 @@ export const Header: React.FC = () => {
                 onClick={() => handleNav("/auditoria")}
                 className={`text-left py-2 font-medium transition-colors ${
                   isActive("/auditoria")
-                    ? "text-brand-primary font-semibold"
-                    : "text-text-primary hover:text-brand-primary"
+                    ? "text-brand-interactive font-semibold"
+                    : "text-text-primary hover:text-brand-interactive"
                 }`}
               >
                 Auditoria Pública Verificável
@@ -336,8 +342,8 @@ export const Header: React.FC = () => {
                 onClick={() => handleNav("/sobre")}
                 className={`text-left py-2 font-medium transition-colors ${
                   isActive("/sobre")
-                    ? "text-brand-primary font-semibold"
-                    : "text-text-primary hover:text-brand-primary"
+                    ? "text-brand-interactive font-semibold"
+                    : "text-text-primary hover:text-brand-interactive"
                 }`}
               >
                 Sobre a Lance
@@ -347,13 +353,13 @@ export const Header: React.FC = () => {
             <div className="pt-4 border-t border-border-subtle">
               {currentUser ? (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 pb-2 border-b border-border-subtle60">
-                    <div className="w-8 h-8 rounded-full bg-brand-primary text-surface-base flex items-center justify-center font-bold text-xs">
+                  <div className="flex items-center gap-3 pb-2 border-b border-border-subtle">
+                    <div className="w-8 h-8 rounded-full bg-brand-primary text-brand-on-dark flex items-center justify-center font-bold text-xs">
                       {currentUser.name.charAt(0)}
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold text-brand-primary">
+                      <p className="text-xs font-semibold text-brand-interactive">
                         {currentUser.name}
                       </p>
                       <p className="text-[10px] text-text-secondary uppercase font-medium">
@@ -366,21 +372,21 @@ export const Header: React.FC = () => {
                     <>
                       <button
                         onClick={() => handleNav("/conta")}
-                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-interactive"
                       >
                         Minha Conta & Saldo
                       </button>
 
                       <button
                         onClick={() => handleNav("/conta/lances")}
-                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-interactive"
                       >
                         Meus Lances
                       </button>
 
                       <button
                         onClick={() => handleNav("/conta/arrematados")}
-                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-interactive"
                       >
                         Comprovantes de Arremate
                       </button>
@@ -389,14 +395,14 @@ export const Header: React.FC = () => {
                     <>
                       <button
                         onClick={() => handleNav("/leiloeiro")}
-                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-interactive"
                       >
                         Painel do Leiloeiro
                       </button>
 
                       <button
                         onClick={() => handleNav("/leiloeiro/lotes/novo")}
-                        className="w-full text-left py-1.5 text-xs font-semibold text-brand-primary"
+                        className="w-full text-left py-1.5 text-xs font-semibold text-brand-interactive"
                       >
                         Criar Novo Lote (Wizard)
                       </button>
@@ -414,14 +420,14 @@ export const Header: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 pt-2">
                   <button
                     onClick={() => handleNav("/entrar")}
-                    className="py-2.5 text-center text-xs font-semibold rounded-lg border border-brand-primary text-brand-primary bg-white/50"
+                    className="py-2.5 text-center text-xs font-semibold rounded-lg border border-brand-primary text-brand-interactive bg-surface-card/50"
                   >
                     Entrar
                   </button>
 
                   <button
                     onClick={() => handleNav("/cadastro")}
-                    className="py-2.5 text-center text-xs font-semibold rounded-lg bg-brand-primary text-surface-base"
+                    className="py-2.5 text-center text-xs font-semibold rounded-lg bg-brand-primary text-brand-on-dark"
                   >
                     Cadastrar
                   </button>

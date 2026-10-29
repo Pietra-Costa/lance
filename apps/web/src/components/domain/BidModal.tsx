@@ -69,13 +69,13 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
           aria-labelledby="bid-auth-title"
           className="my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-base shadow-2xl sm:max-h-[calc(100dvh-2rem)]"
         >
-          <div className="relative shrink-0 overflow-hidden bg-brand-primary px-5 py-5 text-surface-base sm:px-6">
-            <div className="absolute -right-8 -top-10 h-36 w-36 rounded-full border border-white/10" />
-            <div className="absolute -right-2 -top-4 h-24 w-24 rounded-full border border-white/10" />
+          <div className="relative shrink-0 overflow-hidden bg-brand-primary px-5 py-5 text-brand-on-dark sm:px-6">
+            <div className="absolute -right-8 -top-10 h-36 w-36 rounded-full border border-border-subtle border-invert" />
+            <div className="absolute -right-2 -top-4 h-24 w-24 rounded-full border border-border-subtle border-invert" />
 
             <div className="relative flex items-start justify-between gap-4">
               <div>
-                <span className="mb-3 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                <span className="mb-3 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-gold-ink">
                   <ShieldAlert className="h-3.5 w-3.5" />
                   Acesso à disputa
                 </span>
@@ -87,7 +87,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                   Autenticação Necessária
                 </h3>
 
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-surface-base/75">
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-brand-on-dark/75">
                   Entre na plataforma para participar deste leilão.
                 </p>
               </div>
@@ -95,7 +95,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-white/15 p-2 text-surface-base/80 transition-colors hover:bg-white/10 hover:text-surface-base"
+                className="rounded-full border border-border-subtle border-invert p-2 text-brand-on-dark/80 transition-colors hover:bg-surface-card/10 hover:text-brand-on-dark"
                 aria-label="Fechar"
               >
                 <X className="h-4 w-4" />
@@ -113,10 +113,10 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                 .
               </p>
 
-              <div className="rounded-xl border border-border-subtle bg-white p-3.5">
+              <div className="rounded-xl border border-border-subtle bg-surface-card p-3.5">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs text-text-secondary">Lote</span>
-                  <span className="font-mono text-xs font-semibold text-brand-primary">
+                  <span className="font-mono text-xs font-semibold text-brand-interactive">
                     {lot.code}
                   </span>
                 </div>
@@ -134,7 +134,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                     onClose();
                     navigateTo("/entrar");
                   }}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-primary px-4 py-3 text-sm font-semibold text-surface-base transition-colors hover:bg-brand-deep"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-primary px-4 py-3 text-sm font-semibold text-brand-on-dark transition-colors hover:bg-brand-deep"
                 >
                   Entrar como Licitante
                   <ArrowRight className="h-4 w-4" />
@@ -143,7 +143,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full rounded-lg px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-white hover:text-text-primary"
+                  className="w-full rounded-lg px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-card hover:text-text-primary"
                 >
                   Voltar ao lote
                 </button>
@@ -224,21 +224,21 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
         aria-labelledby="bid-modal-title"
         className="my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-base shadow-2xl sm:max-h-[calc(100dvh-2rem)]"
       >
-        <div className="relative shrink-0 overflow-hidden bg-brand-primary px-5 py-4 text-surface-base sm:px-6 sm:py-5">
-          <div className="absolute -right-12 -top-16 h-40 w-40 rounded-full border border-white/[0.07]" />
-          <div className="absolute -right-4 -top-8 h-28 w-28 rounded-full border border-white/[0.07]" />
+        <div className="relative shrink-0 overflow-hidden bg-brand-primary px-5 py-4 text-brand-on-dark sm:px-6 sm:py-5">
+          <div className="absolute -right-12 -top-16 h-40 w-40 rounded-full border border-border-subtle border-white/[0.07]" />
+          <div className="absolute -right-4 -top-8 h-28 w-28 rounded-full border border-border-subtle border-white/[0.07]" />
 
           <div className="relative flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-gold-ink">
                   <Gavel className="h-3.5 w-3.5" />
                   Lance eletrônico
                 </span>
 
                 <span className="h-1 w-1 rounded-full bg-surface-base/40" />
 
-                <span className="font-mono text-[11px] text-surface-base/65">
+                <span className="font-mono text-[11px] text-brand-on-dark/65">
                   {lot.code}
                 </span>
               </div>
@@ -254,7 +254,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                     : "Confirmar seu Lance"}
               </h3>
 
-              <p className="mt-1 text-xs text-surface-base/65">
+              <p className="mt-1 text-xs text-brand-on-dark/65">
                 {successResult
                   ? "A confirmação foi recebida pela plataforma."
                   : isProcessing
@@ -267,7 +267,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="shrink-0 rounded-full border border-white/15 p-2 text-surface-base/75 transition-colors hover:bg-white/10 hover:text-surface-base"
+                className="shrink-0 rounded-full border border-border-subtle border-invert p-2 text-brand-on-dark/75 transition-colors hover:bg-surface-card/10 hover:text-brand-on-dark"
                 aria-label="Fechar"
               >
                 <X className="h-4 w-4" />
@@ -275,7 +275,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
             )}
           </div>
 
-          <div className="relative mt-4 h-px bg-white/10">
+          <div className="relative mt-4 h-px bg-surface-card/10">
             <div className="h-px w-16 bg-accent-gold" />
           </div>
         </div>
@@ -285,13 +285,13 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
             {isProcessing ? (
               <div className="space-y-5 py-3">
                 <div className="flex flex-col items-center gap-3 text-center">
-                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-border-subtle bg-white">
-                    <div className="absolute inset-2 rounded-full border border-accent-gold/40" />
-                    <LoaderCircle className="h-7 w-7 animate-spin text-brand-primary" />
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-border-subtle bg-surface-card">
+                    <div className="absolute inset-2 rounded-full border border-border-subtle border-accent-gold/40" />
+                    <LoaderCircle className="h-7 w-7 animate-spin text-brand-interactive" />
                   </div>
 
                   <div>
-                    <h4 className="font-heading text-lg font-semibold text-brand-primary">
+                    <h4 className="font-heading text-lg font-semibold text-brand-interactive">
                       Enviando seu lance
                     </h4>
 
@@ -304,7 +304,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-3 text-xs">
                     <span className="flex items-center gap-2 font-medium text-text-primary">
-                      <Gavel className="h-4 w-4 text-accent-gold" />
+                      <Gavel className="h-4 w-4 text-accent-gold-ink" />
                       Registrando lance na plataforma
                     </span>
 
@@ -328,8 +328,8 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 border-l-2 border-accent-gold bg-white px-3.5 py-3">
-                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold" />
+                <div className="flex items-start gap-3 border-l-2 border-accent-gold bg-surface-card px-3.5 py-3">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold-ink" />
                   <p className="text-xs leading-relaxed text-text-secondary">
                     Não feche esta janela enquanto aguardamos a resposta do
                     servidor.
@@ -352,7 +352,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                     Confirmação recebida
                   </p>
 
-                  <h4 className="mt-2 font-heading text-xl font-semibold tracking-tight text-brand-primary">
+                  <h4 className="mt-2 font-heading text-xl font-semibold tracking-tight text-brand-interactive">
                     Lance Registrado com Sucesso!
                   </h4>
 
@@ -385,7 +385,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                   )}
                 </div>
 
-                <div className="border border-border-subtle bg-white">
+                <div className="border border-border-subtle bg-surface-card">
                   <div className="border-b border-border-subtle px-4 py-2.5">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-secondary">
                       Resumo da operação
@@ -404,7 +404,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                       <span className="shrink-0 text-text-secondary">
                         Identidade pública
                       </span>
-                      <span className="text-right font-medium text-brand-primary">
+                      <span className="text-right font-medium text-brand-interactive">
                         Protegida pela plataforma
                       </span>
                     </div>
@@ -413,7 +413,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                       <span className="text-text-secondary">
                         Valor do lance
                       </span>
-                      <span className="font-mono text-sm font-bold text-brand-primary">
+                      <span className="font-mono text-sm font-bold text-brand-interactive">
                         {formatBRL(offerCents)}
                       </span>
                     </div>
@@ -427,7 +427,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                       onClose();
                       navigateTo("/conta/lances");
                     }}
-                    className="flex-1 border border-brand-primary px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:bg-white"
+                    className="flex-1 border border-border-subtle border-brand-primary px-4 py-3 text-xs font-semibold text-brand-interactive transition-colors hover:bg-surface-card"
                   >
                     Ver Meus Lances
                   </button>
@@ -435,7 +435,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 bg-brand-primary px-4 py-3 text-xs font-semibold text-surface-base transition-colors hover:bg-brand-deep"
+                    className="flex-1 bg-brand-primary px-4 py-3 text-xs font-semibold text-brand-on-dark transition-colors hover:bg-brand-deep"
                   >
                     Continuar no Lote
                   </button>
@@ -444,7 +444,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
             ) : (
               <>
                 <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 border-b border-border-subtle pb-4 sm:grid-cols-[80px_minmax(0,1fr)]">
-                  <div className="h-20 w-18 overflow-hidden bg-white sm:h-22 sm:w-20">
+                  <div className="h-20 w-18 overflow-hidden bg-surface-card sm:h-22 sm:w-20">
                     <ItemImage
                       src={lot.itemSnapshot.primaryImageUrl}
                       alt={lot.title}
@@ -468,7 +468,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                         Lance atual
                       </span>
 
-                      <span className="font-mono text-sm font-bold text-brand-primary">
+                      <span className="font-mono text-sm font-bold text-brand-interactive">
                         {formatBRL(
                           lot.currentBidCents || lot.startingPriceCents,
                         )}
@@ -493,13 +493,13 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                       <p className="text-[10px] text-text-secondary">
                         Mínimo válido
                       </p>
-                      <p className="mt-0.5 font-mono text-sm font-bold text-brand-primary">
+                      <p className="mt-0.5 font-mono text-sm font-bold text-brand-interactive">
                         {formatBRL(minNextBidCents)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="relative border border-border-subtle bg-white transition-colors focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary/20">
+                  <div className="relative border border-border-subtle bg-surface-card transition-colors focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary/20">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-xs font-semibold uppercase tracking-wider text-text-secondary">
                       R$
                     </div>
@@ -517,7 +517,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                         setOfferCents(Math.round(num * 100));
                         setValidationError(null);
                       }}
-                      className="w-full bg-transparent py-3 pl-12 pr-4 font-mono text-xl font-bold tracking-tight text-brand-primary outline-hidden disabled:opacity-60 sm:text-2xl"
+                      className="w-full bg-transparent py-3 pl-12 pr-4 font-mono text-xl font-bold tracking-tight text-brand-interactive outline-hidden disabled:opacity-60 sm:text-2xl"
                     />
                   </div>
 
@@ -531,7 +531,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                         type="button"
                         disabled={isProcessing}
                         onClick={() => handleQuickAdd(lot.minIncrementCents)}
-                        className="border border-border-subtle bg-white px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-primary hover:text-brand-primary disabled:opacity-50"
+                        className="border border-border-subtle bg-surface-card px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-primary hover:text-brand-interactive disabled:opacity-50"
                       >
                         +{formatBRL(lot.minIncrementCents)}
                       </button>
@@ -542,7 +542,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                         onClick={() =>
                           handleQuickAdd(lot.minIncrementCents * 2)
                         }
-                        className="border border-border-subtle bg-white px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-primary hover:text-brand-primary disabled:opacity-50"
+                        className="border border-border-subtle bg-surface-card px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-primary hover:text-brand-interactive disabled:opacity-50"
                       >
                         +{formatBRL(lot.minIncrementCents * 2)}
                       </button>
@@ -551,7 +551,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                         type="button"
                         disabled={isProcessing}
                         onClick={() => handleQuickAdd(500000)}
-                        className="border border-border-subtle bg-white px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-primary hover:text-brand-primary disabled:opacity-50"
+                        className="border border-border-subtle bg-surface-card px-2 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-primary hover:text-brand-interactive disabled:opacity-50"
                       >
                         +R$ 5.000
                       </button>
@@ -559,9 +559,9 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2.5 border border-border-subtle bg-white p-3.5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2.5 border border-border-subtle bg-surface-card p-3.5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-surface-base text-brand-primary">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-surface-base text-brand-interactive">
                       <Wallet className="h-4 w-4" />
                     </div>
 
@@ -606,9 +606,9 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                   </motion.div>
                 )}
 
-                <div className="border-l-2 border-accent-gold bg-white px-3.5 py-3">
+                <div className="border-l-2 border-accent-gold bg-surface-card px-3.5 py-3">
                   <p className="flex items-center gap-2 text-xs font-semibold text-text-primary">
-                    <ShieldAlert className="h-4 w-4 shrink-0 text-accent-gold" />
+                    <ShieldAlert className="h-4 w-4 shrink-0 text-accent-gold-ink" />
                     Validação e reserva do lance
                   </p>
 
@@ -624,7 +624,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-4 py-3 text-xs font-medium text-text-secondary transition-colors hover:bg-white hover:text-text-primary sm:min-w-28"
+                    className="px-4 py-3 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-card hover:text-text-primary sm:min-w-28"
                   >
                     Voltar ao lote
                   </button>
@@ -633,7 +633,7 @@ export const BidModal: React.FC<BidModalProps> = ({ lot, onClose }) => {
                     type="button"
                     onClick={handleConfirmBid}
                     disabled={isProcessing}
-                    className="flex flex-1 items-center justify-center gap-2 bg-brand-primary px-4 py-3 text-xs font-semibold text-surface-base shadow-sm transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex flex-1 items-center justify-center gap-2 bg-brand-primary px-4 py-3 text-xs font-semibold text-brand-on-dark shadow-sm transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <span>Confirmar lance de {formatBRL(offerCents)}</span>
                     <ArrowRight className="h-4 w-4 shrink-0" />

@@ -7,27 +7,27 @@ export const Footer: React.FC = () => {
   const { navigateTo } = useApp();
 
   return (
-    <footer className="bg-brand-deep text-surface-base border-t border-brand-primary/80 mt-0">
+    <footer className="bg-brand-deep text-brand-on-dark border-t border-brand-primary/80 mt-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        <div className="grid grid-cols-1 min-[881px]:grid-cols-4 gap-10 pb-12 border-b border-white/10">
+        <div className="grid grid-cols-1 min-[881px]:grid-cols-4 gap-10 pb-12 border-b border-invert">
           <div className="min-[881px]:col-span-1 space-y-4">
             <Logo variant="dark" size="md" />
-            <p className="text-xs text-surface-base/70 leading-relaxed font-body">
+            <p className="text-xs text-brand-on-dark/80 leading-relaxed font-body">
               A Lance é uma casa de leilões digital que conecta colecionadores a
               peças singulares por meio de uma experiência clara, organizada e
               confiável.
             </p>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-brand-primary text-[11px] text-accent-gold border border-accent-gold/20">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-brand-primary text-[11px] text-accent-gold-ink border border-accent-gold/20">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Auditoria com integridade verificável</span>
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold">
+            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold-ink">
               Explorar Catálogo
             </h4>
-            <ul className="space-y-2 text-xs text-surface-base/80">
+            <ul className="space-y-2 text-xs text-brand-on-dark/80">
               <li>
                 <button
                   onClick={() => navigateTo("/lotes")}
@@ -80,10 +80,10 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold">
+            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold-ink">
               Institucional
             </h4>
-            <ul className="space-y-2 text-xs text-surface-base/80">
+            <ul className="space-y-2 text-xs text-brand-on-dark/80">
               <li>
                 <button
                   onClick={() => navigateTo("/#como-funciona")}
@@ -136,10 +136,10 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold">
+            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold-ink">
               Fontes de Catálogo
             </h4>
-            <ul className="space-y-1.5 text-xs text-surface-base/80">
+            <ul className="space-y-1.5 text-xs text-brand-on-dark/80">
               <li className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-gold" />
                 <span>The Metropolitan Museum of Art API</span>
@@ -156,13 +156,13 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-8 flex flex-col min-[881px]:flex-row items-center justify-between gap-4 text-[11px] text-surface-base/60">
+        <div className="pt-8 flex flex-col min-[881px]:flex-row items-center justify-between gap-4 text-[11px] text-brand-on-dark/75">
           <div>
             <p>
               © 2026 Lance — Casa de Leilões. Todos os direitos reservados à
               Pietra.
             </p>
-            <p className="mt-0.5 text-surface-base/40">
+            <p className="mt-0.5 text-brand-on-dark/40">
               Plataforma com dados e operações persistidos pela API.
             </p>
           </div>

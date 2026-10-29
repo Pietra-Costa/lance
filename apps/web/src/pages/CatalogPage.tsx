@@ -161,7 +161,7 @@ export const CatalogPage: React.FC = () => {
         >
           <button
             onClick={() => navigateTo("/")}
-            className="cursor-pointer transition-colors hover:text-brand-primary"
+            className="cursor-pointer transition-colors hover:text-brand-interactive"
           >
             Início
           </button>
@@ -183,7 +183,7 @@ export const CatalogPage: React.FC = () => {
                 </span>
               </div>
 
-              <h1 className="font-heading text-4xl font-bold leading-[1.05] tracking-tight text-brand-primary sm:text-5xl lg:text-6xl">
+              <h1 className="font-heading text-4xl font-bold leading-[1.05] tracking-tight text-brand-interactive sm:text-5xl lg:text-6xl">
                 Catálogo de
                 <br className="hidden sm:block" /> Lotes
               </h1>
@@ -199,7 +199,7 @@ export const CatalogPage: React.FC = () => {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
                   Peças no catálogo
                 </p>
-                <p className="mt-1 font-heading text-3xl font-semibold tabular-nums text-brand-primary">
+                <p className="mt-1 font-heading text-3xl font-semibold tabular-nums text-brand-interactive">
                   {filteredLots.length.toString().padStart(2, "0")}
                 </p>
               </div>
@@ -208,14 +208,14 @@ export const CatalogPage: React.FC = () => {
                 <button
                   onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
                   aria-expanded={mobileFilterOpen}
-                  className="inline-flex items-center gap-2 border border-border-strong px-3 py-3 text-xs font-semibold text-brand-primary transition-colors hover:bg-brand-primary hover:text-surface-base md:hidden"
+                  className="inline-flex items-center gap-2 border border-border-subtle border-border-strong px-3 py-3 text-xs font-semibold text-brand-interactive transition-colors hover:bg-brand-primary hover:text-brand-on-dark md:hidden"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                   Filtros {hasActiveFilters ? "(Ativos)" : ""}
                 </button>
 
                 <div className="flex min-w-0 items-center gap-2 border-b border-border-strong py-3">
-                  <ArrowUpDown className="h-4 w-4 shrink-0 text-brand-primary" />
+                  <ArrowUpDown className="h-4 w-4 shrink-0 text-brand-interactive" />
 
                   <label htmlFor="catalog-sort" className="sr-only">
                     Ordenar lotes
@@ -254,7 +254,7 @@ export const CatalogPage: React.FC = () => {
                   <span className="text-[10px] uppercase tracking-[0.2em] text-text-secondary">
                     Refinar busca
                   </span>
-                  <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary">
+                  <h2 className="mt-1 font-heading text-xl font-semibold text-brand-interactive">
                     Filtros
                   </h2>
                 </div>
@@ -262,7 +262,7 @@ export const CatalogPage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setMobileFilterOpen(false)}
-                    className="p-1 text-text-secondary hover:text-brand-primary md:hidden"
+                    className="p-1 text-text-secondary hover:text-brand-interactive md:hidden"
                     aria-label="Fechar filtros"
                   >
                     <X className="h-4 w-4" />
@@ -279,7 +279,7 @@ export const CatalogPage: React.FC = () => {
                 </label>
 
                 <div className="flex items-center gap-3 border-b border-border-strong pb-3 transition-colors focus-within:border-brand-primary">
-                  <Search className="h-4 w-4 shrink-0 text-brand-primary" />
+                  <Search className="h-4 w-4 shrink-0 text-brand-interactive" />
 
                   <input
                     id="catalog-search"
@@ -295,7 +295,7 @@ export const CatalogPage: React.FC = () => {
                       type="button"
                       onClick={() => setSearchTerm("")}
                       aria-label="Limpar busca"
-                      className="text-text-secondary hover:text-brand-primary"
+                      className="text-text-secondary hover:text-brand-interactive"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -319,8 +319,8 @@ export const CatalogPage: React.FC = () => {
                         aria-pressed={isSelected}
                         className={`group flex w-full cursor-pointer items-center justify-between gap-3 border-l-2 px-3 py-3 text-left text-xs transition-colors ${
                           isSelected
-                            ? "border-accent-gold bg-brand-primary/5 font-semibold text-brand-primary"
-                            : "border-transparent text-text-secondary hover:border-border-strong hover:text-brand-primary"
+                            ? "border-accent-gold bg-brand-primary/5 font-semibold text-brand-interactive"
+                            : "border-transparent text-text-secondary hover:border-border-strong hover:text-brand-interactive"
                         }`}
                       >
                         <span>
@@ -355,8 +355,8 @@ export const CatalogPage: React.FC = () => {
                         aria-pressed={isSelected}
                         className={`group flex w-full cursor-pointer items-center justify-between gap-3 border-l-2 px-3 py-3 text-left text-xs transition-colors ${
                           isSelected
-                            ? "border-accent-gold bg-brand-primary/5 font-semibold text-brand-primary"
-                            : "border-transparent text-text-secondary hover:border-border-strong hover:text-brand-primary"
+                            ? "border-accent-gold bg-brand-primary/5 font-semibold text-brand-interactive"
+                            : "border-transparent text-text-secondary hover:border-border-strong hover:text-brand-interactive"
                         }`}
                       >
                         <span>
@@ -387,7 +387,7 @@ export const CatalogPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <span className="font-mono text-sm font-semibold text-brand-primary">
+                  <span className="font-mono text-sm font-semibold text-brand-interactive">
                     {formatBRL(maxPriceCents)}
                   </span>
                 </div>
@@ -414,7 +414,7 @@ export const CatalogPage: React.FC = () => {
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
-                  className="inline-flex w-full items-center justify-center gap-2 border border-border-strong px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:bg-brand-primary hover:text-surface-base"
+                  className="inline-flex w-full items-center justify-center gap-2 border border-border-subtle border-border-strong px-4 py-3 text-xs font-semibold text-brand-interactive transition-colors hover:bg-brand-primary hover:text-brand-on-dark"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   Restaurar filtros
@@ -424,7 +424,7 @@ export const CatalogPage: React.FC = () => {
               <div className="pt-4 md:hidden">
                 <button
                   onClick={() => setMobileFilterOpen(false)}
-                  className="flex w-full items-center justify-center gap-2 bg-brand-primary px-4 py-3.5 text-xs font-semibold text-surface-base transition-colors hover:bg-brand-deep"
+                  className="flex w-full items-center justify-center gap-2 bg-brand-primary px-4 py-3.5 text-xs font-semibold text-brand-on-dark transition-colors hover:bg-brand-deep"
                 >
                   Ver {filteredLots.length}{" "}
                   {filteredLots.length === 1 ? "lote" : "lotes"}
@@ -442,7 +442,7 @@ export const CatalogPage: React.FC = () => {
                 </p>
 
                 <p className="mt-2 text-sm text-text-primary">
-                  <strong className="font-semibold text-brand-primary">
+                  <strong className="font-semibold text-brand-interactive">
                     {filteredLots.length}
                   </strong>{" "}
                   {filteredLots.length === 1
@@ -466,7 +466,7 @@ export const CatalogPage: React.FC = () => {
               </div>
             ) : (
               <div className="flex min-h-105 flex-col items-center justify-center border-y border-border-subtle px-6 py-16 text-center">
-                <div className="mb-6 flex h-16 w-16 items-center justify-center border border-border-strong text-brand-primary">
+                <div className="mb-6 flex h-16 w-16 items-center justify-center border border-border-subtle border-border-strong text-brand-interactive">
                   <PackageOpen className="h-7 w-7" strokeWidth={1.2} />
                 </div>
 
@@ -474,7 +474,7 @@ export const CatalogPage: React.FC = () => {
                   Nenhum resultado
                 </span>
 
-                <h2 className="max-w-md font-heading text-2xl font-semibold leading-tight text-brand-primary sm:text-3xl">
+                <h2 className="max-w-md font-heading text-2xl font-semibold leading-tight text-brand-interactive sm:text-3xl">
                   Não encontramos lotes com esses filtros
                 </h2>
 
@@ -485,7 +485,7 @@ export const CatalogPage: React.FC = () => {
 
                 <button
                   onClick={handleResetFilters}
-                  className="mt-8 inline-flex items-center gap-3 border-b border-brand-primary pb-2 text-xs font-semibold text-brand-primary transition-colors hover:border-accent-gold hover:text-text-primary"
+                  className="mt-8 inline-flex items-center gap-3 border-b border-brand-primary pb-2 text-xs font-semibold text-brand-interactive transition-colors hover:border-accent-gold hover:text-text-primary"
                 >
                   Limpar todos os filtros
                   <ArrowRight className="h-3.5 w-3.5" />

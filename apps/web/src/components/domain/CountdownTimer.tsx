@@ -105,7 +105,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       {isAntiSnipingActive ? (
         <AlertTriangle className="w-4 h-4 text-semantic-warning shrink-0 animate-bounce" />
       ) : (
-        <Clock className="w-4 h-4 text-brand-primary shrink-0" />
+        <Clock className="w-4 h-4 text-brand-interactive shrink-0" />
       )}
       <div className="flex items-center gap-1">
         {timeLeft.days > 0 && (
