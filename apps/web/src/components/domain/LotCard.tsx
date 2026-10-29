@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Lot } from "../../types/auction";
 import { useApp } from "../../context/AppContext";
 import { LotStatusBadge } from "./LotStatusBadge";
@@ -31,7 +31,6 @@ export const LotCard: React.FC<LotCardProps> = ({ lot, compact = false }) => {
         isUserLeading ? "ring-2 ring-brand-primary" : ""
       }`}
     >
-      {/* Image container with source badge */}
       <div className="relative aspect-4/3 w-full overflow-hidden bg-[#FAF7F2]">
         <ItemImage
           src={lot.itemSnapshot.primaryImageUrl}
@@ -41,15 +40,12 @@ export const LotCard: React.FC<LotCardProps> = ({ lot, compact = false }) => {
           showLabel={false}
         />
 
-        {/* Faixa superior: status/lider Ã  esquerda, cÃ³digo do lote Ã  direita.
-            O cÃ³digo tem largura limitada e o status nunca quebra linha para
-            os dois nÃ£o se sobreporem em telas estreitas. */}
         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5 min-w-0">
             <LotStatusBadge status={lot.status} size="sm" />
             {isUserLeading && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-primary text-surface-base border border-accent-gold/40 shadow-xs whitespace-nowrap">
-                VocÃª estÃ¡ liderando
+                Você está liderando
               </span>
             )}
           </div>
@@ -79,7 +75,7 @@ export const LotCard: React.FC<LotCardProps> = ({ lot, compact = false }) => {
               <>
                 <span className="font-medium shrink-0">{lot.category}</span>
                 {lot.itemSnapshot.creator && (
-                  <span className="text-border-subtle shrink-0">â€¢</span>
+                  <span className="text-border-subtle shrink-0">•</span>
                 )}
               </>
             ) : null}
@@ -129,7 +125,7 @@ export const LotCard: React.FC<LotCardProps> = ({ lot, compact = false }) => {
               </>
             ) : (
               <span className="text-xs text-text-secondary font-medium">
-                PregÃ£o finalizado
+                Pregão finalizado
               </span>
             )}
           </div>

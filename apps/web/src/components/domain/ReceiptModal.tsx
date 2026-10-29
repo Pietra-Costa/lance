@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Receipt } from "../../types/auction";
 import { formatBRL, formatDateTimeBR } from "../../logic/auctionRules";
 import { Logo } from "../layout/Logo";
@@ -46,8 +46,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2500);
     } catch {
-      // Navegadores sem permissÃ£o de clipboard: seleciona o texto do campo.
-      window.prompt("Copie o link de verificaÃ§Ã£o:", shareUrl);
+      window.prompt("Copie o link de verificação:", shareUrl);
     }
   };
 
@@ -69,7 +68,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-accent-gold" />
             <span className="font-heading font-medium text-xs tracking-wide">
-              Comprovante Oficial de Arremate Â· Lance
+              Comprovante Oficial de Arremate · Lance
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -90,14 +89,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           </div>
         </div>
 
-        {/* Share bar â€” link pÃºblico de verificaÃ§Ã£o */}
         <div className="bg-surface-base border-b border-border-subtle px-4 sm:px-6 py-3 shrink-0 print:hidden">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <label
               htmlFor="receipt-share-url"
               className="text-[10px] font-mono uppercase tracking-wider text-text-secondary shrink-0"
             >
-              Link de verificaÃ§Ã£o
+              Link de verificação
             </label>
             <div className="flex flex-1 items-center gap-2">
               <input
@@ -148,7 +146,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               <Logo variant="light" size="lg" />
               <div className="text-right">
                 <span className="text-[10px] font-mono tracking-widest uppercase text-text-secondary block">
-                  CÃ“DIGO DE AUTENTICIDADE
+                  CÓDIGO DE AUTENTICIDADE
                 </span>
                 <span className="font-mono font-bold text-sm text-brand-primary bg-white px-2.5 py-1 rounded border border-border-subtle">
                   {receipt.verificationCode}
@@ -158,10 +156,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
             <div className="my-6 text-center space-y-1">
               <h2 className="font-heading font-bold text-2xl text-brand-primary tracking-tight">
-                Certificado de ArremataÃ§Ã£o Demonstrativo
+                Certificado de Arrematação Demonstrativo
               </h2>
               <p className="text-xs text-text-secondary">
-                PregÃ£o EletrÃ´nico Homologado Â· Registro de Arremate em
+                Pregão Eletrônico Homologado · Registro de Arremate em
                 Plataforma Digital
               </p>
             </div>
@@ -170,7 +168,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className="text-text-secondary block text-[11px]">
-                    CÃ³digo do Lote:
+                    Código do Lote:
                   </span>
                   <span className="font-mono font-bold text-brand-primary text-sm">
                     {receipt.lotCode}
@@ -186,7 +184,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 </div>
                 <div className="sm:col-span-2">
                   <span className="text-text-secondary block text-[11px]">
-                    DescriÃ§Ã£o da PeÃ§a:
+                    Descrição da Peça:
                   </span>
                   <span className="font-heading font-semibold text-sm text-text-primary">
                     {receipt.lotTitle}
@@ -230,7 +228,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 <span>Leiloeiro Conducente: {receipt.sellerName}</span>
                 <span className="inline-flex items-center gap-1 text-semantic-success font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>LiquidaÃ§Ã£o Simulada ConcluÃ­da</span>
+                  <span>Liquidação Simulada Concluída</span>
                 </span>
               </div>
             </div>
@@ -242,13 +240,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </p>
               <p className="text-text-secondary leading-relaxed">
                 Este comprovante demonstra o encerramento do lote dentro de uma
-                plataforma com saldo e lances simulados. NÃ£o constitui nota
-                fiscal, escritura pÃºblica, comprovante de pagamento real ou
+                plataforma com saldo e lances simulados. Não constitui nota
+                fiscal, escritura pública, comprovante de pagamento real ou
                 garantia de autenticidade material.
               </p>
             </div>
 
-            {/* Verification footer â€” apenas o que a plataforma realmente faz */}
+            {/* Verification footer — apenas o que a plataforma realmente faz */}
             <div className="mt-8 pt-6 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white rounded-lg border border-border-subtle p-1 flex items-center justify-center">
@@ -256,9 +254,9 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 </div>
                 <div className="text-[10px] text-text-secondary">
                   <p className="font-mono text-brand-primary font-bold">
-                    VERIFICAÃ‡ÃƒO PÃšBLICA
+                    VERIFICAÇÃO PÚBLICA
                   </p>
-                  <p>Consulte este cÃ³digo em {shareUrl}</p>
+                  <p>Consulte este código em {shareUrl}</p>
                   <p>
                     Eventos encadeados por hash SHA-256 na trilha de auditoria
                   </p>
@@ -268,10 +266,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               <div className="text-center sm:text-right">
                 <div className="w-48 h-0.5 bg-border-strong mb-1"></div>
                 <p className="text-[11px] font-semibold text-brand-primary">
-                  Lance Casa de LeilÃµes Digitais
+                  Lance Casa de Leilões Digitais
                 </p>
                 <p className="text-[10px] text-text-secondary">
-                  Comprovante de liquidaÃ§Ã£o simulada â€” sem valor fiscal
+                  Comprovante de liquidação simulada — sem valor fiscal
                 </p>
               </div>
             </div>

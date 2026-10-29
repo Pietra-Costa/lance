@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { useApp } from "../../context/AppContext";
 import {
   Monitor,
@@ -43,7 +43,7 @@ export const ViewportSimulator: React.FC = () => {
             <span className="font-semibold text-accent-gold">
               {formatBRL(wallet.availableCents)}
             </span>
-            <span className="text-surface-base/40">Â·</span>
+            <span className="text-surface-base/40">·</span>
             <span>Res.:</span>
             <span className="text-surface-base/70">
               {formatBRL(wallet.reservedCents)}
@@ -52,7 +52,6 @@ export const ViewportSimulator: React.FC = () => {
         )}
       </div>
 
-      {/* Center/Right: Product Switcher Block (Vitrine LeilÃ£o vs Landing SaaS vs Design System) */}
       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
         <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-lg border border-accent-gold/30">
           <button
@@ -62,10 +61,10 @@ export const ViewportSimulator: React.FC = () => {
                 ? "bg-surface-base text-brand-primary font-semibold shadow-xs"
                 : "text-surface-base/80 hover:text-white"
             }`}
-            title="Vitrine de LeilÃµes (Marketplace oficial)"
+            title="Vitrine de Leilões (Marketplace oficial)"
           >
             <Gavel className="w-3 h-3" />
-            <span>Vitrine de LeilÃµes</span>
+            <span>Vitrine de Leilões</span>
           </button>
 
           <button

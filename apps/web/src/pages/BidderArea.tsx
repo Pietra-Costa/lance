@@ -1,6 +1,5 @@
 ﻿import React, { useState } from "react";
-import {
-  useApp } from "../context/AppContext";
+import { useApp } from "../context/AppContext";
 import {
   Wallet as WalletIcon,
   Gavel,
@@ -19,7 +18,7 @@ import {
   Sparkles,
   ChevronDown,
   ArrowUpRight,
-  ShieldCheck
+  ShieldCheck,
 } from "lucide-react";
 import { formatBRL, formatDateTimeBR } from "../logic/auctionRules";
 import { LotStatusBadge } from "../components/domain/LotStatusBadge";
@@ -41,7 +40,7 @@ type Tab =
 type DepositStage = "form" | "connecting" | "transferring" | "success";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: "dashboard", label: "VisÃ£o geral", icon: Gavel },
+  { id: "dashboard", label: "Visão geral", icon: Gavel },
   { id: "lances", label: "Meus lances", icon: History },
   { id: "arrematados", label: "Arrematados", icon: FileCheck },
   { id: "carteira", label: "Carteira", icon: WalletIcon },
@@ -129,7 +128,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
     const parsed = Number(normalized);
 
     if (!Number.isFinite(parsed) || parsed <= 0) {
-      setDepositError("Informe um valor de depÃ³sito vÃ¡lido.");
+      setDepositError("Informe um valor de depósito válido.");
       return;
     }
 
@@ -166,7 +165,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
       setDepositError(
         error instanceof Error
           ? error.message
-          : "NÃ£o foi possÃ­vel registrar o depÃ³sito.",
+          : "Não foi possível registrar o depósito.",
       );
     } finally {
       setDepositSubmitting(false);
@@ -209,12 +208,12 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
     return (
       <span className="text-[10px] font-medium text-text-secondary">
-        NÃ£o arrematado
+        Não arrematado
       </span>
     );
   };
 
-  const selectedTab = tabs.find(tab => tab.id === activeTab) ?? tabs[0];
+  const selectedTab = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
   const SelectedTabIcon = selectedTab.icon;
 
   return (
@@ -322,7 +321,6 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
       `}</style>
 
       <div className="mx-auto w-full min-w-0 max-w-7xl space-y-5 px-3 py-4 sm:space-y-7 sm:px-6 sm:py-9 lg:px-8">
-        {/* CabeÃ§alho */}
         <header className="relative overflow-hidden rounded-2xl bg-brand-primary text-surface-base">
           <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border border-accent-gold/20" />
           <div className="pointer-events-none absolute -right-4 -top-12 h-52 w-52 rounded-full border border-accent-gold/20" />
@@ -345,7 +343,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-gold sm:tracking-[0.2em]">
-                    Ãrea do licitante
+                    Área do licitante
                   </span>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-surface-base">
                     <ShieldCheck className="h-3 w-3 text-accent-gold" />
@@ -354,7 +352,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </div>
 
                 <h1 className="wrap-break-word font-heading text-xl font-semibold tracking-tight sm:text-3xl">
-                  {currentUser?.name || "Ãrea do Licitante"}
+                  {currentUser?.name || "Área do Licitante"}
                 </h1>
 
                 <p className="mt-1 break-all text-xs text-surface-base/65">
@@ -366,7 +364,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
             <div className="grid min-w-0 grid-cols-2 divide-x divide-white/15 rounded-xl border border-white/15 bg-black/10 lg:min-w-85">
               <div className="min-w-0 p-3 sm:p-5">
                 <span className="text-[9px] font-semibold uppercase tracking-wider text-surface-base/60 sm:tracking-[0.15em]">
-                  Saldo disponÃ­vel
+                  Saldo disponí­vel
                 </span>
                 <p className="mt-2 break-all font-heading text-sm font-semibold tabular-nums sm:text-xl">
                   {formatBRL(wallet.availableCents)}
@@ -384,14 +382,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           </div>
         </header>
 
-        {/* NavegaÃ§Ã£o: dropdown no mobile e abas no desktop */}
-        <nav aria-label="NavegaÃ§Ã£o da Ã¡rea do licitante" className="min-w-0">
+        <nav aria-label="Navegação da área do licitante" className="min-w-0">
           <div className="relative sm:hidden">
             <label
               htmlFor="bidder-tab-select"
               className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-text-secondary"
             >
-              Navegar pela sua Ã¡rea
+              Navegar pela sua área
             </label>
 
             <div className="relative">
@@ -402,7 +399,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <select
                 id="bidder-tab-select"
                 value={activeTab}
-                onChange={event => setActiveTab(event.target.value as Tab)}
+                onChange={(event) => setActiveTab(event.target.value as Tab)}
                 className="w-full appearance-none rounded-xl border border-border-strong bg-white py-4 pl-11 pr-11 text-sm font-semibold text-brand-primary shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
               >
                 {tabs.map(({ id, label }) => {
@@ -475,7 +472,6 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           </div>
         </nav>
 
-        {/* VisÃ£o geral */}
         {activeTab === "dashboard" && (
           <div className="min-w-0 space-y-8">
             <section>
@@ -483,7 +479,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 <div>
                   <p className={eyebrowClass}>Seu painel</p>
                   <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
-                    VisÃ£o geral
+                    Visão geral
                   </h2>
                 </div>
                 <span className="hidden text-xs text-text-secondary sm:block">
@@ -500,7 +496,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     {leadingLots.length}
                   </p>
                   <p className="mt-1 text-[10px] text-text-secondary">
-                    Lances ativos na lideranÃ§a
+                    Lances ativos na liderança
                   </p>
                 </div>
 
@@ -512,7 +508,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     {outbidLots.length}
                   </p>
                   <p className="mt-1 text-[10px] text-text-secondary">
-                    PregÃµes ainda em andamento
+                    Pregões ainda em andamento
                   </p>
                 </div>
 
@@ -538,7 +534,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     {formatBRL(wallet.balanceCents)}
                   </p>
                   <p className="mt-1 wrap-break-word text-[10px] text-white/60">
-                    DisponÃ­vel: {formatBRL(wallet.availableCents)}
+                    Disponível: {formatBRL(wallet.availableCents)}
                   </p>
                 </div>
               </div>
@@ -546,12 +542,12 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
             <section className="flex min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border-subtle bg-white p-4 sm:flex-row sm:items-center sm:p-6">
               <div className="min-w-0">
-                <p className={eyebrowClass}>Acesso rÃ¡pido</p>
+                <p className={eyebrowClass}>Acesso rápido</p>
                 <h3 className="mt-1 font-heading text-lg font-semibold text-brand-primary">
                   O que deseja fazer?
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-                  Gerencie seus recursos ou encontre seu prÃ³ximo lote.
+                  Gerencie seus recursos ou encontre seu próximo lote.
                 </p>
               </div>
 
@@ -582,9 +578,9 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
             <section className="min-w-0">
               <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <p className={eyebrowClass}>PregÃµes em andamento</p>
+                  <p className={eyebrowClass}>Pregões em andamento</p>
                   <h3 className="mt-1 font-heading text-lg font-semibold text-brand-primary sm:text-xl">
-                    Lotes sob sua lideranÃ§a
+                    Lotes sob sua ldierança
                   </h3>
                 </div>
                 <button
@@ -597,7 +593,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
               {leadingLots.length > 0 ? (
                 <div className="grid min-w-0 gap-3 lg:grid-cols-2">
-                  {leadingLots.map(lot => (
+                  {leadingLots.map((lot) => (
                     <article
                       key={lot.id}
                       className="flex min-w-0 flex-col gap-3 rounded-2xl border border-semantic-success/25 bg-white p-4 transition-colors hover:border-semantic-success/50 min-[480px]:flex-row min-[480px]:items-center min-[480px]:gap-4"
@@ -635,17 +631,17 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 <div className={`${panelClass} px-5 py-12 text-center`}>
                   <Gavel className="mx-auto h-7 w-7 text-accent-gold" />
                   <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
-                    Nenhum lote sob sua lideranÃ§a
+                    Nenhum lote sob sua liderança
                   </p>
                   <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-text-secondary">
-                    Explore o catÃ¡logo para encontrar lotes e participar dos
-                    prÃ³ximos pregÃµes.
+                    Explore o catálogo para encontrar lotes e participar dos
+                    próximos pregões
                   </p>
                   <button
                     onClick={() => navigateTo("/lotes")}
                     className={`${primaryButtonClass} mt-5 w-full sm:w-auto`}
                   >
-                    Explorar catÃ¡logo
+                    Explorar catálogo
                     <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -654,7 +650,6 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           </div>
         )}
 
-        {/* Meus lances */}
         {activeTab === "lances" && (
           <section className={`${panelClass} min-w-0 overflow-hidden`}>
             <div className="border-b border-border-subtle p-4 sm:p-7">
@@ -662,10 +657,10 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
-                    HistÃ³rico de lances
+                    Histórico de lances
                   </h2>
                   <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-                    Acompanhe sua posiÃ§Ã£o e os valores atuais de cada lote.
+                    Acompanhe sua posição e os valores atuais de cada lote.
                   </p>
                 </div>
                 <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-primary">
@@ -677,7 +672,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
             {myBidsLots.length > 0 ? (
               <div className="divide-y divide-border-subtle">
-                {myBidsLots.map(lot => (
+                {myBidsLots.map((lot) => (
                   <article
                     key={lot.id}
                     className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5"
@@ -731,7 +726,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   Nenhum lance registrado
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
-                  Seus lotes participantes aparecerÃ£o nesta Ã¡rea.
+                  Seus lotes participantes aparecerão nesta área.
                 </p>
                 <button
                   onClick={() => navigateTo("/lotes")}
@@ -748,19 +743,19 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
         {activeTab === "arrematados" && (
           <section className="min-w-0 space-y-5">
             <div>
-              <p className={eyebrowClass}>HistÃ³rico de aquisiÃ§Ãµes</p>
+              <p className={eyebrowClass}>Histórico de aquisições</p>
               <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
                 Arrematados e comprovantes
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-text-secondary">
                 Consulte os dados dos lotes arrematados e seus certificados
-                digitais de verificaÃ§Ã£o.
+                digitais de verificação.
               </p>
             </div>
 
             {wonReceipts.length > 0 ? (
               <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-                {wonReceipts.map(rec => (
+                {wonReceipts.map((rec) => (
                   <article
                     key={rec.id}
                     className={`${panelClass} min-w-0 overflow-hidden transition-shadow hover:shadow-md`}
@@ -794,7 +789,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                         </p>
                       </div>
                       <div className="min-w-0 min-[420px]:text-right">
-                        <span className={eyebrowClass}>VerificaÃ§Ã£o</span>
+                        <span className={eyebrowClass}>Verificação</span>
                         <p className="mt-2 break-all font-mono text-xs font-semibold text-brand-primary">
                           {rec.verificationCode}
                         </p>
@@ -820,24 +815,23 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   Nenhum lote arrematado
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
-                  Seus comprovantes estarÃ£o disponÃ­veis aqui apÃ³s os arremates.
+                  Seus comprovantes estarão disponíveis aqui após os arremates.
                 </p>
                 <button
                   onClick={() => navigateTo("/lotes")}
                   className={`${primaryButtonClass} mt-5 w-full sm:w-auto`}
                 >
-                  Explorar catÃ¡logo
+                  Explorar catálogo
                 </button>
               </div>
             )}
           </section>
         )}
 
-        {/* Carteira */}
         {activeTab === "carteira" && (
           <section className="min-w-0 space-y-5">
             <div>
-              <p className={eyebrowClass}>GestÃ£o financeira</p>
+              <p className={eyebrowClass}>Gestão financeira</p>
               <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
                 Sua carteira
               </h2>
@@ -853,7 +847,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   <div className="flex items-center gap-2 text-accent-gold">
                     <WalletIcon className="h-5 w-5 shrink-0" />
                     <span className="text-[10px] font-semibold uppercase tracking-[0.14em] sm:tracking-[0.18em]">
-                      Saldo total em custÃ³dia
+                      Saldo total em custódia
                     </span>
                   </div>
                   <p className="mt-3 break-all font-heading text-2xl font-semibold tabular-nums sm:text-4xl">
@@ -875,7 +869,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <div className="grid min-w-0 grid-cols-1 divide-y divide-white/10 border-t border-white/15 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
                 <div className="min-w-0 p-4 sm:p-5">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
-                    DisponÃ­vel
+                    Disponível
                   </span>
                   <p className="mt-2 break-all font-heading text-lg font-semibold tabular-nums text-surface-base sm:text-xl">
                     {formatBRL(wallet.availableCents)}
@@ -912,13 +906,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
                 <div className="min-w-0 p-4 sm:p-5">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
-                    DepÃ³sitos
+                    Depósitos
                   </span>
                   <p className="mt-2 font-heading text-xl font-semibold text-surface-base">
                     Simulados
                   </p>
                   <p className="mt-2 text-[10px] leading-relaxed text-white/50">
-                    Sem movimentaÃ§Ã£o financeira real.
+                    Sem movimentação financeira real.
                   </p>
                 </div>
               </div>
@@ -935,15 +929,15 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   </h3>
                   <p className="mt-1 text-xs leading-relaxed text-text-secondary">
                     O valor comprometido no seu maior lance ativo fica
-                    reservado. Quando seu lance Ã© superado, a reserva Ã©
-                    devolvida automaticamente ao saldo disponÃ­vel.
+                    reservado. Quando seu lance for superado, a reserva será
+                    devolvida automaticamente ao saldo disponível.
                   </p>
                 </div>
               </div>
 
               <div className="mt-5 border-t border-border-subtle pt-4">
                 <p className="text-[10px] leading-relaxed text-text-secondary">
-                  Os depÃ³sitos nesta demonstraÃ§Ã£o sÃ£o crÃ©ditos fictÃ­cios,
+                  Os depósitos nesta demonstração são créditos fictícios,
                   registrados no extrato da carteira.
                 </p>
               </div>
@@ -951,19 +945,17 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           </section>
         )}
 
-        {/* Extrato */}
         {activeTab === "transacoes" && (
           <section className={`${panelClass} min-w-0 overflow-hidden`}>
             <div className="border-b border-border-subtle p-4 sm:p-7">
-              <p className={eyebrowClass}>MovimentaÃ§Ã£o da carteira</p>
+              <p className={eyebrowClass}>Movimentação da carteira</p>
               <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
-                    Extrato de transaÃ§Ãµes
+                    Extrato de transações
                   </h2>
                   <p className="mt-1 max-w-2xl text-xs leading-relaxed text-text-secondary">
-                    Registro de depÃ³sitos, bloqueios e liberaÃ§Ãµes de reservas,
-                    com chave de idempotÃªncia.
+                    Registro de depósitos, bloqueios e liberações de reservas.
                   </p>
                 </div>
                 <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-primary">
@@ -977,15 +969,15 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
               <div className="px-5 py-14 text-center">
                 <History className="mx-auto h-7 w-7 text-accent-gold" />
                 <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
-                  Nenhuma movimentaÃ§Ã£o registrada
+                  Nenhuma movimentação registrada
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
-                  Quando houver movimentaÃ§Ãµes, elas aparecerÃ£o neste extrato.
+                  Quando houver movimentações, elas aparecerão neste extrato.
                 </p>
               </div>
             ) : (
               <div className="divide-y divide-border-subtle">
-                {transactions.map(tx => (
+                {transactions.map((tx) => (
                   <article
                     key={tx.id}
                     className="flex min-w-0 flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
@@ -1044,16 +1036,15 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           </section>
         )}
 
-        {/* Perfil */}
         {activeTab === "perfil" && (
           <section className="min-w-0 space-y-5">
             <div>
-              <p className={eyebrowClass}>Conta e permissÃµes</p>
+              <p className={eyebrowClass}>Conta e permissões</p>
               <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
                 Dados cadastrais
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-                InformaÃ§Ãµes da sua conta e regras de participaÃ§Ã£o na plataforma.
+                Informações da sua conta e regras de participação na plataforma.
               </p>
             </div>
 
@@ -1100,7 +1091,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   </p>
                 </div>
                 <div className="min-w-0 p-4 sm:border-r sm:p-6">
-                  <span className={eyebrowClass}>PseudÃ´nimo pÃºblico</span>
+                  <span className={eyebrowClass}>Pseudônimo público</span>
                   <p className="mt-2 wrap-break-word font-mono text-sm font-semibold text-brand-primary">
                     {currentUser?.publicPseudonym || "â€”"}
                   </p>
@@ -1121,14 +1112,14 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 </div>
                 <div className="min-w-0">
                   <h3 className="font-heading text-sm font-semibold text-brand-primary">
-                    Exclusividade de papÃ©is
+                    Exclusividade de papéis
                   </h3>
                   <p className="mt-2 text-xs leading-relaxed text-text-secondary">
                     Esta conta possui papel exclusivo de{" "}
                     <strong className="text-text-primary">LICITANTE</strong>.
-                    Conforme as regras de negÃ³cio da plataforma, um licitante
-                    nÃ£o pode administrar nem criar lotes, evitando conflitos de
-                    interesse durante os pregÃµes.
+                    Conforme as regras de negócio da plataforma, um licitante
+                    não pode administrar nem criar lotes, evitando conflitos de
+                    interesse durante os pregões.
                   </p>
                 </div>
               </div>
@@ -1136,11 +1127,10 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
           </section>
         )}
 
-        {/* Modal de depÃ³sito */}
         {depositModalOpen && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-2 backdrop-blur-sm sm:p-4"
-            onMouseDown={event => {
+            onMouseDown={(event) => {
               if (event.target === event.currentTarget && !depositSubmitting) {
                 closeDepositModal();
               }
@@ -1164,17 +1154,17 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                       className="mt-4 font-heading text-xl font-semibold"
                     >
                       {depositStage === "success"
-                        ? "DepÃ³sito concluÃ­do"
+                        ? "Depósito concluido"
                         : depositStage !== "form"
                           ? "Transferindo saldo"
                           : "Adicionar saldo"}
                     </h2>
                     <p className="mt-1 text-xs text-white/60">
                       {depositStage === "success"
-                        ? "O crÃ©dito foi registrado na sua carteira."
+                        ? "O crédito foi registrado na sua carteira."
                         : depositStage !== "form"
-                          ? "Aguarde enquanto registramos o crÃ©dito."
-                          : "DepÃ³sito simulado para sua carteira."}
+                          ? "Aguarde enquanto registramos o crédito."
+                          : "Depósito simulado para sua carteira."}
                     </p>
                   </div>
 
@@ -1194,15 +1184,15 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                 <div className="px-4 py-7 sm:px-6 sm:py-8">
                   <div className="text-center">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
-                      TransferÃªncia simulada
+                      Transferência simulada
                     </p>
                     <p className="mt-2 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-primary sm:text-3xl">
                       {formatBRL(completedDepositCents)}
                     </p>
                     <p className="mt-2 text-xs text-text-secondary">
                       {depositStage === "connecting"
-                        ? "Estabelecendo conexÃ£o com a instituiÃ§Ã£o..."
-                        : "O valor estÃ¡ a caminho da sua carteira..."}
+                        ? "Estabelecendo conexão com a insituição..."
+                        : "O valor está a caminho da sua carteira..."}
                     </p>
                   </div>
 
@@ -1269,13 +1259,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin text-brand-primary" />
                     <span className="text-center text-xs font-medium text-text-secondary">
                       {depositStage === "connecting"
-                        ? "Validando solicitaÃ§Ã£o"
-                        : "Registrando crÃ©dito na carteira"}
+                        ? "Validando solicitação"
+                        : "Registrando crédito na carteira"}
                     </span>
                   </div>
 
                   <p className="mt-4 text-center text-[10px] leading-relaxed text-text-secondary">
-                    NÃ£o feche esta janela atÃ© a conclusÃ£o da operaÃ§Ã£o.
+                    Não feche esta janela até a conclusão da operação.
                   </p>
                 </div>
               ) : depositStage === "success" ? (
@@ -1289,13 +1279,13 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
                   <div className="mt-5">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-semantic-success">
-                      OperaÃ§Ã£o confirmada
+                      Operação confirmada
                     </p>
                     <h3 className="mt-2 font-heading text-2xl font-semibold text-brand-primary">
                       Saldo adicionado
                     </h3>
                     <p className="mt-2 text-sm text-text-secondary">
-                      O valor foi creditado Ã  sua carteira.
+                      O valor foi creditado à sua carteira.
                     </p>
                     <p className="mt-5 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-primary sm:text-3xl">
                       +{formatBRL(completedDepositCents)}
@@ -1312,7 +1302,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   <div className="rounded-xl border border-border-subtle bg-[#FAF7F2] p-3">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
-                        Saldo disponÃ­vel atual
+                        Saldo disponível atual
                       </span>
                       <WalletIcon className="h-4 w-4 shrink-0 text-brand-primary" />
                     </div>
@@ -1326,7 +1316,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                       htmlFor="deposit-amount"
                       className="block text-xs font-semibold text-text-primary"
                     >
-                      Valor do depÃ³sito
+                      Valor do depósito
                     </label>
 
                     <div className="flex min-w-0 items-center rounded-xl border border-border-strong bg-white transition-colors focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/10">
@@ -1338,8 +1328,10 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                         type="text"
                         inputMode="decimal"
                         value={depositAmount}
-                        onChange={event => setDepositAmount(event.target.value)}
-                        onKeyDown={event => {
+                        onChange={(event) =>
+                          setDepositAmount(event.target.value)
+                        }
+                        onKeyDown={(event) => {
                           if (event.key === "Enter" && !depositSubmitting) {
                             void handleDeposit();
                           }
@@ -1356,9 +1348,9 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                   </div>
 
                   <div>
-                    <span className={eyebrowClass}>Valores rÃ¡pidos</span>
+                    <span className={eyebrowClass}>Valores rápidos</span>
                     <div className="mt-2 grid grid-cols-2 gap-2">
-                      {QUICK_DEPOSIT_AMOUNTS.map(cents => {
+                      {QUICK_DEPOSIT_AMOUNTS.map((cents) => {
                         const quickAmount = (cents / 100)
                           .toFixed(2)
                           .replace(".", ",");
@@ -1392,8 +1384,8 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
                   <div className="rounded-xl border border-accent-gold/30 bg-surface-base/70 p-3">
                     <p className="text-[10px] leading-relaxed text-text-secondary">
-                      Esta Ã© uma operaÃ§Ã£o demonstrativa. O crÃ©dito Ã© fictÃ­cio e
-                      nÃ£o envolve transferÃªncia ou cobranÃ§a financeira real.
+                      Esta é uma operação demonstrativa. O crédito é fictício e
+                      não envolve tranfêrencia ou cobrança financeira real.
                     </p>
                   </div>
 
@@ -1410,7 +1402,7 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
                       disabled={depositSubmitting}
                       className={`${primaryButtonClass} w-full flex-1 sm:w-auto`}
                     >
-                      Confirmar depÃ³sito
+                      Confirmar depósito
                       <ArrowUpRight className="h-4 w-4 shrink-0" />
                     </button>
                   </div>
@@ -1423,5 +1415,3 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
     </div>
   );
 };
-
-

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { apiGet } from "../services/api";
 import { formatBRL, formatDateTimeBR } from "../logic/auctionRules";
@@ -44,13 +44,7 @@ const str = (value: unknown): string | null =>
 const num = (value: unknown): number | null =>
   typeof value === "number" && Number.isFinite(value) ? value : null;
 
-/**
- * PÃ¡gina pÃºblica de verificaÃ§Ã£o do comprovante de arremate.
- *
- * AcessÃ­vel sem login pelo link compartilhado (`/comprovante/:code`).
- * Consome `GET /receipts/:verificationCode` e exibe apenas dados pÃºblicos:
- * tÃ­tulo do item, valor, data, pseudÃ´nimo do vencedor e status da liquidaÃ§Ã£o.
- */
+
 export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
   verificationCode,
 }) => {
@@ -76,7 +70,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
       .catch(() => {
         if (active) {
           setError(
-            "NÃ£o encontramos um comprovante com este cÃ³digo. Confira se o link foi copiado por completo.",
+            "Não encontramos um comprovante com este código. Confira se o link foi copiado por completo.",
           );
         }
       })
@@ -113,7 +107,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
       <div className="max-w-3xl mx-auto px-4 py-20 space-y-5 text-center">
         <ShieldAlert className="w-10 h-10 text-semantic-warning mx-auto" />
         <h1 className="font-heading font-bold text-2xl text-brand-primary">
-          Comprovante nÃ£o encontrado
+          Comprovante não encontrado
         </h1>
         <p className="text-xs text-text-secondary max-w-md mx-auto leading-relaxed">
           {error}
@@ -131,12 +125,12 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
   const snapshot = receipt.snapshot ?? {};
   const winnerPseudonym =
     str(snapshot.winnerPseudonym) ?? "Licitante identificado";
-  const houseName = str(snapshot.houseName) ?? "Lance Casa de LeilÃµes";
+  const houseName = str(snapshot.houseName) ?? "Lance Casa de Leilões";
   const settledAt =
     receipt.settlement.settledAt ?? str(snapshot.settledAt) ?? receipt.issuedAt;
   const endedAt = str(snapshot.endedAt) ?? receipt.lot.endsAt;
   const title =
-    str(snapshot.lotTitle) ?? receipt.lot.title ?? "Lote sem tÃ­tulo";
+    str(snapshot.lotTitle) ?? receipt.lot.title ?? "Lote sem título";
   const imageUrl = str(snapshot.imageUrl) ?? receipt.lot.imageUrl;
   const amountCents =
     num(snapshot.winningPriceCents) ?? receipt.settlement.amountCents;
@@ -156,7 +150,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-accent-gold" />
             <span className="text-xs font-semibold">
-              Comprovante verificado Â· {houseName}
+              Comprovante verificado · {houseName}
             </span>
           </div>
           <button
@@ -180,7 +174,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
             <Logo variant="light" size="md" />
             <div className="text-right">
               <span className="text-[10px] font-mono uppercase tracking-widest text-text-secondary block">
-                CÃ³digo de verificaÃ§Ã£o
+                Código de verificação
               </span>
               <span className="font-mono font-bold text-sm text-brand-primary bg-[#FAF7F2] px-2.5 py-1 rounded border border-border-subtle inline-block mt-1">
                 {receipt.verificationCode}
@@ -238,7 +232,7 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
                 </div>
                 <div>
                   <span className="text-text-secondary block text-[11px]">
-                    LiquidaÃ§Ã£o
+                    Liquidação
                   </span>
                   <span className="text-text-primary">
                     {formatDateTimeBR(settledAt)}
@@ -249,8 +243,8 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
               <div className="pt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-semantic-success bg-semantic-success-bg px-2.5 py-1 rounded-full border border-semantic-success/20">
                 <Check className="w-3.5 h-3.5" />
                 {receipt.settlement.status === "COMPLETED"
-                  ? "LiquidaÃ§Ã£o simulada concluÃ­da"
-                  : `LiquidaÃ§Ã£o: ${receipt.settlement.status}`}
+                  ? "Liquidação simulada concluída"
+                  : `Liquidação: ${receipt.settlement.status}`}
               </div>
             </div>
           </div>
@@ -263,8 +257,8 @@ export const PublicReceiptPage: React.FC<PublicReceiptPageProps> = ({
           </div>
 
           <p className="text-[10px] text-text-secondary leading-relaxed border-t border-border-subtle pt-4">
-            Este comprovante Ã© pÃºblico e nÃ£o expÃµe dados pessoais. O histÃ³rico
-            de eventos deste lote pode ser conferido na pÃ¡gina de auditoria, que
+            Este comprovante é público e não expõe dados pessoais. O histórico
+            de eventos deste lote pode ser conferido na página de auditoria, que
             recalcula a cadeia de hashes SHA-256 da plataforma.
           </p>
         </div>

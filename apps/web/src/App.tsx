@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { AppProvider, useApp } from "./context/AppContext";
 import { ViewportSimulator } from "./components/layout/ViewportSimulator";
 import { Header } from "./components/layout/Header";
@@ -115,7 +115,6 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#EFE9DB] flex flex-col font-body w-full max-w-full overflow-x-hidden">
-      {/* Main Responsive Canvas - Vitrine de LeilÃµes */}
       <div
         className={`flex-1 flex flex-col justify-between bg-surface-base transition-all duration-300 w-full ${getFrameContainerClass()}`}
       >
@@ -131,7 +130,6 @@ const MainAppContent: React.FC = () => {
         {selectedLotForBidModal && (
           <BidModal
             // Sempre o estado mais recente do lote: se um evento realtime
-            // atualizar preÃ§o/lÃ­der, o modal reflete na hora.
             lot={
               lots.find((item) => item.id === selectedLotForBidModal.id) ??
               selectedLotForBidModal

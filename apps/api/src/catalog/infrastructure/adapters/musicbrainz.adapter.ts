@@ -1,4 +1,4 @@
-﻿import {
+import {
   CatalogSearchOptions,
   CatalogSourceAdapter,
   ExternalCatalogItem,
@@ -111,7 +111,7 @@ export class MusicBrainzAdapter implements CatalogSourceAdapter {
     try {
       imageUrl = await this.coverArtArchive.getFrontCover(group.id);
     } catch {
-      // A falha no serviÃ§o de capas nÃ£o deve descartar os metadados.
+      // A falha no serviço de capas não deve descartar os metadados.
     }
 
     return {

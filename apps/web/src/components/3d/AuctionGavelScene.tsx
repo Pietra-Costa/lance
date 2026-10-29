@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import {
@@ -471,7 +471,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
       <div className="absolute top-4 left-4 z-10 pointer-events-none">
         <div className="flex items-center gap-2 text-xs font-mono text-surface-base/70 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-xs">
           <Sparkles className="w-3.5 h-3.5 text-accent-gold" />
-          <span>MOTOR 3D EM TEMPO REAL Â· LATÃƒO ESCOVADO & MOGNO</span>
+          <span>MOTOR 3D EM TEMPO REAL · LATÃO ESCOVADO & MOGNO</span>
         </div>
       </div>
 
@@ -563,9 +563,9 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
                       ? "bg-accent-gold text-brand-deep font-semibold"
                       : "text-surface-base/70 hover:text-white"
                   }`}
-                  title="TitÃ¢nio Escovado & Nogueira"
+                  title="Titânio Escovado & Nogueira"
                 >
-                  TitÃ¢nio
+                  Titânio
                 </button>
                 <button
                   onClick={() => setActiveFinish("bronze_antique")}
@@ -574,7 +574,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
                       ? "bg-accent-gold text-brand-deep font-semibold"
                       : "text-surface-base/70 hover:text-white"
                   }`}
-                  title="Bronze PÃ¡tina Antiga"
+                  title="Bronze Pátina Antiga"
                 >
                   Bronze
                 </button>
@@ -589,7 +589,7 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
                   ? "bg-brand-primary text-accent-gold border-accent-gold/40"
                   : "bg-white/5 text-surface-base/70 border-white/10 hover:text-white"
               }`}
-              title="Alternar rotaÃ§Ã£o contÃ­nua"
+              title="Alternar rotação contínua"
             >
               <RotateCw
                 className={`w-3.5 h-3.5 ${isAutoRotating ? "animate-spin" : ""}`}

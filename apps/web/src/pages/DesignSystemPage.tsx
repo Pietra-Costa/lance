@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { Logo } from "../components/layout/Logo";
 import { LotStatusBadge } from "../components/domain/LotStatusBadge";
@@ -33,15 +33,15 @@ export const DesignSystemPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("overview");
 
   const sections = [
-    { id: "overview", name: "1. VisÃ£o Geral & PrincÃ­pios", icon: Compass },
+    { id: "overview", name: "1. Visão Geral & Princípios", icon: Compass },
     { id: "logo", name: "2. Logotipo & Variantes", icon: Layers },
-    { id: "colors", name: "3. Cores & Tokens SemÃ¢nticos", icon: Palette },
+    { id: "colors", name: "3. Cores & Tokens Semânticos", icon: Palette },
     { id: "typography", name: "4. Tipografia Sora & Inter", icon: Type },
-    { id: "spacing", name: "5. EspaÃ§amento & Grid", icon: Maximize },
-    { id: "icons", name: "6. CatÃ¡logo de Ãcones (Lucide)", icon: SquareCheck },
-    { id: "buttons", name: "7. BotÃµes & Variantes", icon: MousePointer },
-    { id: "forms", name: "8. FormulÃ¡rios & Controles", icon: FormInput },
-    { id: "domain", name: "9. Componentes de DomÃ­nio", icon: Gavel },
+    { id: "spacing", name: "5. Espaçamento & Grid", icon: Maximize },
+    { id: "icons", name: "6. Catálogo de Ícones (Lucide)", icon: SquareCheck },
+    { id: "buttons", name: "7. Botões & Variantes", icon: MousePointer },
+    { id: "forms", name: "8. Formulários & Controles", icon: FormInput },
+    { id: "domain", name: "9. Componentes de Domínio", icon: Gavel },
     { id: "states", name: "10. Estados & Feedback", icon: AlertTriangle },
     { id: "tokens", name: "11. Mapeamento de Tokens CSS", icon: Code2 },
     {
@@ -49,13 +49,13 @@ export const DesignSystemPage: React.FC = () => {
       name: "12. Acessibilidade (WCAG AA)",
       icon: ShieldCheck,
     },
-    { id: "routes", name: "13. InventÃ¡rio de Rotas", icon: Layers },
+    { id: "routes", name: "13. Inventário de Rotas", icon: Layers },
     {
       id: "interactions",
-      name: "14. InventÃ¡rio de InteraÃ§Ãµes",
+      name: "14. Inventário de Interações",
       icon: CheckCircle2,
     },
-    { id: "pendings", name: "15. DecisÃµes & PendÃªncias", icon: Clock },
+    { id: "pendings", name: "15. Decisões & Pendências", icon: Clock },
   ];
 
   return (
@@ -69,14 +69,14 @@ export const DesignSystemPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-heading font-bold text-sm text-surface-base">
-                Design System Â· Lance Casa de LeilÃµes
+                Design System · Lance Casa de Leilões
               </span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-gold text-brand-deep uppercase">
                 v1.1 Oficial
               </span>
             </div>
             <p className="text-[11px] text-surface-base/70 font-mono">
-              Ãrea interna de protÃ³tipo â€” nÃ£o incluir no produto final
+              Área interna de protótipo — não incluir no produto final
             </p>
           </div>
         </div>
@@ -85,7 +85,7 @@ export const DesignSystemPage: React.FC = () => {
           onClick={() => navigateTo("/")}
           className="px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-primary/80 text-surface-base text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
         >
-          <span>Retornar ao Site PÃºblico</span>
+          <span>Retornar ao Site Público</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -94,7 +94,7 @@ export const DesignSystemPage: React.FC = () => {
       <div className="lg:hidden bg-white p-3 rounded-2xl border border-border-subtle shadow-xs space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-[10px] uppercase font-mono font-bold text-text-secondary">
-            SeÃ§Ã£o do Design System:
+            Seção do Design System:
           </span>
           <select
             value={activeSection}
@@ -136,7 +136,7 @@ export const DesignSystemPage: React.FC = () => {
         {/* Desktop Navigation Sidebar (hidden lg:block) */}
         <aside className="hidden lg:block lg:col-span-3 bg-white p-4 rounded-2xl border border-border-subtle shadow-xs space-y-1 lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
           <span className="text-[10px] uppercase font-mono font-bold text-text-secondary px-3 pb-2 block">
-            SUMÃRIO DO SISTEMA
+            SUMÁRIO DO SISTEMA
           </span>
           {sections.map((s) => {
             const Icon = s.icon;
@@ -165,15 +165,15 @@ export const DesignSystemPage: React.FC = () => {
 
         {/* Content Body */}
         <main className="lg:col-span-9 space-y-10">
-          {/* 1. VisÃ£o Geral */}
+          {/* 1. Visão Geral */}
           {activeSection === "overview" && (
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.1
+                  SEÇÃO 15.1
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  VisÃ£o Geral & PrincÃ­pios do Sistema
+                  Visão Geral & Princípios do Sistema
                 </h2>
                 <p className="text-xs text-text-secondary">
                   Diretrizes de produto, arquitetura e linguagem de design da
@@ -187,17 +187,17 @@ export const DesignSystemPage: React.FC = () => {
                     1. Clareza
                   </h4>
                   <p className="text-xs text-text-secondary leading-relaxed">
-                    InformaÃ§Ã£o e regras apresentadas de forma direta, sem termos
+                    Informação e regras apresentadas de forma direta, sem termos
                     rebuscados ou letramento excessivo.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-[#FAF7F2] border border-border-subtle space-y-2">
                   <h4 className="font-heading font-bold text-sm text-brand-primary">
-                    2. ConfianÃ§a
+                    2. Confiança
                   </h4>
                   <p className="text-xs text-text-secondary leading-relaxed">
                     Estados, lances, reservas financeiras e resultados
-                    comunicados com precisÃ£o transacional.
+                    comunicados com precisão transacional.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-[#FAF7F2] border border-border-subtle space-y-2">
@@ -205,8 +205,8 @@ export const DesignSystemPage: React.FC = () => {
                     3. Descoberta
                   </h4>
                   <p className="text-xs text-text-secondary leading-relaxed">
-                    Um catÃ¡logo que valoriza a imagem e a procedÃªncia do objeto
-                    sem distraÃ§Ãµes cosmÃ©ticas.
+                    Um catálogo que valoriza a imagem e a procedência do objeto
+                    sem distrações cosméticas.
                   </p>
                 </div>
               </div>
@@ -216,8 +216,8 @@ export const DesignSystemPage: React.FC = () => {
                   Regra de Ouro Editorial:
                 </p>
                 <p className="text-text-secondary leading-relaxed">
-                  Nunca comunicar vitÃ³ria, reserva, liberaÃ§Ã£o de saldo ou
-                  liquidaÃ§Ã£o antes da confirmaÃ§Ã£o real do sistema. A copy
+                  Nunca comunicar vitória, reserva, liberação de saldo ou
+                  liquidação antes da confirmação real do sistema. A copy
                   precisa refletir fielmente o estado do backend.
                 </p>
               </div>
@@ -229,13 +229,13 @@ export const DesignSystemPage: React.FC = () => {
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.2
+                  SEÇÃO 15.2
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  Logotipo Oficial â€” 4 Variantes
+                  Logotipo Oficial — 4 Variantes
                 </h2>
                 <p className="text-xs text-text-secondary">
-                  SÃ­mbolo abstrato geomÃ©trico baseado no corte arquitetural da
+                  Símbolo abstrato geométrico baseado no corte arquitetural da
                   letra L com losango institucional.
                 </p>
               </div>
@@ -250,7 +250,7 @@ export const DesignSystemPage: React.FC = () => {
                     <Logo variant="light" size="lg" />
                   </div>
                   <p className="text-[11px] text-text-secondary">
-                    AplicaÃ§Ã£o prioritÃ¡ria na navegaÃ§Ã£o e documentos com fundo
+                    Aplicação prioritária na navegação e documentos com fundo
                     claro (#F5F1E7).
                   </p>
                 </div>
@@ -264,7 +264,7 @@ export const DesignSystemPage: React.FC = () => {
                     <Logo variant="dark" size="lg" />
                   </div>
                   <p className="text-[11px] text-white/70">
-                    AplicaÃ§Ã£o no rodapÃ© institucional, cartÃµes escuros e Ã¡reas
+                    Aplicação no rodapé institucional, cartões escuros e áreas
                     de destaque solenes.
                   </p>
                 </div>
@@ -272,27 +272,27 @@ export const DesignSystemPage: React.FC = () => {
                 {/* Variant 3 */}
                 <div className="p-6 rounded-2xl bg-[#FAF7F2] border border-border-subtle space-y-3">
                   <span className="text-[10px] font-mono font-bold text-text-secondary block">
-                    VARIANTE 3: SÃMBOLO ISOLADO
+                    VARIANTE 3: SÍMBOLO ISOLADO
                   </span>
                   <div className="p-4 bg-white rounded-xl flex items-center justify-center">
                     <Logo variant="isolated" size="xl" />
                   </div>
                   <p className="text-[11px] text-text-secondary">
-                    Destinado a favicon, avatares, carimbos de validaÃ§Ã£o e
-                    marcas dâ€™Ã¡gua de documentos.
+                    Destinado a favicon, avatares, carimbos de validação e
+                    marcas d’água de documentos.
                   </p>
                 </div>
 
                 {/* Variant 4 */}
                 <div className="p-6 rounded-2xl bg-white border border-border-subtle space-y-3">
                   <span className="text-[10px] font-mono font-bold text-text-secondary block">
-                    VARIANTE 4: MONOCROMÃTICA (Grafite)
+                    VARIANTE 4: MONOCROMÁTICA (Grafite)
                   </span>
                   <div className="p-4 bg-[#FAF7F2] rounded-xl flex items-center justify-center">
                     <Logo variant="monochrome" size="lg" />
                   </div>
                   <p className="text-[11px] text-text-secondary">
-                    Para impressÃµes fÃ­sicas, notas fiscais simuladas e mÃ­dias
+                    Para impressões físicas, notas fiscais simuladas e mídias
                     sem suporte a cor.
                   </p>
                 </div>
@@ -305,10 +305,10 @@ export const DesignSystemPage: React.FC = () => {
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.3
+                  SEÇÃO 15.3
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  Paleta CromÃ¡tica Oficial & Tokens SemÃ¢nticos
+                  Paleta Cromática Oficial & Tokens Semânticos
                 </h2>
                 <p className="text-xs text-text-secondary">
                   Cores oficiais da marca e tokens funcionais de estado com taxa
@@ -319,7 +319,7 @@ export const DesignSystemPage: React.FC = () => {
               {/* Brand Colors */}
               <div className="space-y-3">
                 <h3 className="font-heading font-bold text-sm text-brand-primary">
-                  Cores PrimÃ¡rias da Marca
+                  Cores Primárias da Marca
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
@@ -327,7 +327,7 @@ export const DesignSystemPage: React.FC = () => {
                       name: "Verde Lance",
                       hex: "#123D2F",
                       rgb: "18, 61, 47",
-                      role: "Cor primÃ¡ria / AÃ§Ã£o principal",
+                      role: "Cor primária / Ação principal",
                       bg: "#123D2F",
                       text: "#F5F1E7",
                       contrast: "9.8:1 (AAA)",
@@ -336,7 +336,7 @@ export const DesignSystemPage: React.FC = () => {
                       name: "Verde Profundo",
                       hex: "#0A2B22",
                       rgb: "10, 43, 34",
-                      role: "Fundos solenes e rodapÃ©",
+                      role: "Fundos solenes e rodapé",
                       bg: "#0A2B22",
                       text: "#F5F1E7",
                       contrast: "12.4:1 (AAA)",
@@ -345,7 +345,7 @@ export const DesignSystemPage: React.FC = () => {
                       name: "Off-white",
                       hex: "#F5F1E7",
                       rgb: "245, 241, 231",
-                      role: "Fundo principal da aplicaÃ§Ã£o",
+                      role: "Fundo principal da aplicação",
                       bg: "#F5F1E7",
                       text: "#222923",
                       contrast: "11.2:1 (AAA)",
@@ -354,7 +354,7 @@ export const DesignSystemPage: React.FC = () => {
                       name: "Grafite",
                       hex: "#222923",
                       rgb: "34, 41, 35",
-                      role: "Textos principais e tÃ­tulos",
+                      role: "Textos principais e títulos",
                       bg: "#222923",
                       text: "#F5F1E7",
                       contrast: "11.5:1 (AAA)",
@@ -363,7 +363,7 @@ export const DesignSystemPage: React.FC = () => {
                       name: "Cinza Funcional",
                       hex: "#68716A",
                       rgb: "104, 113, 106",
-                      role: "Metadados e textos secundÃ¡rios",
+                      role: "Metadados e textos secundários",
                       bg: "#68716A",
                       text: "#FFFFFF",
                       contrast: "4.6:1 (AA)",
@@ -409,7 +409,7 @@ export const DesignSystemPage: React.FC = () => {
               {/* Semantic States */}
               <div className="space-y-3 pt-4 border-t border-border-subtle">
                 <h3 className="font-heading font-bold text-sm text-brand-primary">
-                  Tokens SemÃ¢nticos de Interface
+                  Tokens Semânticos de Interface
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                   <div className="p-3 rounded-xl bg-semantic-success-bg border border-semantic-success/30 text-semantic-success">
@@ -427,7 +427,7 @@ export const DesignSystemPage: React.FC = () => {
                     </span>
                   </div>
                   <div className="p-3 rounded-xl bg-semantic-error-bg border border-semantic-error/30 text-semantic-error">
-                    <span className="font-bold block">Erro / RejeiÃ§Ã£o</span>
+                    <span className="font-bold block">Erro / Rejeição</span>
                     <span className="font-mono text-[10px]">
                       #B91C1C / #FEE2E2
                     </span>
@@ -448,14 +448,14 @@ export const DesignSystemPage: React.FC = () => {
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.4
+                  SEÇÃO 15.4
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
                   Tipografia Oficial: Sora & Inter
                 </h2>
                 <p className="text-xs text-text-secondary">
-                  Sora para tÃ­tulos, identidades e chamadas institucionais;
-                  Inter para textos de corpo, valores, botÃµes e tabelas.
+                  Sora para títulos, identidades e chamadas institucionais;
+                  Inter para textos de corpo, valores, botões e tabelas.
                 </p>
               </div>
 
@@ -465,7 +465,7 @@ export const DesignSystemPage: React.FC = () => {
                     DISPLAY (Sora Bold 48px)
                   </span>
                   <p className="font-heading font-bold text-4xl text-brand-primary leading-tight">
-                    Arte, objetos de coleÃ§Ã£o e discos.
+                    Arte, objetos de coleção e discos.
                   </p>
                 </div>
 
@@ -474,7 +474,7 @@ export const DesignSystemPage: React.FC = () => {
                     H1 (Sora Semibold 32px)
                   </span>
                   <p className="font-heading font-semibold text-2xl text-text-primary">
-                    CatÃ¡logo de Lotes & PregÃ£o Oficial
+                    Catálogo de Lotes & Pregão Oficial
                   </p>
                 </div>
 
@@ -489,7 +489,7 @@ export const DesignSystemPage: React.FC = () => {
 
                 <div className="p-4 bg-white rounded-xl border border-border-subtle space-y-2">
                   <span className="text-xs font-mono font-bold text-brand-primary">
-                    VALOR MONETÃRIO BRL (Inter Bold 24px / Sora Numbers)
+                    VALOR MONETÁRIO BRL (Inter Bold 24px / Sora Numbers)
                   </span>
                   <p className="font-heading font-bold text-2xl text-brand-primary">
                     R$ 18.000,00{" "}
@@ -504,34 +504,34 @@ export const DesignSystemPage: React.FC = () => {
                     BODY (Inter Regular 16px / line-height 24px)
                   </span>
                   <p className="font-body text-base text-text-primary leading-relaxed max-w-2xl">
-                    A Lance aproxima a dinÃ¢mica dos leilÃµes da simplicidade de
+                    A Lance aproxima a dinâmica dos leilões da simplicidade de
                     uma boa plataforma digital. A identidade deve inspirar
-                    confianÃ§a, facilitar decisÃµes e valorizar cada lote sem
-                    excesso de formalidade ou cÃ³digos visuais de luxo.
+                    confiança, facilitar decisões e valorizar cada lote sem
+                    excesso de formalidade ou códigos visuais de luxo.
                   </p>
                 </div>
 
                 <div className="p-4 bg-white rounded-xl border border-border-subtle space-y-2">
                   <span className="text-xs font-mono font-bold text-brand-primary">
-                    METADATA & PSEUDÃ”NIMO (Inter Medium 12px)
+                    METADATA & PSEUDÔNIMO (Inter Medium 12px)
                   </span>
                   <p className="font-mono text-xs text-text-secondary">
-                    Licitante â€¢â€¢â€¢â€¢ 4821 Â· 24/10/2026 Ã s 11:45
+                    Licitante •••• 4821 · 24/10/2026 às 11:45
                   </p>
                 </div>
               </div>
             </section>
           )}
 
-          {/* 7. BotÃµes */}
+          {/* 7. Botões */}
           {activeSection === "buttons" && (
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.7
+                  SEÇÃO 15.7
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  Matriz de BotÃµes & Estados
+                  Matriz de Botões & Estados
                 </h2>
                 <p className="text-xs text-text-secondary">
                   Componente Button com variantes Primary, Secondary, Outline,
@@ -591,19 +591,19 @@ export const DesignSystemPage: React.FC = () => {
             </section>
           )}
 
-          {/* 9. Componentes de DomÃ­nio */}
+          {/* 9. Componentes de Domínio */}
           {activeSection === "domain" && (
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.9
+                  SEÇÃO 15.9
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  Componentes de DomÃ­nio de LeilÃµes
+                  Componentes de Domínio de Leilões
                 </h2>
                 <p className="text-xs text-text-secondary">
-                  Estruturas especÃ­ficas do modelo Lance: Badges de pregÃ£o,
-                  cronÃ´metro com anti-sniping, e identificadores anonimizados.
+                  Estruturas específicas do modelo Lance: Badges de pregão,
+                  cronômetro com anti-sniping, e identificadores anonimizados.
                 </p>
               </div>
 
@@ -644,13 +644,13 @@ export const DesignSystemPage: React.FC = () => {
                   </h4>
                   <div className="flex flex-wrap gap-2 text-xs">
                     <span className="font-mono bg-[#FAF7F2] border border-border-subtle px-3 py-1 rounded-lg text-brand-primary font-bold">
-                      Licitante â€¢â€¢â€¢â€¢ 4821 (VocÃª)
+                      Licitante •••• 4821 (Você)
                     </span>
                     <span className="font-mono bg-[#FAF7F2] border border-border-subtle px-3 py-1 rounded-lg text-text-secondary">
-                      Licitante â€¢â€¢â€¢â€¢ 1904
+                      Licitante •••• 1904
                     </span>
                     <span className="font-mono bg-[#FAF7F2] border border-border-subtle px-3 py-1 rounded-lg text-text-secondary">
-                      Licitante â€¢â€¢â€¢â€¢ 6310
+                      Licitante •••• 6310
                     </span>
                   </div>
                 </div>
@@ -663,14 +663,14 @@ export const DesignSystemPage: React.FC = () => {
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.12
+                  SEÇÃO 15.12
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  Mapeamento de Tokens & VariÃ¡veis CSS
+                  Mapeamento de Tokens & Variáveis CSS
                 </h2>
                 <p className="text-xs text-text-secondary">
-                  CorrespondÃªncia entre propriedades do Figma, CSS Variables e
-                  classes utilitÃ¡rias Tailwind.
+                  Correspondência entre propriedades do Figma, CSS Variables e
+                  classes utilitárias Tailwind.
                 </p>
               </div>
 
@@ -678,7 +678,7 @@ export const DesignSystemPage: React.FC = () => {
                 <table className="w-full text-left">
                   <thead className="bg-[#FAF7F2] border-b border-border-subtle text-text-secondary">
                     <tr>
-                      <th className="py-2.5 px-3">Token SemÃ¢ntico</th>
+                      <th className="py-2.5 px-3">Token Semântico</th>
                       <th className="py-2.5 px-3">CSS Variable</th>
                       <th className="py-2.5 px-3">Valor Oficial</th>
                       <th className="py-2.5 px-3">Uso no Produto</th>
@@ -692,7 +692,7 @@ export const DesignSystemPage: React.FC = () => {
                       <td className="py-2.5 px-3">--color-brand-primary</td>
                       <td className="py-2.5 px-3">#123D2F</td>
                       <td className="py-2.5 px-3 font-sans">
-                        Cor principal, CTAs, tÃ­tulos
+                        Cor principal, CTAs, títulos
                       </td>
                     </tr>
                     <tr>
@@ -702,7 +702,7 @@ export const DesignSystemPage: React.FC = () => {
                       <td className="py-2.5 px-3">--color-brand-deep</td>
                       <td className="py-2.5 px-3">#0A2B22</td>
                       <td className="py-2.5 px-3 font-sans">
-                        Fundos escuros, rodapÃ©
+                        Fundos escuros, rodapé
                       </td>
                     </tr>
                     <tr>
@@ -732,7 +732,7 @@ export const DesignSystemPage: React.FC = () => {
                       <td className="py-2.5 px-3">--font-heading</td>
                       <td className="py-2.5 px-3">'Sora', sans-serif</td>
                       <td className="py-2.5 px-3 font-sans">
-                        TÃ­tulos e destaques numÃ©ricos
+                        Títulos e destaques numéricos
                       </td>
                     </tr>
                     <tr>
@@ -742,7 +742,7 @@ export const DesignSystemPage: React.FC = () => {
                       <td className="py-2.5 px-3">--font-body</td>
                       <td className="py-2.5 px-3">'Inter', sans-serif</td>
                       <td className="py-2.5 px-3 font-sans">
-                        Interface, formulÃ¡rios e tabelas
+                        Interface, formulários e tabelas
                       </td>
                     </tr>
                   </tbody>
@@ -756,14 +756,14 @@ export const DesignSystemPage: React.FC = () => {
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.14
+                  SEÇÃO 15.14
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  InventÃ¡rio Completo de Rotas
+                  Inventário Completo de Rotas
                 </h2>
                 <p className="text-xs text-text-secondary">
-                  Mapeamento de rotas pÃºblicas, restritas ao licitante, ao
-                  leiloeiro e de documentaÃ§Ã£o.
+                  Mapeamento de rotas públicas, restritas ao licitante, ao
+                  leiloeiro e de documentação.
                 </p>
               </div>
 
@@ -771,26 +771,26 @@ export const DesignSystemPage: React.FC = () => {
                 {[
                   {
                     path: "/",
-                    role: "PÃºblico",
+                    role: "Público",
                     purpose:
                       "Homepage com hero, busca, categorias e lotes ao vivo",
                   },
                   {
                     path: "/lotes",
-                    role: "PÃºblico",
+                    role: "Público",
                     purpose:
-                      "CatÃ¡logo geral com busca, filtros de categoria e preÃ§o",
+                      "Catálogo geral com busca, filtros de categoria e preço",
                   },
                   {
                     path: "/lotes/:id",
-                    role: "PÃºblico / Licitante",
+                    role: "Público / Licitante",
                     purpose:
-                      "Detalhe do lote, galeria ampliada, painel de lances e histÃ³rico",
+                      "Detalhe do lote, galeria ampliada, painel de lances e histórico",
                   },
                   {
                     path: "/entrar",
                     role: "Visitante",
-                    purpose: "AutenticaÃ§Ã£o com preservaÃ§Ã£o da rota de origem",
+                    purpose: "Autenticação com preservação da rota de origem",
                   },
                   {
                     path: "/cadastro",
@@ -808,7 +808,7 @@ export const DesignSystemPage: React.FC = () => {
                     path: "/conta/lances",
                     role: "Licitante",
                     purpose:
-                      "HistÃ³rico dos lances do usuÃ¡rio e status da lideranÃ§a",
+                      "Histórico dos lances do usuário e status da liderança",
                   },
                   {
                     path: "/conta/arrematados",
@@ -819,37 +819,37 @@ export const DesignSystemPage: React.FC = () => {
                     path: "/conta/carteira",
                     role: "Licitante",
                     purpose:
-                      "GestÃ£o de saldo disponÃ­vel, reservas e aportes simulados",
+                      "Gestão de saldo disponível, reservas e aportes simulados",
                   },
                   {
                     path: "/conta/transacoes",
                     role: "Licitante",
                     purpose:
-                      "Ledger de transaÃ§Ãµes da carteira com idempotÃªncia",
+                      "Ledger de transações da carteira com idempotência",
                   },
                   {
                     path: "/leiloeiro",
                     role: "Leiloeiro",
                     purpose:
-                      "Painel operacional com mÃ©tricas e gestÃ£o de lotes",
+                      "Painel operacional com métricas e gestão de lotes",
                   },
                   {
                     path: "/leiloeiro/lotes/novo",
                     role: "Leiloeiro",
                     purpose:
-                      "Wizard em 5 etapas para importaÃ§Ã£o e publicaÃ§Ã£o de lote",
+                      "Wizard em 5 etapas para importação e publicação de lote",
                   },
                   {
                     path: "/auditoria",
-                    role: "PÃºblico",
+                    role: "Público",
                     purpose:
-                      "Trilha de auditoria criptogrÃ¡fica com verificaÃ§Ã£o SHA-256",
+                      "Trilha de auditoria criptográfica com verificação SHA-256",
                   },
                   {
                     path: "/design-system",
                     role: "Interno",
                     purpose:
-                      "DocumentaÃ§Ã£o viva do sistema de design e componentes",
+                      "Documentação viva do sistema de design e componentes",
                   },
                 ].map((r) => (
                   <div
@@ -873,19 +873,19 @@ export const DesignSystemPage: React.FC = () => {
             </section>
           )}
 
-          {/* 15. PendÃªncias */}
+          {/* 15. Pendências */}
           {activeSection === "pendings" && (
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-6 shadow-xs">
               <div className="space-y-1 border-b border-border-subtle pb-4">
                 <span className="text-[10px] font-mono text-accent-gold font-bold uppercase">
-                  SEÃ‡ÃƒO 15.15 / CAPÃTULO 43
+                  SEÇÃO 15.15 / CAPÍTULO 43
                 </span>
                 <h2 className="font-heading font-bold text-2xl text-brand-primary">
-                  DecisÃµes Arquiteturais & PendÃªncias de HomologaÃ§Ã£o
+                  Decisões Arquiteturais & Pendências de Homologação
                 </h2>
                 <p className="text-xs text-text-secondary">
-                  Registro fiel dos pontos pendentes de validaÃ§Ã£o
-                  tÃ©cnica/jurÃ­dica, tratados no protÃ³tipo como comportamentos
+                  Registro fiel dos pontos pendentes de validação
+                  técnica/jurídica, tratados no protótipo como comportamentos
                   demonstrativos.
                 </p>
               </div>
@@ -893,21 +893,21 @@ export const DesignSystemPage: React.FC = () => {
               <div className="space-y-3 text-xs">
                 {[
                   {
-                    title: "Regras Definitivas de DepÃ³sito e Saque Real",
-                    desc: "OperaÃ§Ãµes financeiras reais exigem licenÃ§as BACEN ou integraÃ§Ã£o de Gateway bancÃ¡rio/PIX real. No protÃ³tipo, a carteira opera em modo demonstrativo.",
+                    title: "Regras Definitivas de Depósito e Saque Real",
+                    desc: "Operações financeiras reais exigem licenças BACEN ou integração de Gateway bancário/PIX real. No protótipo, a carteira opera em modo demonstrativo.",
                   },
                   {
                     title:
-                      "PolÃ­tica Definitiva de Direitos de Imagem Comerciais",
-                    desc: "Acessibilidade de APIs como The Met ou AIC sob CC0 nÃ£o confere direito automÃ¡tico de exploraÃ§Ã£o comercial irrestrita. O leiloeiro deve validar caso a caso.",
+                      "Política Definitiva de Direitos de Imagem Comerciais",
+                    desc: "Acessibilidade de APIs como The Met ou AIC sob CC0 não confere direito automático de exploração comercial irrestrita. O leiloeiro deve validar caso a caso.",
                   },
                   {
-                    title: "ServiÃ§o Externo de Ancoragem Temporal",
-                    desc: "A integridade hoje Ã© garantida por cadeia de hashes SHA-256 com verificaÃ§Ã£o recalculada pela API. Assinatura de checkpoints (Ed25519) e ancoragem temporal externa (OpenTimestamps) nÃ£o estÃ£o implementadas nesta versÃ£o.",
+                    title: "Serviço Externo de Ancoragem Temporal",
+                    desc: "A integridade hoje é garantida por cadeia de hashes SHA-256 com verificação recalculada pela API. Assinatura de checkpoints (Ed25519) e ancoragem temporal externa (OpenTimestamps) não estão implementadas nesta versão.",
                   },
                   {
-                    title: "OrdenaÃ§Ã£o de ConcorrÃªncia em Alta Escala",
-                    desc: "O bloqueio por lote em PostgreSQL atende ao monÃ³lito modular do MVP; disputas em milissegundos com milhares de licitantes exigiriam Redis Lock.",
+                    title: "Ordenação de Concorrência em Alta Escala",
+                    desc: "O bloqueio por lote em PostgreSQL atende ao monólito modular do MVP; disputas em milissegundos com milhares de licitantes exigiriam Redis Lock.",
                   },
                 ].map((item, idx) => (
                   <div
@@ -940,10 +940,10 @@ export const DesignSystemPage: React.FC = () => {
           ].includes(activeSection) && (
             <section className="bg-white p-8 rounded-2xl border border-border-subtle space-y-4">
               <h3 className="font-heading font-bold text-xl text-brand-primary">
-                DocumentaÃ§Ã£o de {activeSection}
+                Documentação de {activeSection}
               </h3>
               <p className="text-xs text-text-secondary">
-                Consulte as seÃ§Ãµes principais no menu lateral para visualizar os
+                Consulte as seções principais no menu lateral para visualizar os
                 fundamentos consolidados.
               </p>
             </section>

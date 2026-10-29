@@ -1,14 +1,7 @@
-﻿import React from "react";
+import React from "react";
 import { useApp } from "../context/AppContext";
 import { ShieldCheck, ArrowLeft, Gavel, Wallet, FileText } from "lucide-react";
 
-/**
- * PÃ¡ginas institucionais de regras.
- *
- * ConteÃºdo derivado do documento de arquitetura (seÃ§Ãµes 19 a 26) e do
- * comportamento real da API â€” nÃ£o Ã© texto de marketing: cada regra listada
- * corresponde a algo implementado no backend.
- */
 
 const Section: React.FC<{
   title: string;
@@ -30,7 +23,7 @@ const RuleList: React.FC<{ items: React.ReactNode[] }> = ({ items }) => (
   <ul className="space-y-2">
     {items.map((item, index) => (
       <li key={index} className="flex gap-2">
-        <span className="text-accent-gold shrink-0 mt-0.5">â€”</span>
+        <span className="text-accent-gold shrink-0 mt-0.5">—</span>
         <span>{item}</span>
       </li>
     ))}
@@ -69,9 +62,9 @@ const PageShell: React.FC<{
       {children}
 
       <p className="text-[10px] text-text-secondary leading-relaxed pt-2">
-        Documento informativo da versÃ£o de demonstraÃ§Ã£o. A plataforma opera com
-        saldo e liquidaÃ§Ã£o simulados: nÃ£o hÃ¡ pagamento real, nota fiscal,
-        revenda entre usuÃ¡rios ou garantia de entrega.
+        Documento informativo da versão de demonstração. A plataforma opera com
+        saldo e liquidação simulados: não há pagamento real, nota fiscal,
+        revenda entre usuários ou garantia de entrega.
       </p>
     </div>
   );
@@ -79,34 +72,34 @@ const PageShell: React.FC<{
 
 export const RulesPage: React.FC = () => (
   <PageShell
-    eyebrow="Regras do pregÃ£o"
+    eyebrow="Regras do pregão"
     title="Regras Gerais"
-    intro="Como um lote nasce, entra ao vivo, recebe lances e Ã© encerrado. As regras abaixo sÃ£o aplicadas pelo servidor â€” a interface apenas reflete o estado oficial."
+    intro="Como um lote nasce, entra ao vivo, recebe lances e é encerrado. As regras abaixo são aplicadas pelo servidor — a interface apenas reflete o estado oficial."
   >
     <Section title="Ciclo de vida do lote" icon={<Gavel className="w-4 h-4" />}>
       <RuleList
         items={[
           <>
-            <strong>Agendado</strong> â€” criado, ainda nÃ£o iniciado. NÃ£o aceita
+            <strong>Agendado</strong> — criado, ainda não iniciado. Não aceita
             lances.
           </>,
           <>
-            <strong>Ao vivo</strong> â€” dentro da janela de disputa. Ã‰ o Ãºnico
+            <strong>Ao vivo</strong> — dentro da janela de disputa. É o único
             estado que aceita lances.
           </>,
           <>
-            <strong>Encerrado</strong> â€” janela fechada. A liquidaÃ§Ã£o Ã©
+            <strong>Encerrado</strong> — janela fechada. A liquidação é
             processada automaticamente.
           </>,
           <>
-            <strong>Cancelado</strong> â€” oculto da vitrine; o histÃ³rico de
-            auditoria permanece pÃºblico.
+            <strong>Cancelado</strong> — oculto da vitrine; o histórico de
+            auditoria permanece público.
           </>,
         ]}
       />
       <p>
-        O estado e o horÃ¡rio de encerramento sÃ£o avaliados no servidor. O
-        contador da tela Ã© apenas informativo: nenhum cliente decide o
+        O estado e o horário de encerramento são avaliados no servidor. O
+        contador da tela é apenas informativo: nenhum cliente decide o
         encerramento.
       </p>
     </Section>
@@ -114,49 +107,49 @@ export const RulesPage: React.FC = () => (
     <Section title="Regras de lance">
       <RuleList
         items={[
-          "O primeiro lance deve ser maior ou igual ao preÃ§o inicial.",
-          "Os lances seguintes devem ser maiores ou iguais ao preÃ§o atual mais o incremento mÃ­nimo do lote.",
-          "O licitante que lidera nÃ£o pode cobrir o prÃ³prio lance.",
-          "Lotes fora da janela de disputa recusam lances, com motivo especÃ­fico na resposta.",
-          "Valores sÃ£o tratados em centavos inteiros â€” nunca em ponto flutuante.",
+          "O primeiro lance deve ser maior ou igual ao preço inicial.",
+          "Os lances seguintes devem ser maiores ou iguais ao preço atual mais o incremento mínimo do lote.",
+          "O licitante que lidera não pode cobrir o próprio lance.",
+          "Lotes fora da janela de disputa recusam lances, com motivo específico na resposta.",
+          "Valores são tratados em centavos inteiros — nunca em ponto flutuante.",
         ]}
       />
       <p>
-        Cada recusa retorna um cÃ³digo estÃ¡vel e uma mensagem em portuguÃªs com o
-        valor em reais: <em>abaixo do mÃ­nimo</em>, <em>saldo insuficiente</em>,{" "}
-        <em>vocÃª jÃ¡ estÃ¡ liderando</em>, <em>lote ainda nÃ£o iniciado</em> ou{" "}
+        Cada recusa retorna um código estável e uma mensagem em português com o
+        valor em reais: <em>abaixo do mínimo</em>, <em>saldo insuficiente</em>,{" "}
+        <em>você já está liderando</em>, <em>lote ainda não iniciado</em> ou{" "}
         <em>lote encerrado</em>.
       </p>
     </Section>
 
     <Section title="Anti-sniping">
       <p>
-        Um lance vÃ¡lido aceito nos <strong>Ãºltimos 2 minutos</strong> estende o
-        encerramento do lote para <strong>2 minutos apÃ³s o lance</strong>. A
-        checagem e a extensÃ£o acontecem dentro da mesma transaÃ§Ã£o que confirma o
-        lance, usando o horÃ¡rio do servidor. A extensÃ£o nunca encurta o prazo
-        nem reabre um lote jÃ¡ encerrado.
+        Um lance válido aceito nos <strong>últimos 2 minutos</strong> estende o
+        encerramento do lote para <strong>2 minutos após o lance</strong>. A
+        checagem e a extensão acontecem dentro da mesma transação que confirma o
+        lance, usando o horário do servidor. A extensão nunca encurta o prazo
+        nem reabre um lote já encerrado.
       </p>
     </Section>
 
-    <Section title="ConcorrÃªncia e idempotÃªncia">
+    <Section title="Concorrência e idempotência">
       <RuleList
         items={[
-          "Todos os lances de um mesmo lote sÃ£o serializados por bloqueio no registro do lote, em transaÃ§Ã£o Serializable.",
-          "Um lance pode ser recusado se outro licitante confirmar primeiro â€” nesse caso o valor mÃ­nimo Ã© recalculado.",
-          "Toda requisiÃ§Ã£o de lance exige uma chave de idempotÃªncia: repetir a mesma solicitaÃ§Ã£o devolve o mesmo resultado, sem duplicar reserva ou lance.",
-          "DepÃ³sitos seguem a mesma regra: a chave de idempotÃªncia impede crÃ©dito duplicado.",
+          "Todos os lances de um mesmo lote são serializados por bloqueio no registro do lote, em transação Serializable.",
+          "Um lance pode ser recusado se outro licitante confirmar primeiro — nesse caso o valor mínimo é recalculado.",
+          "Toda requisição de lance exige uma chave de idempotência: repetir a mesma solicitação devolve o mesmo resultado, sem duplicar reserva ou lance.",
+          "Depósitos seguem a mesma regra: a chave de idempotência impede crédito duplicado.",
         ]}
       />
     </Section>
 
-    <Section title="Encerramento e liquidaÃ§Ã£o">
+    <Section title="Encerramento e liquidação">
       <RuleList
         items={[
-          "Ao encerrar com vencedor: o valor Ã© debitado do vencedor, creditado ao leiloeiro e um comprovante Ã© emitido â€” tudo atomicamente.",
-          "Ao encerrar sem lances: o lote fecha sem vencedor e sem qualquer movimentaÃ§Ã£o financeira.",
-          "A liquidaÃ§Ã£o Ã© idempotente: reprocessar nÃ£o duplica dÃ©bito, crÃ©dito ou comprovante.",
-          "Se a liquidaÃ§Ã£o falhar, o lote fica marcado com falha e o caso Ã© registrado na trilha de auditoria.",
+          "Ao encerrar com vencedor: o valor é debitado do vencedor, creditado ao leiloeiro e um comprovante é emitido — tudo atomicamente.",
+          "Ao encerrar sem lances: o lote fecha sem vencedor e sem qualquer movimentação financeira.",
+          "A liquidação é idempotente: reprocessar não duplica débito, crédito ou comprovante.",
+          "Se a liquidação falhar, o lote fica marcado com falha e o caso é registrado na trilha de auditoria.",
         ]}
       />
     </Section>
@@ -164,10 +157,10 @@ export const RulesPage: React.FC = () => (
     <Section title="Cancelamento">
       <RuleList
         items={[
-          "SÃ³ o leiloeiro responsÃ¡vel pode cancelar, e apenas antes do encerramento.",
-          "A justificativa Ã© obrigatÃ³ria.",
-          "Todas as reservas ativas sÃ£o liberadas e os licitantes sÃ£o notificados.",
-          "Lote cancelado nÃ£o Ã© liquidado e nÃ£o aparece na vitrine comum.",
+          "Só o leiloeiro responsável pode cancelar, e apenas antes do encerramento.",
+          "A justificativa é obrigatória.",
+          "Todas as reservas ativas são liberadas e os licitantes são notificados.",
+          "Lote cancelado não é liquidado e não aparece na vitrine comum.",
         ]}
       />
     </Section>
@@ -175,15 +168,15 @@ export const RulesPage: React.FC = () => (
     <Section title="Auditoria e privacidade">
       <RuleList
         items={[
-          "Cada evento relevante Ã© gravado em uma cadeia de hashes SHA-256, na mesma transaÃ§Ã£o da operaÃ§Ã£o de negÃ³cio.",
+          "Cada evento relevante é gravado em uma cadeia de hashes SHA-256, na mesma transação da operação de negócio.",
           "Qualquer pessoa, sem login, pode verificar a integridade em /auditoria.",
-          "AlteraÃ§Ã£o, remoÃ§Ã£o ou inserÃ§Ã£o direta no banco Ã© detectada pela verificaÃ§Ã£o.",
-          "Licitantes aparecem apenas por pseudÃ´nimo estÃ¡vel; nome, e-mail e identificadores internos nunca sÃ£o expostos.",
+          "Alteração, remoção ou inserção direta no banco é detectada pela verificação.",
+          "Licitantes aparecem apenas por pseudônimo estável; nome, e-mail e identificadores internos nunca são expostos.",
         ]}
       />
       <p className="text-[11px] text-text-secondary">
-        Limite declarado: a cadeia nÃ£o Ã© assinada nem ancorada externamente,
-        portanto detecta alteraÃ§Ã£o local, mas nÃ£o impede que alguÃ©m com acesso
+        Limite declarado: a cadeia não é assinada nem ancorada externamente,
+        portanto detecta alteração local, mas não impede que alguém com acesso
         total ao banco reescreva toda a cadeia.
       </p>
     </Section>
@@ -194,52 +187,52 @@ export const SellerTermsPage: React.FC = () => (
   <PageShell
     eyebrow="Termo do leiloeiro"
     title="Termo de Responsabilidade do Leiloeiro"
-    intro="Para criar ou administrar lotes, o leiloeiro precisa aceitar este termo. O aceite Ã© registrado de forma imutÃ¡vel, com versÃ£o e hash do conteÃºdo."
+    intro="Para criar ou administrar lotes, o leiloeiro precisa aceitar este termo. O aceite é registrado de forma imutável, com versão e hash do conteúdo."
   >
     <Section
-      title="1. Escopo da atuaÃ§Ã£o"
+      title="1. Escopo da atuação"
       icon={<FileText className="w-4 h-4" />}
     >
       <p>
-        O leiloeiro declara possuir autorizaÃ§Ã£o para ofertar os itens que
-        cadastrar, respondendo pela procedÃªncia, pela descriÃ§Ã£o e pelas imagens
+        O leiloeiro declara possuir autorização para ofertar os itens que
+        cadastrar, respondendo pela procedência, pela descrição e pelas imagens
         publicadas em cada lote.
       </p>
       <p>
-        O papel <strong>LEILOEIRO</strong> Ã© exclusivo: a mesma conta nÃ£o pode
-        dar lances em nenhum lote, incluindo os prÃ³prios.
+        O papel <strong>LEILOEIRO</strong> é exclusivo: a mesma conta não pode
+        dar lances em nenhum lote, incluindo os próprios.
       </p>
     </Section>
 
-    <Section title="2. ProcedÃªncia e direitos de uso">
+    <Section title="2. Procedência e direitos de uso">
       <p>
-        Itens importados de acervos pÃºblicos (The Met, Art Institute of Chicago,
-        MusicBrainz) mantÃªm a atribuiÃ§Ã£o e a origem registradas no snapshot do
-        lote. Acessibilidade tÃ©cnica da imagem nÃ£o equivale a licenÃ§a de uso
-        comercial: a verificaÃ§Ã£o de direitos Ã© responsabilidade do leiloeiro
+        Itens importados de acervos públicos (The Met, Art Institute of Chicago,
+        MusicBrainz) mantêm a atribuição e a origem registradas no snapshot do
+        lote. Acessibilidade técnica da imagem não equivale a licença de uso
+        comercial: a verificação de direitos é responsabilidade do leiloeiro
         antes de publicar.
       </p>
       <p>
-        O snapshot publicado Ã© imutÃ¡vel: alteraÃ§Ãµes na fonte externa nÃ£o
-        modificam o lote jÃ¡ criado.
+        O snapshot publicado é imutável: alterações na fonte externa não
+        modificam o lote já criado.
       </p>
     </Section>
 
-    <Section title="3. ConduÃ§Ã£o do pregÃ£o">
+    <Section title="3. Condução do pregão">
       <RuleList
         items={[
-          "Os campos do lote ficam congelados quando ele entra ao vivo, exceto o horÃ¡rio de encerramento, que pode ser estendido pela regra anti-sniping.",
-          "O cancelamento exige justificativa e sÃ³ Ã© permitido antes do encerramento.",
-          "O leiloeiro recebe o crÃ©dito do arremate na liquidaÃ§Ã£o simulada; nÃ£o hÃ¡ repasse financeiro real nesta versÃ£o.",
+          "Os campos do lote ficam congelados quando ele entra ao vivo, exceto o horário de encerramento, que pode ser estendido pela regra anti-sniping.",
+          "O cancelamento exige justificativa e só é permitido antes do encerramento.",
+          "O leiloeiro recebe o crédito do arremate na liquidação simulada; não há repasse financeiro real nesta versão.",
         ]}
       />
     </Section>
 
     <Section title="4. Registro do aceite">
       <p>
-        O aceite grava usuÃ¡rio, versÃ£o do termo, hash do conteÃºdo e horÃ¡rio. O
-        registro Ã© imutÃ¡vel e uma restriÃ§Ã£o Ãºnica por usuÃ¡rio e versÃ£o impede
-        duplicaÃ§Ã£o. Trata-se de evidÃªncia tÃ©cnica dentro da aplicaÃ§Ã£o â€” nÃ£o de
+        O aceite grava usuário, versão do termo, hash do conteúdo e horário. O
+        registro é imutável e uma restrição única por usuário e versão impede
+        duplicação. Trata-se de evidência técnica dentro da aplicação — não de
         assinatura digital certificada.
       </p>
     </Section>
@@ -249,67 +242,67 @@ export const SellerTermsPage: React.FC = () => (
 export const ReservationPolicyPage: React.FC = () => (
   <PageShell
     eyebrow="Carteira e reservas"
-    title="PolÃ­tica de Reservas e Carteira"
-    intro="Como o saldo simulado Ã© comprometido, liberado e consumido ao longo de um pregÃ£o."
+    title="Política de Reservas e Carteira"
+    intro="Como o saldo simulado é comprometido, liberado e consumido ao longo de um pregão."
   >
     <Section
-      title="TrÃªs saldos, uma regra"
+      title="Três saldos, uma regra"
       icon={<Wallet className="w-4 h-4" />}
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded-xl border border-border-subtle bg-[#FAF7F2] p-3">
           <span className="text-[10px] text-text-secondary block">Saldo total</span>
-          <span className="text-[11px]">Tudo o que jÃ¡ foi depositado.</span>
+          <span className="text-[11px]">Tudo o que já foi depositado.</span>
         </div>
         <div className="rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg/40 p-3">
           <span className="text-[10px] text-semantic-warning block">Comprometido</span>
           <span className="text-[11px]">
-            Soma das reservas ativas dos seus lances lÃ­deres.
+            Soma das reservas ativas dos seus lances líderes.
           </span>
         </div>
         <div className="rounded-xl border border-semantic-success/30 bg-semantic-success-bg p-3">
-          <span className="text-[10px] text-semantic-success block">DisponÃ­vel</span>
+          <span className="text-[10px] text-semantic-success block">Disponível</span>
           <span className="text-[11px]">
-            Total menos comprometido. Ã‰ o que pode sustentar um novo lance.
+            Total menos comprometido. É o que pode sustentar um novo lance.
           </span>
         </div>
       </div>
       <p className="font-semibold text-brand-primary">
-        DisponÃ­vel = Total âˆ’ Comprometido. O lance sÃ³ Ã© aceito se couber no
-        disponÃ­vel.
+        Disponível = Total − Comprometido. O lance só é aceito se couber no
+        disponível.
       </p>
     </Section>
 
     <Section title="Como a reserva funciona">
       <RuleList
         items={[
-          "O licitante precisa cobrir o valor integral do novo lance, nÃ£o apenas a diferenÃ§a em relaÃ§Ã£o ao anterior.",
+          "O licitante precisa cobrir o valor integral do novo lance, não apenas a diferença em relação ao anterior.",
           "Ao liderar, o valor do lance fica reservado.",
-          "Ao ser superado, a reserva Ã© liberada imediatamente e volta ao disponÃ­vel.",
-          "Existe no mÃ¡ximo uma reserva ativa por lote â€” garantido por Ã­ndice Ãºnico parcial no banco.",
-          "A troca de reserva (liberar a anterior e criar a nova) acontece na mesma transaÃ§Ã£o do lance.",
+          "Ao ser superado, a reserva é liberada imediatamente e volta ao disponível.",
+          "Existe no máximo uma reserva ativa por lote — garantido por índice único parcial no banco.",
+          "A troca de reserva (liberar a anterior e criar a nova) acontece na mesma transação do lance.",
         ]}
       />
     </Section>
 
-    <Section title="DepÃ³sitos">
+    <Section title="Depósitos">
       <RuleList
         items={[
-          "DepÃ³sitos sÃ£o simulados: crÃ©dito imediato em saldo fictÃ­cio, sem movimentaÃ§Ã£o bancÃ¡ria.",
-          "Cada depÃ³sito exige chave de idempotÃªncia; repetir a solicitaÃ§Ã£o nÃ£o duplica o crÃ©dito.",
-          "Todo depÃ³sito entra na trilha de auditoria e no extrato da carteira.",
-          "NÃ£o hÃ¡ saque nem pagamento real nesta versÃ£o.",
+          "Depósitos são simulados: crédito imediato em saldo fictício, sem movimentação bancária.",
+          "Cada depósito exige chave de idempotência; repetir a solicitação não duplica o crédito.",
+          "Todo depósito entra na trilha de auditoria e no extrato da carteira.",
+          "Não há saque nem pagamento real nesta versão.",
         ]}
       />
     </Section>
 
-    <Section title="LiquidaÃ§Ã£o e consumo da reserva">
+    <Section title="Liquidação e consumo da reserva">
       <RuleList
         items={[
-          "Ao encerrar com vencedor, o valor reservado Ã© consumido: debitado do vencedor e creditado ao leiloeiro.",
-          "Lotes encerrados sem lances nÃ£o movimentam saldo algum.",
-          "Se um lote for cancelado, todas as reservas ativas sÃ£o devolvidas aos licitantes.",
-          "O dÃ©bito e o crÃ©dito usam chaves de idempotÃªncia: reprocessar a liquidaÃ§Ã£o nÃ£o movimenta o saldo duas vezes.",
+          "Ao encerrar com vencedor, o valor reservado é consumido: debitado do vencedor e creditado ao leiloeiro.",
+          "Lotes encerrados sem lances não movimentam saldo algum.",
+          "Se um lote for cancelado, todas as reservas ativas são devolvidas aos licitantes.",
+          "O débito e o crédito usam chaves de idempotência: reprocessar a liquidação não movimenta o saldo duas vezes.",
         ]}
       />
     </Section>
