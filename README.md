@@ -1,6 +1,6 @@
  <div align="center">
-
-<img src="docs/images/lance-banner.png" alt="Lance — Casa de Leilões" width="100%">
+  
+<img width="100%" height="724" alt="Banner luxuoso da Lance Casa de Leilões" src="https://github.com/user-attachments/assets/abf903b4-ee01-4665-ba1b-afcdf8ab3f05" />
 
 # LANCE
 
@@ -8,10 +8,7 @@
 
 **Pregões ao vivo. Segurança transacional. Auditoria criptográfica.**
 
-[![Produção](https://img.shields.io/badge/PRODUÇÃO-ONLINE-123D2F?style=for-the-badge)](https://lance-leiloes.vercel.app/)
-[![Frontend](https://img.shields.io/badge/FRONTEND-VERCEL-0A2B22?style=for-the-badge&logo=vercel&logoColor=F5F1E7)](https://lance-leiloes.vercel.app/)
-[![API](https://img.shields.io/badge/API-RENDER-123D2F?style=for-the-badge&logo=render&logoColor=F5F1E7)](https://lance-api-rfiz.onrender.com)
-[![Database](https://img.shields.io/badge/DATABASE-POSTGRESQL%2016-C8A96A?style=for-the-badge&logo=postgresql&logoColor=222923)](https://supabase.com/)
+
 
 [**Acessar plataforma ↗**](https://lance-leiloes.vercel.app/) · [API](https://lance-api-rfiz.onrender.com) · [Healthcheck](https://lance-api-rfiz.onrender.com/health)
 
@@ -27,17 +24,9 @@ O **Lance** é uma plataforma SaaS para gestão, catalogação e realização de
 
 O sistema contempla fluxos transacionais, concorrência controlada, comunicação em tempo real e mecanismos de verificação da integridade dos eventos registrados.
 
-## Visão geral da plataforma
 
-<div align="center">
+<img width="1920" height="1440" alt="427shots_so" src="https://github.com/user-attachments/assets/27c60381-d177-4eba-b58d-07b440f61c62" />
 
-|                 Vitrine e lotes                  |                 Pregão e gestão                 |
-| :----------------------------------------------: | :---------------------------------------------: |
-| ![Vitrine do Lance](docs/images/804shots_so.png) | ![Pregão do Lance](docs/images/453shots_so.png) |
-
-|               Carteira e operações                |               Interface adicional                |
-| :-----------------------------------------------: | :----------------------------------------------: |
-| ![Carteira do Lance](docs/images/406shots_so.png) | ![Plataforma Lance](docs/images/650shots_so.png) |
 
 </div>
 
@@ -59,6 +48,8 @@ O sistema contempla fluxos transacionais, concorrência controlada, comunicaçã
 - **Governança:** separação de permissões, termos digitais e registros de operações relevantes.
 - **Comprovantes verificáveis:** consulta pública de comprovantes de arremate.
 - **Design responsivo:** interface adaptada para diferentes tamanhos de tela.
+
+<img width="1920" height="1440" alt="236shots_so" src="https://github.com/user-attachments/assets/f85c4751-6988-4833-bb21-b4cd1ab68e59" />
 
 ## Funcionalidades
 
@@ -145,6 +136,9 @@ As fontes são independentes: se uma cair ou estourar o tempo de resposta, ela e
 As imagens ficam em `docs/images/` (`lance-banner.png` e as capturas citadas na
 visão geral). Se a pasta não existir no clone, os blocos de imagem do topo
 aparecem quebrados — rode a aplicação e salve as capturas nesse caminho.
+
+<img width="1920" height="1440" alt="856shots_so" src="https://github.com/user-attachments/assets/746112c9-c9d9-433b-a206-86735b49b7fb" />
+
 
 ## Identidade visual
 
@@ -573,6 +567,33 @@ Os testes de integração sobem contra um PostgreSQL real e exigem
 - **Upload de imagens**: não há; a imagem vem sempre da fonte externa.
 
 ---
+
+## Inteligência Artificial e decisões de projeto
+
+A inteligência artificial fez parte do processo de desenvolvimento da Lance como ferramenta de apoio à engenharia de software e à exploração de soluções.
+
+Foram utilizados **OpenAI Codex e GPT** em atividades como:
+
+- **Documentação:** elaboração e revisão de documentos técnicos e funcionais.
+- **Arquitetura de software:** discussão de alternativas, análise de decisões estruturais e avaliação de possíveis soluções.
+- **Testes automatizados:** apoio à criação de testes e à exploração de cenários de validação.
+- **Identidade visual:** exploração de conceitos visuais, paleta de cores, composição da marca e materiais gráficos.
+- **Desenvolvimento:** apoio à implementação, revisão de código, investigação de problemas e refinamento de funcionalidades.
+
+O uso de IA não substitui a responsabilidade técnica. As ferramentas são utilizadas para acelerar tarefas, ampliar possibilidades e apoiar a análise — não para decidir autonomamente os rumos do projeto.
+
+**A decisão final é humana.** As sugestões geradas são avaliadas criticamente, confrontadas com os requisitos e com a arquitetura da aplicação e aceitas, adaptadas ou descartadas conforme necessário. A direção do produto, as prioridades, as escolhas arquiteturais e os critérios de qualidade permanecem sob responsabilidade do desenvolvedor.
+
+> A IA participa do processo; o desenvolvedor define o resultado.
+
+## Documentação do projeto
+
+Os documentos abaixo registram os requisitos, as decisões de arquitetura e as diretrizes de identidade visual da Lance.
+
+[Lance_Identidade_Visual.pdf](https://github.com/user-attachments/files/34138101/Lance_Identidade_Visual.pdf)
+
+[Lance_Arquitetura_Decisoes_Estruturais.pdf](https://github.com/user-attachments/files/34138098/Lance_Arquitetura_Decisoes_Estruturais.pdf)
+
 
 <div align="center">
 
