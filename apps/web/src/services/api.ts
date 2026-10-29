@@ -114,7 +114,7 @@ async function refreshAccessToken(): Promise<string> {
 
     return auth.accessToken;
   })()
-    .catch(error => {
+    .catch((error) => {
       clearAuthTokens();
       notifySessionExpired();
       throw error;
