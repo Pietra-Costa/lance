@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { LotStatusBadge } from "../components/domain/LotStatusBadge";
+import { ItemImage } from "../components/domain/ItemImage";
 import { CountdownTimer } from "../components/domain/CountdownTimer";
+import { LotAuditModal } from "../components/domain/LotAuditModal";
 import {
   calculateNextMinimumBid,
   formatBRL,
@@ -16,6 +18,9 @@ import {
   FileText,
   ZoomIn,
   X,
+  AlertTriangle,
+  ArrowUpRight,
+  Fingerprint,
 } from "lucide-react";
 
 export interface LotDetailPageProps {
@@ -35,38 +40,58 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
     auditEvents,
     setSelectedReceiptForModal,
     receipts,
+    myBids,
+    subscribeToLot,
+    unsubscribeFromLot,
   } = useApp();
 
   const lot = getLotById(lotId);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [auditModalOpen, setAuditModalOpen] = useState(false);
 
   useEffect(() => {
+    subscribeToLot(lotId);
+
     void Promise.all([refreshLotBids(lotId), refreshLotAudit(lotId)]).catch(
-      error => {
+      (error) => {
         console.error("Falha ao carregar o histórico do lote:", error);
       },
     );
-    // As funções do contexto são recriadas pelo provider; o lote é a dependência real.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lotId]);
+
+    return () => {
+      unsubscribeFromLot(lotId);
+    };
+  }, [
+    lotId,
+    subscribeToLot,
+    unsubscribeFromLot,
+    refreshLotBids,
+    refreshLotAudit,
+  ]);
 
   if (!lot) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="font-heading font-bold text-2xl text-[#123D2F]">
-          Lote não encontrado
-        </h2>
-        <p className="text-xs text-[#68716A]">
-          O identificador do lote solicitado não existe ou foi removido do
-          catálogo.
-        </p>
-        <button
-          onClick={() => navigateTo("/lotes")}
-          className="px-5 py-2.5 rounded-xl bg-[#123D2F] text-white text-xs font-semibold hover:bg-[#0A2B22] cursor-pointer"
-        >
-          Voltar ao Catálogo de Lotes
-        </button>
+      <div className="min-h-[65vh] bg-surface-base px-5 py-24">
+        <div className="mx-auto max-w-3xl border-y border-border-subtle py-12 text-center">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-text-secondary">
+            Catálogo de lotes
+          </span>
+          <h2 className="mt-4 font-heading text-3xl font-bold text-brand-primary">
+            Lote não encontrado
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-text-secondary">
+            O identificador do lote solicitado não existe ou foi removido do
+            catálogo.
+          </p>
+          <button
+            onClick={() => navigateTo("/lotes")}
+            className="mt-8 inline-flex cursor-pointer items-center gap-3 bg-brand-primary px-5 py-3 text-xs font-semibold text-surface-base transition-colors hover:bg-brand-deep"
+          >
+            Voltar ao Catálogo de Lotes
+            <ArrowUpRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -86,9 +111,19 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
     currentUser?.id &&
     lot.currentLeaderBidderId === currentUser.id;
 
-  const lotReceipt = receipts.find(r => r.lotCode === lot.code);
+  // A presença do lote no histórico pessoal indica participação.
+  const hasBidInLot = myBids.some((bid) => bid.lotId === lot.id);
+  const isUserOutbid =
+    lot.status === "LIVE" &&
+    !!currentUser?.id &&
+    currentRole === "LICITANTE" &&
+    !isUserLeading &&
+    hasBidInLot &&
+    !!lot.currentLeaderBidderId;
+
+  const lotReceipt = receipts.find((r) => r.lotCode === lot.code);
   const lotAuditHistory = auditEvents.filter(
-    ev => ev.lotId === lot.id || ev.lotCode === lot.code,
+    (ev) => ev.lotId === lot.id || ev.lotCode === lot.code,
   );
 
   const handleOpenBidModal = () => {
@@ -96,503 +131,667 @@ export const LotDetailPage: React.FC<LotDetailPageProps> = ({ lotId }) => {
   };
 
   const renderActionBox = () => (
-    <div className="bg-white rounded-2xl border border-[#CDC5B4] p-5 sm:p-6 space-y-5 sm:space-y-6 shadow-md">
-      <div>
-        <div className="flex items-center justify-between gap-2 text-xs text-[#68716A] mb-1">
-          <span className="font-mono text-[#123D2F] font-semibold">
+    <section className="border border-border-subtle bg-surface-base">
+      <div className="border-b border-border-subtle px-5 py-5 sm:px-7">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <span className="font-mono text-xs font-semibold text-brand-primary">
             {lot.code}
           </span>
-          <span>{lot.category}</span>
+          <span className="text-[10px] uppercase tracking-[0.16em] text-text-secondary">
+            {lot.category}
+          </span>
         </div>
-        <h1 className="font-heading font-bold text-xl sm:text-2xl text-[#222923] leading-snug">
+
+        <h1 className="font-heading text-2xl font-bold leading-tight tracking-tight text-brand-primary sm:text-3xl">
           {lot.title}
         </h1>
       </div>
 
-      {/* Dynamic Status Alert Banner */}
-      {isUserLeading ? (
-        <div className="p-3.5 rounded-xl bg-[#EAF7EE] border border-[#1E7E34]/30 flex items-start gap-2.5">
-          <CheckCircle2 className="w-5 h-5 text-[#1E7E34] shrink-0 mt-0.5" />
-          <div className="text-xs">
-            <p className="font-bold text-[#1E7E34]">
-              Você está liderando este lote
-            </p>
-            <p className="text-[#222923]/80 mt-0.5">
-              Seu lance de {formatBRL(lot.currentBidCents)} é o maior
-              registrado. Acompanhe até o encerramento.
-            </p>
-          </div>
-        </div>
-      ) : lot.status === "LIVE" && lot.currentLeaderPseudonym ? (
-        <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#E2DDD2] flex items-center justify-between text-xs">
-          <span className="text-[#68716A]">Líder atual do pregão:</span>
-          <span className="font-mono font-bold text-[#123D2F] bg-white px-2 py-0.5 rounded border border-[#E2DDD2]">
-            {lot.currentLeaderPseudonym}
-          </span>
-        </div>
-      ) : null}
-
-      {/* Values Grid */}
-      <div className="p-4 bg-[#FAF7F2] rounded-xl border border-[#E2DDD2] space-y-3">
-        <div className="flex justify-between items-baseline">
-          <span className="text-xs text-[#68716A]">
-            {lot.bidCount > 0 ? "Lance Atual:" : "Lance Inicial:"}
-          </span>
-          <span className="font-heading font-extrabold text-2xl sm:text-3xl text-[#123D2F]">
-            {formatBRL(lot.currentBidCents || lot.startingPriceCents)}
-          </span>
-        </div>
-
-        <div className="pt-2 border-t border-[#E2DDD2]/60 grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <span className="text-[#68716A] block text-[11px]">
-              Incremento Mínimo:
-            </span>
-            <span className="font-semibold text-[#222923]">
-              {formatBRL(lot.minIncrementCents)}
-            </span>
-          </div>
-          <div>
-            <span className="text-[#68716A] block text-[11px]">
-              Próximo Mínimo Válido:
-            </span>
-            <span className="font-mono font-bold text-[#123D2F]">
-              {formatBRL(minNextBid)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Countdown / Ending Info */}
-      <div className="space-y-1.5">
-        <div className="flex justify-between items-center text-xs text-[#68716A]">
-          <span>
-            {lot.status === "LIVE"
-              ? "Encerramento em:"
-              : lot.status === "SCHEDULED"
-                ? "Inicia em:"
-                : "Encerramento:"}
-          </span>
-          <span className="font-medium text-[#222923]">
-            {formatDateTimeBR(
-              lot.status === "SCHEDULED" ? lot.startsAt : lot.endsAt,
-            )}
-          </span>
-        </div>
-
-        {lot.status === "LIVE" && (
-          <div className="w-full">
-            <CountdownTimer targetDateISO={lot.endsAt} />
-          </div>
-        )}
-      </div>
-
-      {/* CTA Participation Button */}
-      {lot.status === "LIVE" ? (
-        <div className="space-y-2">
-          {currentRole === "LEILOEIRO" ? (
-            <div className="p-3 bg-[#FEF3C7] rounded-xl border border-[#B45309]/30 text-xs text-[#B45309]">
-              <p className="font-semibold">Papel Exclusivo de Leiloeiro:</p>
-              <p className="mt-0.5">
-                Por conformidade regulatória, contas com papel de leiloeiro não
-                podem dar lances. Alterne para o perfil Licitante para
-                participar.
+      <div className="space-y-6 px-5 py-6 sm:px-7">
+        {isUserOutbid ? (
+          <div className="flex items-start gap-3 border-l-2 border-semantic-warning bg-semantic-warning-bg p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-semantic-warning" />
+            <div className="text-xs leading-5">
+              <p className="font-bold text-semantic-warning">
+                Você foi superado
+              </p>
+              <p className="mt-1 text-text-primary">
+                Outro licitante assumiu a liderança com{" "}
+                {formatBRL(lot.currentBidCents)}. Seu saldo reservado foi
+                liberado — dê um novo lance para voltar a liderar.
               </p>
             </div>
-          ) : (
-            <button
-              onClick={handleOpenBidModal}
-              className="w-full py-3.5 sm:py-4 rounded-xl bg-[#123D2F] hover:bg-[#0A2B22] text-[#F5F1E7] font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
-            >
-              <Gavel className="w-4 h-4 text-[#C8A96A]" />
-              <span>Dar um lance · A partir de {formatBRL(minNextBid)}</span>
-            </button>
-          )}
-        </div>
-      ) : lot.status === "SCHEDULED" ? (
-        <div className="p-4 rounded-xl bg-[#FEF3C7] border border-[#B45309]/30 text-xs text-[#B45309] space-y-1">
-          <p className="font-bold flex items-center gap-1.5">
-            <Clock className="w-4 h-4" />
-            <span>Leilão Agendado</span>
+          </div>
+        ) : null}
+
+        {isUserLeading ? (
+          <div className="flex items-start gap-3 border-l-2 border-semantic-success bg-semantic-success-bg p-4">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-semantic-success" />
+            <div className="text-xs leading-5">
+              <p className="font-bold text-semantic-success">
+                Você está liderando este lote
+              </p>
+              <p className="mt-1 text-text-primary">
+                Seu lance de {formatBRL(lot.currentBidCents)} é o maior
+                registrado. Acompanhe até o encerramento.
+              </p>
+            </div>
+          </div>
+        ) : lot.status === "LIVE" && lot.currentLeaderPseudonym ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border-subtle py-3 text-xs">
+            <span className="text-text-secondary">Líder atual do pregão</span>
+            <span className="border border-border-subtle bg-surface-muted px-3 py-1 font-mono font-bold text-brand-primary">
+              {lot.currentLeaderPseudonym}
+            </span>
+          </div>
+        ) : null}
+
+        <div className="border border-border-subtle bg-surface-muted p-5 sm:p-6">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
+            {lot.bidCount > 0 ? "Lance atual" : "Lance inicial"}
+          </span>
+
+          <p className="mt-2 wrap-break-word font-heading text-3xl font-bold tracking-tight text-brand-primary sm:text-4xl">
+            {formatBRL(lot.currentBidCents || lot.startingPriceCents)}
           </p>
-          <p>
-            O pregão será aberto em {formatDateTimeBR(lot.startsAt)}. Lances não
-            são aceitos antes do início oficial.
-          </p>
-        </div>
-      ) : lot.status === "ENDED" ? (
-        <div className="space-y-3">
-          <div className="p-4 rounded-xl bg-[#EFE9DB] border border-[#CDC5B4] text-xs text-[#222923] space-y-1">
-            <p className="font-bold flex items-center gap-1.5 text-[#123D2F]">
-              <CheckCircle2 className="w-4 h-4 text-[#1E7E34]" />
-              <span>Pregão Encerrado</span>
-            </p>
-            <p className="text-[#68716A]">
-              Lote homologado. Valor final de arremate:{" "}
-              <strong className="text-[#123D2F]">
-                {formatBRL(lot.currentBidCents)}
-              </strong>
-              .
-            </p>
-          </div>
 
-          {lotReceipt && (
-            <button
-              onClick={() => setSelectedReceiptForModal(lotReceipt)}
-              className="w-full py-3 rounded-xl border border-[#123D2F] text-[#123D2F] font-semibold text-xs hover:bg-[#F5F1E7] transition-colors flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <FileText className="w-4 h-4 text-[#123D2F]" />
-              <span>Ver Comprovante Oficial de Arremate</span>
-            </button>
-          )}
-        </div>
-      ) : null}
-    </div>
-  );
-
-  const renderBidHistory = () => (
-    <div className="bg-white rounded-2xl border border-[#E2DDD2] p-5 space-y-3 shadow-2xs">
-      <div className="flex items-center justify-between pb-2 border-b border-[#E2DDD2]">
-        <div className="flex items-center gap-2">
-          <Gavel className="w-4 h-4 text-[#123D2F]" />
-          <h3 className="font-heading font-bold text-xs uppercase tracking-wider text-[#123D2F]">
-            Histórico de Lances (Público)
-          </h3>
-        </div>
-        <span className="text-[11px] text-[#68716A]">
-          {bids.length} {bids.length === 1 ? "lance" : "lances"}
-        </span>
-      </div>
-
-      {bids.length > 0 ? (
-        <div className="divide-y divide-[#E2DDD2]/60 overflow-hidden text-xs">
-          {bids.map((b, idx) => (
-            <div
-              key={b.id}
-              className={`py-2.5 flex items-center justify-between ${
-                idx === 0 ? "font-semibold" : "text-[#68716A]"
-              }`}
-            >
-              <div>
-                <span className="font-mono text-[#123D2F] block">
-                  {b.pseudonym}
-                </span>
-                <span className="text-[10px] text-[#68716A]">
-                  {formatDateTimeBR(b.createdAt)}
-                </span>
-              </div>
-
-              <div className="text-right">
-                <span className="font-heading font-bold text-sm text-[#123D2F]">
-                  {formatBRL(b.amountCents)}
-                </span>
-                {idx === 0 && lot.status === "LIVE" && (
-                  <span className="block text-[10px] text-[#1E7E34] font-medium">
-                    Lance Líder
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-xs text-[#68716A] py-3 text-center">
-          Ainda não foram registrados lances para este lote. Seja o primeiro a
-          participar!
-        </p>
-      )}
-
-      {lotAuditHistory.length > 0 && (
-        <div className="pt-3 border-t border-[#E2DDD2]/60 space-y-2">
-          <h4 className="font-heading font-bold text-[11px] uppercase tracking-wider text-[#123D2F]">
-            Eventos do Leilão
-          </h4>
-          <div className="space-y-1.5">
-            {lotAuditHistory.map(event => (
-              <div
-                key={event.sequence}
-                className={`rounded-lg px-3 py-2 text-[11px] ${
-                  event.eventType === "LOT_CANCELED"
-                    ? "bg-red-50 border border-red-300 text-red-800"
-                    : "bg-[#FAF7F2] border border-[#E2DDD2] text-[#222923]"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="font-medium">{event.description}</span>
-                  <span className="text-[10px] whitespace-nowrap opacity-70">
-                    {formatDateTimeBR(event.timestamp)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <p className="text-[10px] text-[#68716A] pt-2 border-t border-[#E2DDD2]/60">
-        * Para preservar a privacidade dos participantes, os licitantes são
-        identificados por pseudônimos únicos e estáveis.
-      </p>
-    </div>
-  );
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs text-[#68716A] overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => navigateTo("/")}
-          className="hover:text-[#123D2F] cursor-pointer whitespace-nowrap shrink-0"
-        >
-          Início
-        </button>
-        <ChevronRight className="w-3 h-3 text-[#CDC5B4] shrink-0" />
-        <button
-          onClick={() => navigateTo("/lotes")}
-          className="hover:text-[#123D2F] cursor-pointer whitespace-nowrap shrink-0"
-        >
-          Catálogo
-        </button>
-        <ChevronRight className="w-3 h-3 text-[#CDC5B4] shrink-0" />
-        <span className="text-[#222923] font-medium font-mono truncate">
-          {lot.code}
-        </span>
-      </nav>
-
-      {/* Main 2-Column Product Detail Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-        {/* Left Column (7 cols): Gallery + on mobile: Action Box, Description, Bids, Specs, Audit */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Main Image Frame */}
-          <div className="relative bg-white rounded-2xl border border-[#E2DDD2] p-2 overflow-hidden shadow-xs">
-            <div className="relative aspect-4/3 w-full rounded-xl overflow-hidden bg-[#FAF7F2]">
-              <img
-                src={currentImage}
-                alt={lot.title}
-                className="w-full h-full object-contain cursor-zoom-in"
-                onClick={() => setLightboxOpen(true)}
-              />
-
-              <button
-                onClick={() => setLightboxOpen(true)}
-                className="absolute bottom-3 right-3 p-2 rounded-lg bg-black/60 hover:bg-black/80 text-white text-xs flex items-center gap-1.5 backdrop-blur-xs transition-colors cursor-pointer"
-                title="Ampliar imagem"
-              >
-                <ZoomIn className="w-4 h-4" />
-                <span className="text-[11px]">Ampliar</span>
-              </button>
-
-              <div className="absolute top-3 left-3">
-                <LotStatusBadge status={lot.status} size="md" />
-              </div>
-            </div>
-
-            {/* Thumbnail Row */}
-            {allImages.length > 1 && (
-              <div className="flex gap-2 p-2 overflow-x-auto no-scrollbar">
-                {allImages.map((imgUrl, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImageIndex(idx)}
-                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
-                      selectedImageIndex === idx
-                        ? "border-[#123D2F] ring-2 ring-[#123D2F]/20"
-                        : "border-[#E2DDD2] hover:border-[#CDC5B4]"
-                    }`}
-                  >
-                    <img
-                      src={imgUrl}
-                      alt={`Miniatura ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* On Mobile: Action Box directly after gallery for immediate bidding! */}
-          <div className="lg:hidden">{renderActionBox()}</div>
-
-          {/* Item Description & Technical Specifications */}
-          <div className="bg-white rounded-2xl border border-[#E2DDD2] p-5 sm:p-6 space-y-4 shadow-2xs">
-            <h3 className="font-heading font-bold text-base text-[#123D2F]">
-              Descrição do Objeto
-            </h3>
-            <p className="text-xs sm:text-sm text-[#222923] leading-relaxed font-body">
-              {lot.itemSnapshot.description}
-            </p>
-
-            <div className="pt-4 border-t border-[#E2DDD2] space-y-2">
-              <h4 className="font-heading font-semibold text-xs text-[#123D2F]">
-                Ficha Técnica
-              </h4>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                <div className="flex justify-between py-1 border-b border-[#FAF7F2]">
-                  <dt className="text-[#68716A]">Material / Técnica:</dt>
-                  <dd className="font-medium text-[#222923] text-right">
-                    {lot.itemSnapshot.medium}
-                  </dd>
-                </div>
-                <div className="flex justify-between py-1 border-b border-[#FAF7F2]">
-                  <dt className="text-[#68716A]">Dimensões:</dt>
-                  <dd className="font-medium text-[#222923] text-right">
-                    {lot.itemSnapshot.dimensions}
-                  </dd>
-                </div>
-                <div className="flex justify-between py-1 border-b border-[#FAF7F2]">
-                  <dt className="text-[#68716A]">Código do Lote:</dt>
-                  <dd className="font-mono font-bold text-[#123D2F] text-right">
-                    {lot.code}
-                  </dd>
-                </div>
-                <div className="flex justify-between py-1 border-b border-[#FAF7F2]">
-                  <dt className="text-[#68716A]">Leiloeiro Conducente:</dt>
-                  <dd className="font-medium text-[#222923] text-right">
-                    {lot.sellerName || "Leiloeiro responsável"}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          {/* On Mobile: Bid History table right after description */}
-          <div className="lg:hidden">{renderBidHistory()}</div>
-
-          {/* External Source Attribution & Provenance Snapshot */}
-          <div className="bg-[#FAF7F2] rounded-2xl border border-[#E2DDD2] p-5 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#E2DDD2]">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#123D2F]" />
-                <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-[#123D2F]">
-                  Origem do Item & Snapshot Imutável
-                </h4>
-              </div>
-              <span className="text-[10px] text-[#68716A] font-mono">
-                ID: {lot.itemSnapshot.externalId}
+          <div className="mt-5 grid grid-cols-2 gap-4 border-t border-border-subtle pt-4">
+            <div>
+              <span className="block text-[10px] leading-4 text-text-secondary">
+                Incremento mínimo
+              </span>
+              <span className="mt-1 block text-sm font-semibold text-text-primary">
+                {formatBRL(lot.minIncrementCents)}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div>
-                <span className="text-[#68716A] block text-[11px]">
-                  Fonte do Acervo:
-                </span>
-                <span className="font-medium text-[#222923]">
-                  {lot.itemSnapshot.source}
-                </span>
-              </div>
-              <div>
-                <span className="text-[#68716A] block text-[11px]">
-                  Autor / Atribuição:
-                </span>
-                <span className="font-medium text-[#222923]">
-                  {lot.itemSnapshot.creator}
-                </span>
-              </div>
-              <div>
-                <span className="text-[#68716A] block text-[11px]">
-                  Período / Ano:
-                </span>
-                <span className="font-medium text-[#222923]">
-                  {lot.itemSnapshot.dateOrYear}
-                </span>
-              </div>
-              <div>
-                <span className="text-[#68716A] block text-[11px]">
-                  Condições da Imagem:
-                </span>
-                <span className="font-medium text-[#222923]">
-                  {lot.itemSnapshot.licenseNotes}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Cryptographic Hash Chain Audit Section for this lot */}
-          <div className="bg-white rounded-2xl border border-[#E2DDD2] p-5 sm:p-6 space-y-4 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#123D2F]" />
-                <h3 className="font-heading font-bold text-sm text-[#123D2F]">
-                  Auditoria Criptográfica do Lote
-                </h3>
-              </div>
-              <button
-                onClick={() => navigateTo("/auditoria")}
-                className="text-[11px] font-semibold text-[#123D2F] hover:underline cursor-pointer"
-              >
-                Ver cadeia completa
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {lotAuditHistory.length > 0 ? (
-                lotAuditHistory.map(ev => (
-                  <div
-                    key={ev.sequence}
-                    className={`p-2.5 rounded-lg text-xs space-y-1 ${
-                      ev.eventType === "LOT_CANCELED"
-                        ? "bg-red-50 border border-red-300"
-                        : "bg-[#FAF7F2] border border-[#E2DDD2]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span
-                        className={`font-mono font-bold ${
-                          ev.eventType === "LOT_CANCELED"
-                            ? "text-red-800"
-                            : "text-[#123D2F]"
-                        }`}
-                      >
-                        Bloco #{ev.sequence} · {ev.eventType.replace(/_/g, " ")}
-                      </span>
-                      <span className="text-[#68716A]">
-                        {formatDateTimeBR(ev.timestamp)}
-                      </span>
-                    </div>
-                    <p className="text-[#222923] text-[11px]">
-                      {ev.description}
-                    </p>
-                    <div className="font-mono text-[9px] text-[#68716A] truncate">
-                      Hash: {ev.hash}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-[#68716A]">
-                  Eventos de auditoria registrados com chave Ed25519 e ancoragem
-                  pública.
-                </p>
-              )}
+            <div>
+              <span className="block text-[10px] leading-4 text-text-secondary">
+                Próximo mínimo válido
+              </span>
+              <span className="mt-1 block wrap-break-word font-mono text-sm font-bold text-brand-primary">
+                {formatBRL(minNextBid)}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right Column (Desktop only): Sticky Bid Panel + Bid History (5 cols) */}
-        <div className="hidden lg:block lg:col-span-5 space-y-6 lg:sticky lg:top-24">
-          {renderActionBox()}
-          {renderBidHistory()}
+        <div className="space-y-3">
+          <div className="flex items-start justify-between gap-4 text-xs">
+            <span className="text-text-secondary">
+              {lot.status === "LIVE"
+                ? "Encerramento em"
+                : lot.status === "SCHEDULED"
+                  ? "Inicia em"
+                  : "Encerramento"}
+            </span>
+            <span className="text-right font-medium text-text-primary">
+              {formatDateTimeBR(
+                lot.status === "SCHEDULED" ? lot.startsAt : lot.endsAt,
+              )}
+            </span>
+          </div>
+
+          {lot.status === "LIVE" && (
+            <div className="w-full">
+              <CountdownTimer targetDateISO={lot.endsAt} />
+            </div>
+          )}
+        </div>
+
+        {lot.status === "LIVE" ? (
+          <div className="space-y-3">
+            {currentRole === "LEILOEIRO" ? (
+              <div className="border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-xs leading-5 text-semantic-warning">
+                <p className="font-semibold">Papel exclusivo de leiloeiro</p>
+                <p className="mt-1">
+                  Por conformidade regulatória, contas com papel de leiloeiro
+                  não podem dar lances. Alterne para o perfil Licitante para
+                  participar.
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={handleOpenBidModal}
+                className="group flex w-full cursor-pointer items-center justify-between gap-3 bg-brand-primary px-5 py-4 text-left text-surface-base transition-colors hover:bg-brand-deep"
+              >
+                <span className="flex items-center gap-3">
+                  <Gavel className="h-5 w-5 shrink-0 text-accent-gold" />
+                  <span>
+                    <span className="block text-sm font-semibold">
+                      Dar um lance
+                    </span>
+                    <span className="mt-1 block text-[11px] text-surface-base/75">
+                      A partir de {formatBRL(minNextBid)}
+                    </span>
+                  </span>
+                </span>
+                <ArrowUpRight className="h-5 w-5 shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </button>
+            )}
+          </div>
+        ) : lot.status === "SCHEDULED" ? (
+          <div className="border-l-2 border-semantic-warning bg-semantic-warning-bg p-4 text-xs leading-5 text-semantic-warning">
+            <p className="flex items-center gap-2 font-bold">
+              <Clock className="h-4 w-4" />
+              Leilão agendado
+            </p>
+            <p className="mt-2">
+              O pregão será aberto em {formatDateTimeBR(lot.startsAt)}. Lances
+              não são aceitos antes do início oficial.
+            </p>
+          </div>
+        ) : lot.status === "ENDED" ? (
+          <div className="space-y-4">
+            <div className="border-l-2 border-semantic-success bg-surface-muted p-4 text-xs leading-5">
+              <p className="flex items-center gap-2 font-bold text-brand-primary">
+                <CheckCircle2 className="h-4 w-4 text-semantic-success" />
+                Pregão encerrado
+              </p>
+              <p className="mt-2 text-text-secondary">
+                Lote homologado. Valor final de arremate:{" "}
+                <strong className="text-brand-primary">
+                  {formatBRL(lot.currentBidCents)}
+                </strong>
+                .
+              </p>
+            </div>
+
+            {lotReceipt && (
+              <button
+                onClick={() => setSelectedReceiptForModal(lotReceipt)}
+                className="flex w-full cursor-pointer items-center justify-between gap-3 border border-brand-primary px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:bg-surface-muted"
+              >
+                <span className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Ver comprovante oficial de arremate
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0" />
+              </button>
+            )}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+
+  /**
+   * Histórico unificado: lances aceitos e eventos do ciclo do lote,
+   * ordenados do mais recente para o mais antigo.
+   */
+  const renderBidHistory = () => {
+    type TimelineEntry = {
+      key: string;
+      kind: "BID" | "EVENT";
+      title: string;
+      subtitle: string | null;
+      amountCents: number | null;
+      timestamp: string;
+      isLeader: boolean;
+      isCanceled: boolean;
+    };
+
+    const bidEntries: TimelineEntry[] = bids.map((bid, index) => ({
+      key: `bid-${bid.id}`,
+      kind: "BID",
+      title: bid.pseudonym,
+      subtitle: null,
+      amountCents: bid.amountCents,
+      timestamp: bid.createdAt,
+      isLeader: index === 0 && lot.status === "LIVE",
+      isCanceled: false,
+    }));
+
+    const eventEntries: TimelineEntry[] = lotAuditHistory
+      .filter((event) => event.eventType !== "BID_PLACED")
+      .map((event) => ({
+        key: `evt-${event.sequence}`,
+        kind: "EVENT",
+        title: event.description,
+        subtitle: event.eventType,
+        amountCents: null,
+        timestamp: event.timestamp,
+        isLeader: false,
+        isCanceled: event.eventType === "LOT_CANCELED",
+      }));
+
+    const timeline = [...bidEntries, ...eventEntries].sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
+
+    return (
+      <section className="border border-border-subtle bg-surface-base">
+        <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-5 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center bg-surface-muted text-brand-primary">
+              <Gavel className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-heading text-sm font-bold text-brand-primary">
+                Histórico de lances
+              </h3>
+              <p className="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-text-secondary">
+                Registro público
+              </p>
+            </div>
+          </div>
+          <span className="shrink-0 font-mono text-xs text-text-secondary">
+            {bids.length.toString().padStart(2, "0")}
+          </span>
+        </div>
+
+        <div className="px-5 py-2 sm:px-6">
+          {timeline.length > 0 ? (
+            <div className="divide-y divide-border-subtle/60 text-xs">
+              {timeline.map((entry) => (
+                <div
+                  key={entry.key}
+                  className={`flex items-start justify-between gap-3 py-4 ${
+                    entry.kind === "BID" && entry.isLeader
+                      ? "font-semibold"
+                      : ""
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <span
+                      className={`block truncate ${
+                        entry.isCanceled
+                          ? "font-mono text-semantic-error"
+                          : entry.kind === "BID"
+                            ? "font-mono text-brand-primary"
+                            : "font-medium text-text-primary"
+                      }`}
+                    >
+                      {entry.title}
+                    </span>
+                    <span className="mt-1 block text-[10px] text-text-secondary">
+                      {formatDateTimeBR(entry.timestamp)}
+                    </span>
+                  </div>
+
+                  {entry.amountCents !== null && (
+                    <div className="shrink-0 text-right">
+                      <span className="font-heading text-sm font-bold text-brand-primary">
+                        {formatBRL(entry.amountCents)}
+                      </span>
+                      {entry.isLeader && (
+                        <span className="mt-1 block text-[10px] font-medium text-semantic-success">
+                          Lance líder
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="py-8 text-center text-xs leading-5 text-text-secondary">
+              Ainda não foram registrados lances para este lote. Seja o primeiro
+              a participar!
+            </p>
+          )}
+        </div>
+
+        <p className="border-t border-border-subtle px-5 py-4 text-[10px] leading-5 text-text-secondary sm:px-6">
+          Para preservar a privacidade dos participantes, os licitantes são
+          identificados por pseudônimos únicos e estáveis.
+        </p>
+      </section>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-surface-base text-text-primary">
+      <div className="mx-auto max-w-360 px-5 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
+        <nav
+          aria-label="Navegação estrutural"
+          className="mb-8 flex items-center gap-2 overflow-x-auto text-xs text-text-secondary no-scrollbar sm:mb-10"
+        >
+          <button
+            onClick={() => navigateTo("/")}
+            className="shrink-0 cursor-pointer whitespace-nowrap transition-colors hover:text-brand-primary"
+          >
+            Início
+          </button>
+          <ChevronRight className="h-3 w-3 shrink-0 text-border-strong" />
+          <button
+            onClick={() => navigateTo("/lotes")}
+            className="shrink-0 cursor-pointer whitespace-nowrap transition-colors hover:text-brand-primary"
+          >
+            Catálogo
+          </button>
+          <ChevronRight className="h-3 w-3 shrink-0 text-border-strong" />
+          <span className="truncate font-mono font-medium text-text-primary">
+            {lot.code}
+          </span>
+        </nav>
+
+        <div className="mb-8 flex flex-col gap-4 border-b border-border-subtle pb-6 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="mb-3 flex items-center gap-3">
+              <span className="h-px w-8 bg-accent-gold" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-text-secondary">
+                Acervo · Registro · Procedência
+              </span>
+            </div>
+            <h2 className="font-heading text-3xl font-bold tracking-tight text-brand-primary sm:text-4xl lg:text-5xl">
+              Detalhes do lote
+            </h2>
+          </div>
+          <div className="flex min-w-0 max-w-full flex-col items-start gap-1 self-start border-l-2 border-accent-gold pl-3 sm:flex-row sm:items-center sm:gap-3 sm:pl-4">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-text-secondary">
+              Identificação
+            </span>
+            <span className="max-w-full break-all font-mono text-sm font-semibold text-brand-primary">
+              {lot.code}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="min-w-0 space-y-8 lg:col-span-7">
+            {/* Imagem principal e miniaturas */}
+            <section>
+              <div className="relative overflow-hidden border border-border-subtle bg-surface-muted p-2 sm:p-3">
+                <div className="relative aspect-4/3 w-full overflow-hidden bg-surface-muted">
+                  <div
+                    className="h-full w-full cursor-zoom-in"
+                    onClick={() => setLightboxOpen(true)}
+                  >
+                    <ItemImage
+                      src={currentImage}
+                      alt={lot.title}
+                      seed={lot.id}
+                      className="h-full w-full object-contain"
+                      loading="eager"
+                    />
+                  </div>
+
+                  <div className="absolute left-3 top-3">
+                    <LotStatusBadge status={lot.status} size="md" />
+                  </div>
+
+                  <button
+                    onClick={() => setLightboxOpen(true)}
+                    className="absolute bottom-3 right-3 inline-flex cursor-pointer items-center gap-2 border border-white/20 bg-brand-deep/90 px-3 py-2 text-xs text-surface-base backdrop-blur-sm transition-colors hover:bg-brand-primary"
+                    title="Ampliar imagem"
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                    Ampliar imagem
+                  </button>
+                </div>
+
+                {allImages.length > 1 && (
+                  <div className="flex gap-3 overflow-x-auto px-1 pb-1 pt-3 no-scrollbar">
+                    {allImages.map((imgUrl, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedImageIndex(idx)}
+                        aria-label={`Ver imagem ${idx + 1}`}
+                        aria-pressed={selectedImageIndex === idx}
+                        className={`h-16 w-16 shrink-0 cursor-pointer overflow-hidden border transition-colors sm:h-20 sm:w-20 ${
+                          selectedImageIndex === idx
+                            ? "border-brand-primary ring-1 ring-brand-primary"
+                            : "border-border-subtle hover:border-border-strong"
+                        }`}
+                      >
+                        <ItemImage
+                          src={imgUrl}
+                          alt={`Miniatura ${idx + 1}`}
+                          className="h-full w-full object-cover"
+                          showLabel={false}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <p className="mt-3 text-[10px] uppercase tracking-[0.14em] text-text-secondary">
+                {allImages.length}{" "}
+                {allImages.length === 1
+                  ? "imagem disponível"
+                  : "imagens disponíveis"}
+                {" · "}
+                Selecione para ampliar
+              </p>
+            </section>
+
+            <div className="lg:hidden">{renderActionBox()}</div>
+
+            {/* Descrição e ficha técnica */}
+            <section className="border-y border-border-subtle py-6 sm:py-8">
+              <div className="mb-6 flex items-start gap-4">
+                <span className="font-mono text-xs text-accent-gold">01</span>
+                <div>
+                  <h3 className="font-heading text-xl font-bold text-brand-primary sm:text-2xl">
+                    Descrição do objeto
+                  </h3>
+                  <p className="mt-2 text-xs text-text-secondary">
+                    Informações fornecidas para identificação da peça
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-sm leading-7 text-text-primary">
+                {lot.itemSnapshot.description}
+              </p>
+
+              {(lot.specialConditions || lot.sellerNotes) && (
+                <div className="mt-7 grid grid-cols-1 gap-6 border-t border-border-subtle pt-6 sm:grid-cols-2">
+                  {lot.specialConditions && (
+                    <div>
+                      <h4 className="mb-2 text-xs font-semibold text-brand-primary">
+                        Condições especiais
+                      </h4>
+                      <p className="whitespace-pre-line text-xs leading-6 text-text-secondary">
+                        {lot.specialConditions}
+                      </p>
+                    </div>
+                  )}
+                  {lot.sellerNotes && (
+                    <div>
+                      <h4 className="mb-2 text-xs font-semibold text-brand-primary">
+                        Observações do leiloeiro
+                      </h4>
+                      <p className="whitespace-pre-line text-xs leading-6 text-text-secondary">
+                        {lot.sellerNotes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-8 border-t border-border-subtle pt-6">
+                <h4 className="mb-4 font-heading text-base font-semibold text-brand-primary">
+                  Ficha técnica
+                </h4>
+                <dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+                  <div className="flex items-start justify-between gap-4 border-b border-border-subtle py-3">
+                    <dt className="text-xs text-text-secondary">
+                      Material / Técnica
+                    </dt>
+                    <dd className="text-right text-xs font-medium text-text-primary">
+                      {lot.itemSnapshot.medium || "Não informado"}
+                    </dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-4 border-b border-border-subtle py-3">
+                    <dt className="text-xs text-text-secondary">Dimensões</dt>
+                    <dd className="text-right text-xs font-medium text-text-primary">
+                      {lot.itemSnapshot.dimensions || "Não informado"}
+                    </dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-4 border-b border-border-subtle py-3">
+                    <dt className="text-xs text-text-secondary">
+                      Código do lote
+                    </dt>
+                    <dd className="text-right font-mono text-xs font-bold text-brand-primary">
+                      {lot.code}
+                    </dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-4 border-b border-border-subtle py-3">
+                    <dt className="text-xs text-text-secondary">
+                      Leiloeiro conducente
+                    </dt>
+                    <dd className="text-right text-xs font-medium text-text-primary">
+                      {lot.sellerName || "Leiloeiro responsável"}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </section>
+
+            <div className="lg:hidden">{renderBidHistory()}</div>
+
+            {/* Origem e snapshot */}
+            <section className="border border-border-subtle bg-surface-muted p-5 sm:p-6">
+              <div className="flex flex-col gap-4 border-b border-border-subtle pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-5 w-5 shrink-0 text-brand-primary" />
+                  <div>
+                    <h4 className="font-heading text-sm font-bold text-brand-primary">
+                      Origem do item
+                    </h4>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary">
+                      Snapshot imutável
+                    </p>
+                  </div>
+                </div>
+                <span className="font-mono text-[10px] text-text-secondary">
+                  ID: {lot.itemSnapshot.externalId}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-x-8 gap-y-5 pt-5 sm:grid-cols-2">
+                <div>
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.12em] text-text-secondary">
+                    Fonte do acervo
+                  </span>
+                  <span className="text-xs font-medium text-text-primary">
+                    {lot.itemSnapshot.source}
+                  </span>
+                </div>
+                <div>
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.12em] text-text-secondary">
+                    Autor / Atribuição
+                  </span>
+                  <span className="text-xs font-medium text-text-primary">
+                    {lot.itemSnapshot.creator}
+                  </span>
+                </div>
+                <div>
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.12em] text-text-secondary">
+                    Período / Ano
+                  </span>
+                  <span className="text-xs font-medium text-text-primary">
+                    {lot.itemSnapshot.dateOrYear}
+                  </span>
+                </div>
+                <div>
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.12em] text-text-secondary">
+                    Condições da imagem
+                  </span>
+                  <span className="text-xs font-medium text-text-primary">
+                    {lot.itemSnapshot.licenseNotes}
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            {/* Auditoria: acesso com destaque visual */}
+            <section className="overflow-hidden border border-brand-primary">
+              <div className="flex items-start gap-4 bg-brand-deep p-5 text-surface-base sm:p-7">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-surface-base/20 bg-surface-base/10">
+                  <Fingerprint className="h-5 w-5 text-accent-gold" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                    Integridade e rastreabilidade
+                  </p>
+                  <h3 className="mt-2 font-heading text-lg font-bold leading-snug sm:text-xl">
+                    Auditoria Criptográfica do Lote
+                  </h3>
+                  <p className="mt-2 text-xs leading-6 text-surface-base/75">
+                    {lotAuditHistory.length > 0
+                      ? `${lotAuditHistory.length} evento(s) registrados para este lote. Consulte hashes, descrições e verificações.`
+                      : "Eventos de auditoria encadeados por hash SHA-256 e verificáveis na página de auditoria."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 bg-surface-muted p-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-5 w-5 shrink-0 text-brand-primary" />
+                  <div>
+                    <p className="text-xs font-semibold text-text-primary">
+                      Registro de verificação
+                    </p>
+                    <p className="mt-1 text-[10px] text-text-secondary">
+                      {lotAuditHistory.length}{" "}
+                      {lotAuditHistory.length === 1
+                        ? "evento disponível"
+                        : "eventos disponíveis"}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setAuditModalOpen(true)}
+                  className="group flex w-full cursor-pointer items-center justify-between gap-4 bg-brand-primary px-5 py-4 text-left text-surface-base transition-colors hover:bg-brand-deep sm:w-auto sm:min-w-55"
+                >
+                  <span>
+                    <span className="block text-sm font-bold">
+                      Abrir auditoria
+                    </span>
+                    <span className="mt-1 block text-[10px] text-surface-base/75">
+                      Consultar registro completo
+                    </span>
+                  </span>
+                  <ArrowUpRight className="h-5 w-5 shrink-0 text-accent-gold transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <div className="hidden space-y-6 lg:sticky lg:top-8 lg:col-span-5 lg:block">
+            {renderActionBox()}
+            {renderBidHistory()}
+          </div>
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {auditModalOpen && (
+        <LotAuditModal
+          lotTitle={lot.title}
+          lotCode={lot.code}
+          events={lotAuditHistory}
+          onClose={() => setAuditModalOpen(false)}
+        />
+      )}
+
       {lightboxOpen && (
         <div
           onClick={() => setLightboxOpen(false)}
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-3 backdrop-blur-sm sm:p-4"
         >
           <button
             onClick={() => setLightboxOpen(false)}
-            className="absolute top-4 right-4 text-white hover:text-white/80 p-2"
+            aria-label="Fechar imagem ampliada"
+            className="absolute right-4 top-4 cursor-pointer p-2 text-surface-base transition-colors hover:text-accent-gold"
           >
-            <X className="w-8 h-8" />
+            <X className="h-7 w-7" />
           </button>
-          <img
-            src={currentImage}
-            alt={lot.title}
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
-          />
+
+          <div className="h-[80vh] max-h-[90vh] w-[90vw] max-w-[90vw]">
+            <ItemImage
+              src={currentImage}
+              alt={lot.title}
+              className="mx-auto max-h-[90vh] max-w-[90vw] rounded-sm object-contain"
+              loading="eager"
+            />
+          </div>
         </div>
       )}
     </div>

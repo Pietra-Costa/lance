@@ -1,8 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useApp } from "../context/AppContext";
-import { CatalogItem, CatalogSource, Lot } from "../types/auction";
+import type { CatalogItem, CatalogSource, Lot } from "../types/auction";
 import { formatBRL } from "../logic/auctionRules";
 import { apiGet, apiPost } from "../services/api";
+import { ItemImage } from "../components/domain/ItemImage";
 import {
   Search,
   CheckCircle2,
@@ -11,6 +18,17 @@ import {
   AlertTriangle,
   Sparkles,
   LoaderCircle,
+  Image as ImageIcon,
+  ShieldCheck,
+  FileCheck2,
+  Gavel,
+  Clock3,
+  CircleDollarSign,
+  CalendarClock,
+  ExternalLink,
+  RefreshCw,
+  PackageCheck,
+  ArrowUpRight,
 } from "lucide-react";
 
 type ApiCatalogSource = "THE_MET" | "ARTIC" | "MUSICBRAINZ";
@@ -30,6 +48,10 @@ interface ApiCatalogItem {
 interface CatalogSearchResponse {
   items: ApiCatalogItem[];
   failedSources: ApiCatalogSource[];
+  sources?: ApiCatalogSource[];
+  offset?: number;
+  limit?: number;
+  hasMore?: boolean;
 }
 
 interface CatalogImportResponse {
@@ -45,7 +67,50 @@ interface CreateLotResponse {
   endsAt: string;
 }
 
-const SELLER_AGREEMENT_VERSION = "1.0.0-termo-leiloeiro";
+const RESULTS_PER_PAGE = 20;
+
+const LOT_CATEGORIES = [
+  "Arte",
+  "Esculturas",
+  "Objetos de coleção",
+  "Mobiliário",
+  "Discos e edições musicais",
+] as const;
+
+const STEPS = [
+  { number: 1, label: "Acervo", description: "Escolha a peça", icon: Search },
+  {
+    number: 2,
+    label: "Procedência",
+    description: "Revise os dados",
+    icon: ShieldCheck,
+  },
+  {
+    number: 3,
+    label: "Configuração",
+    description: "Defina o pregão",
+    icon: Gavel,
+  },
+  {
+    number: 4,
+    label: "Prévia",
+    description: "Confira o lote",
+    icon: FileCheck2,
+  },
+  {
+    number: 5,
+    label: "Publicação",
+    description: "Conclua o cadastro",
+    icon: PackageCheck,
+  },
+];
+
+const SOURCES = [
+  { value: "ALL", label: "Todas as fontes", shortLabel: "Todas" },
+  { value: "THE_MET", label: "The Met", shortLabel: "The Met" },
+  { value: "ARTIC", label: "Art Institute", shortLabel: "Art Institute" },
+  { value: "MUSICBRAINZ", label: "MusicBrainz", shortLabel: "MusicBrainz" },
+] as const;
 
 const getSourceFromUrl = (sourceUrl: string): CatalogSource | null => {
   try {
@@ -85,6 +150,20 @@ const getApiSource = (source: CatalogSource): ApiCatalogSource => {
   }
 };
 
+const getApiSourceFromItem = (
+  item: ApiCatalogItem,
+): ApiCatalogSource | null => {
+  const url = item.sourceUrl ?? "";
+
+  if (url.includes("metmuseum.org")) return "THE_MET";
+  if (url.includes("artic.edu")) return "ARTIC";
+  if (url.includes("musicbrainz.org") || url.includes("coverartarchive.org")) {
+    return "MUSICBRAINZ";
+  }
+
+  return null;
+};
+
 const mapCatalogItem = (item: ApiCatalogItem): CatalogItem | null => {
   const source = getSourceFromUrl(item.sourceUrl);
 
@@ -116,26 +195,125 @@ const getErrorMessage = (error: unknown): string => {
   return "Ocorreu um erro inesperado. Tente novamente.";
 };
 
+const inputClassName =
+  "w-full rounded-xl border border-border-strong bg-white px-4 py-3 text-sm text-text-primary outline-none transition-all duration-200 placeholder:text-text-secondary/70 hover:border-brand-primary/50 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10";
+
+const primaryButtonClassName =
+  "inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-5 py-3 text-sm font-semibold text-surface-base shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-md focus:outline-none focus:ring-4 focus:ring-brand-primary/20 disabled:pointer-events-none disabled:opacity-50 disabled:hover:translate-y-0";
+
+const secondaryButtonClassName =
+  "inline-flex items-center justify-center gap-2 rounded-xl border border-border-strong bg-white px-4 py-3 text-sm font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary hover:bg-brand-primary/5 focus:outline-none focus:ring-4 focus:ring-brand-primary/10 disabled:pointer-events-none disabled:opacity-50";
+
+const SectionHeading: React.FC<{
+  eyebrow?: string;
+  title: string;
+  description?: string;
+}> = ({ eyebrow, title, description }) => (
+  <div className="space-y-2">
+    {eyebrow && (
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+        {eyebrow}
+      </span>
+    )}
+    <h2 className="font-heading text-xl font-bold tracking-tight text-brand-primary sm:text-2xl">
+      {title}
+    </h2>
+    {description && (
+      <p className="max-w-2xl text-sm leading-relaxed text-text-secondary">
+        {description}
+      </p>
+    )}
+  </div>
+);
+
+const FormField: React.FC<{
+  label: string;
+  htmlFor: string;
+  hint?: string;
+  children: React.ReactNode;
+}> = ({ label, htmlFor, hint, children }) => (
+  <div className="space-y-2">
+    <label
+      htmlFor={htmlFor}
+      className="block text-xs font-semibold text-text-primary"
+    >
+      {label}
+    </label>
+    {children}
+    {hint && (
+      <p className="text-[11px] leading-relaxed text-text-secondary">{hint}</p>
+    )}
+  </div>
+);
+
+const AlertMessage: React.FC<{
+  children: React.ReactNode;
+  variant?: "error" | "warning" | "success";
+}> = ({ children, variant = "error" }) => {
+  const styles = {
+    error: "border-red-200 bg-red-50 text-red-800",
+    warning: "border-amber-200 bg-amber-50 text-amber-900",
+    success: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  };
+
+  return (
+    <div
+      role={variant === "error" ? "alert" : "status"}
+      className={`flex items-start gap-3 rounded-xl border p-4 text-sm leading-relaxed ${styles[variant]}`}
+    >
+      {variant === "warning" ? (
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+      ) : variant === "success" ? (
+        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+      ) : (
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+      )}
+      <div>{children}</div>
+    </div>
+  );
+};
+
+const SummaryRow: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  emphasized?: boolean;
+}> = ({ label, value, emphasized = false }) => (
+  <div className="flex items-start justify-between gap-4 border-b border-border-subtle py-3 last:border-b-0 last:pb-0">
+    <span className="text-xs text-text-secondary">{label}</span>
+    <span
+      className={`max-w-[65%] break-words text-right text-xs ${
+        emphasized
+          ? "font-mono text-base font-bold text-brand-primary"
+          : "font-medium text-text-primary"
+      }`}
+    >
+      {value}
+    </span>
+  </div>
+);
+
 export const CreateLotWizard: React.FC = () => {
   const { navigateTo, addNotification } = useApp();
 
   const [currentStep, setCurrentStep] = useState(1);
-
-  // Busca do catálogo
   const [searchQuery, setSearchQuery] = useState("");
   const [catalogResults, setCatalogResults] = useState<ApiCatalogItem[]>([]);
   const [failedSources, setFailedSources] = useState<ApiCatalogSource[]>([]);
+  const [sourceFilter, setSourceFilter] = useState<ApiCatalogSource | "ALL">(
+    "ALL",
+  );
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
 
   const searchRequestId = useRef(0);
+  const selectionActionsRef = useRef<HTMLDivElement | null>(null);
 
-  // Item selecionado
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
   const [verifiedRights, setVerifiedRights] = useState(false);
 
-  // Parâmetros do lote
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<Lot["category"]>("Arte");
   const [startingPriceBRL, setStartingPriceBRL] = useState(15000);
@@ -145,58 +323,108 @@ export const CreateLotWizard: React.FC = () => {
   const [conditions, setConditions] = useState(
     "Peça em perfeito estado de conservação, armazenada sob temperatura e umidade controladas.",
   );
+  const [sellerNotes, setSellerNotes] = useState("");
 
-  // Publicação real
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState("");
   const [publishedLot, setPublishedLot] = useState<CreateLotResponse | null>(
     null,
   );
 
-  // Busca automática com debounce e cancelamento lógico de requisições antigas.
-  useEffect(() => {
-    const query = searchQuery.trim();
-    const requestId = ++searchRequestId.current;
+  const loadCatalogPage = useCallback(
+    async (options: {
+      query: string;
+      offset: number;
+      mode: "replace" | "append";
+    }) => {
+      const requestId = ++searchRequestId.current;
 
-    if (!query) {
-      setCatalogResults([]);
-      setFailedSources([]);
-      setSearchError("");
-      setHasSearched(false);
-      setIsSearching(false);
-      return;
-    }
-
-    const timeoutId = window.setTimeout(async () => {
-      setIsSearching(true);
-      setSearchError("");
+      if (options.mode === "append") {
+        setIsLoadingMore(true);
+      } else {
+        setIsSearching(true);
+        setSearchError("");
+      }
 
       try {
+        const params = new URLSearchParams({
+          offset: String(options.offset),
+          limit: String(RESULTS_PER_PAGE),
+        });
+
+        if (options.query.trim()) {
+          params.set("q", options.query.trim());
+        }
+
         const response = await apiGet<CatalogSearchResponse>(
-          `/catalog/search?q=${encodeURIComponent(query)}`,
+          `/catalog/search?${params.toString()}`,
         );
 
         if (requestId !== searchRequestId.current) return;
 
-        setCatalogResults(response.items ?? []);
+        setCatalogResults(previous =>
+          options.mode === "append"
+            ? [...previous, ...(response.items ?? [])]
+            : (response.items ?? []),
+        );
+
         setFailedSources(response.failedSources ?? []);
         setHasSearched(true);
+        setHasMore(Boolean(response.hasMore));
       } catch (error) {
         if (requestId !== searchRequestId.current) return;
 
-        setCatalogResults([]);
-        setFailedSources([]);
-        setHasSearched(false);
+        if (options.mode === "replace") {
+          setCatalogResults([]);
+          setFailedSources([]);
+          setHasSearched(false);
+        }
+
         setSearchError(getErrorMessage(error));
       } finally {
         if (requestId === searchRequestId.current) {
           setIsSearching(false);
+          setIsLoadingMore(false);
         }
       }
-    }, 350);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+
+    if (!query) {
+      setCatalogResults([]);
+      setHasSearched(false);
+      setHasMore(false);
+      setFailedSources([]);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void loadCatalogPage({ query, offset: 0, mode: "replace" });
+    }, 400);
 
     return () => window.clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery, loadCatalogPage]);
+
+  const filteredCatalogResults = useMemo(() => {
+    if (sourceFilter === "ALL") return catalogResults;
+
+    return catalogResults.filter(
+      item => getApiSourceFromItem(item) === sourceFilter,
+    );
+  }, [catalogResults, sourceFilter]);
+
+  useEffect(() => {
+    if (!selectedItem || currentStep !== 1) return;
+
+    selectionActionsRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [selectedItem, currentStep]);
 
   const handleSelectItem = (item: ApiCatalogItem) => {
     const mappedItem = mapCatalogItem(item);
@@ -237,7 +465,7 @@ export const CreateLotWizard: React.FC = () => {
 
     if (
       !Number.isFinite(startsAtHours) ||
-      startsAtHours < 1 ||
+      startsAtHours < 0 ||
       !Number.isFinite(durationHours) ||
       durationHours <= 0
     ) {
@@ -278,10 +506,6 @@ export const CreateLotWizard: React.FC = () => {
     setIsPublishing(true);
 
     try {
-      /*
-       * 1. Importa o item do catálogo externo.
-       * O backend retorna o ID interno do CatalogItem persistido.
-       */
       const source = getApiSource(selectedItem.source);
 
       const importedItem = await apiPost<CatalogImportResponse>(
@@ -295,10 +519,6 @@ export const CreateLotWizard: React.FC = () => {
         );
       }
 
-      /*
-       * 2. Calcula o agendamento.
-       * O backend exige startsAt estritamente posterior ao horário atual.
-       */
       const now = Date.now();
 
       const startsAt = new Date(
@@ -309,12 +529,11 @@ export const CreateLotWizard: React.FC = () => {
         now + (startsAtHours + durationHours) * 60 * 60 * 1000,
       ).toISOString();
 
-      /*
-       * 3. Cria o lote persistido no backend.
-       * Os valores monetários são enviados em centavos.
-       */
       const createdLot = await apiPost<CreateLotResponse>("/lots", {
         catalogItemId: importedItem.id,
+        category: category || undefined,
+        specialConditions: conditions.trim() || undefined,
+        sellerNotes: sellerNotes.trim() || undefined,
         startingPriceCents: Math.round(startingPriceBRL * 100),
         minIncrementCents: Math.round(minIncrementBRL * 100),
         startsAt,
@@ -324,13 +543,11 @@ export const CreateLotWizard: React.FC = () => {
       setPublishedLot(createdLot);
       setCurrentStep(5);
 
-      addNotification(
-        {
-          title: "Lote publicado",
-          message: "O lote foi cadastrado com sucesso na API.",
-          type: "success",
-        },
-      );
+      addNotification({
+        title: "Lote publicado",
+        message: "O lote foi cadastrado com sucesso na API.",
+        type: "success",
+      });
     } catch (error) {
       setPublishError(getErrorMessage(error));
     } finally {
@@ -338,757 +555,1143 @@ export const CreateLotWizard: React.FC = () => {
     }
   };
 
-  const renderImage = (imageUrl: string, alt: string, className: string) => {
-    if (imageUrl) {
-      return (
-        <img
-          src={imageUrl}
-          alt={alt}
-          className={className}
-          onError={event => {
-            event.currentTarget.style.display = "none";
-          }}
-        />
-      );
-    }
-
-    return (
-      <div
-        className={`${className} flex items-center justify-center text-xs text-[#68716A]`}
-      >
-        Imagem não disponível
-      </div>
-    );
+  const goToStep = (step: number) => {
+    if (isPublishing) return;
+    setPublishError("");
+    setCurrentStep(step);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-      {/* Cabeçalho */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#C8A96A] font-bold">
-              CADASTRO DE PREGÃO
-            </span>
-
-            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-[#123D2F]">
-              Wizard de Criação de Lote
-            </h1>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => navigateTo("/leiloeiro")}
-            className="text-xs text-[#68716A] hover:text-[#222923] font-medium"
-          >
-            Cancelar e Voltar
-          </button>
+  const renderStepNavigation = () => (
+    <div className="rounded-2xl border border-border-subtle bg-white p-4 shadow-sm sm:p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary">
+            Etapa {currentStep} de 5
+          </p>
+          <p className="mt-1 text-sm font-semibold text-brand-primary">
+            {STEPS[currentStep - 1].label}
+          </p>
         </div>
-
-        <div className="grid grid-cols-5 gap-2 text-xs">
-          {[
-            "1. Fonte & Busca",
-            "2. Revisão",
-            "3. Parâmetros",
-            "4. Prévia",
-            "5. Publicação",
-          ].map((stepName, index) => {
-            const step = index + 1;
-            const active = step <= currentStep;
-
-            return (
-              <div key={stepName} className="space-y-1.5">
-                <div
-                  className={`h-1.5 rounded-full ${
-                    active ? "bg-[#123D2F]" : "bg-[#E2DDD2]"
-                  }`}
-                />
-                <span
-                  className={`text-[10px] block ${
-                    active ? "text-[#123D2F] font-bold" : "text-[#68716A]"
-                  }`}
-                >
-                  {stepName}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        <span className="font-mono text-xs text-text-secondary">
+          {String(Math.round((currentStep / STEPS.length) * 100)).padStart(
+            2,
+            "0",
+          )}
+          %
+        </span>
       </div>
 
-      {/* ETAPA 1 — Busca */}
-      {currentStep === 1 && (
-        <section className="bg-white rounded-2xl border border-[#E2DDD2] p-6 space-y-6">
-          <div>
-            <h2 className="font-heading font-bold text-lg text-[#123D2F]">
-              Etapa 1 — Pesquise no Acervo
-            </h2>
-            <p className="text-xs text-[#68716A] mt-1">
-              Os resultados são consultados na API do catálogo.
-            </p>
-          </div>
+      <div
+        className="mb-5 h-1.5 overflow-hidden rounded-full bg-border-subtle"
+        aria-label={`Progresso: ${currentStep} de 5 etapas`}
+      >
+        <div
+          className="h-full rounded-full bg-accent-gold transition-all duration-500 ease-out"
+          style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
+        />
+      </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="catalog-search"
-              className="text-xs font-semibold text-[#222923] block"
+      <div className="grid grid-cols-5 gap-2">
+        {STEPS.map(step => {
+          const StepIcon = step.icon;
+          const isComplete = step.number < currentStep;
+          const isActive = step.number === currentStep;
+
+          return (
+            <button
+              key={step.number}
+              type="button"
+              disabled={step.number > currentStep || isPublishing}
+              onClick={() => {
+                if (step.number < currentStep && step.number !== 5) {
+                  goToStep(step.number);
+                }
+              }}
+              className="group min-w-0 text-left disabled:cursor-default"
+              aria-current={isActive ? "step" : undefined}
             >
-              Termo de pesquisa
-            </label>
+              <span
+                className={`mx-auto flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 sm:mx-0 ${
+                  isComplete
+                    ? "border-brand-primary bg-brand-primary text-white"
+                    : isActive
+                      ? "border-accent-gold bg-brand-primary text-accent-gold shadow-md shadow-brand-primary/10"
+                      : "border-border-subtle bg-surface-base text-text-secondary"
+                }`}
+              >
+                {isComplete ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <StepIcon className="h-4 w-4" />
+                )}
+              </span>
+              <span
+                className={`mt-2 hidden text-[11px] font-semibold sm:block ${
+                  isActive || isComplete
+                    ? "text-brand-primary"
+                    : "text-text-secondary"
+                }`}
+              >
+                {step.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 
-            <div className="relative">
-              <Search className="w-4 h-4 text-[#68716A] absolute left-3.5 top-3 pointer-events-none" />
-              <input
-                id="catalog-search"
-                type="search"
-                value={searchQuery}
-                onChange={event => setSearchQuery(event.target.value)}
-                placeholder="Título, autor, artista ou obra..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#CDC5B4] text-xs focus:ring-2 focus:ring-[#123D2F] focus:outline-hidden"
-              />
-            </div>
-          </div>
+  return (
+    <main className="min-h-screen bg-surface-base">
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+        <header className="relative overflow-hidden rounded-3xl bg-brand-deep p-6 text-white shadow-xl shadow-brand-deep/10 sm:p-8 lg:p-10">
+          <div className="pointer-events-none absolute -right-12 -top-20 h-64 w-64 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -right-1 -top-8 h-44 w-44 rounded-full border border-accent-gold/20" />
+          <div className="pointer-events-none absolute -bottom-20 right-1/4 h-48 w-48 rounded-full bg-accent-gold/5 blur-3xl" />
 
-          {searchError && (
-            <div
-              role="alert"
-              className="p-3 rounded-xl border border-red-200 bg-red-50 text-xs text-red-800"
-            >
-              {searchError}
-            </div>
-          )}
+          <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+            <div className="max-w-2xl">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-gold/30 bg-white/5 px-3 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-gold" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                  Lance · Área do leiloeiro
+                </span>
+              </div>
 
-          {failedSources.length > 0 && (
-            <div className="p-3 rounded-xl border border-amber-200 bg-amber-50 text-xs text-amber-900">
-              Algumas fontes não responderam: {failedSources.join(", ")}. Os
-              resultados disponíveis continuam sendo exibidos.
-            </div>
-          )}
+              <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                Criar novo lote<span className="text-accent-gold">.</span>
+              </h1>
 
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-[#222923] block">
-              Resultados
-            </span>
-
-            {isSearching && (
-              <p className="text-xs text-[#68716A] py-4">
-                Consultando as fontes do catálogo...
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
+                Selecione uma peça do acervo, revise sua procedência e configure
+                os parâmetros do pregão antes da publicação.
               </p>
-            )}
+            </div>
 
-            {!isSearching && hasSearched && catalogResults.length === 0 && (
-              <div className="p-6 text-center rounded-xl border border-dashed border-[#CDC5B4]">
-                <p className="text-xs font-semibold text-[#222923]">
-                  Nenhum resultado encontrado
-                </p>
-                <p className="text-[11px] text-[#68716A] mt-1">
-                  Tente outro termo de pesquisa.
+            <button
+              type="button"
+              onClick={() => navigateTo("/leiloeiro")}
+              className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-white/20 px-4 py-3 text-xs font-semibold text-white/80 transition-all duration-200 hover:border-white/50 hover:bg-white/10 hover:text-white sm:self-auto"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar ao painel
+            </button>
+          </div>
+        </header>
+
+        {renderStepNavigation()}
+
+        <div
+          key={currentStep}
+          className="space-y-6 transition-opacity duration-300 motion-reduce:transition-none"
+        >
+          {currentStep === 1 && (
+            <section className="space-y-6 rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+              <SectionHeading
+                eyebrow="01 · Seleção"
+                title="Explore o acervo"
+                description="Pesquise em coleções públicas e selecione o item que deseja cadastrar como lote."
+              />
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="catalog-search"
+                  className="block text-xs font-semibold text-text-primary"
+                >
+                  Buscar no catálogo
+                </label>
+                <div className="group relative">
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary transition-colors group-focus-within:text-brand-primary" />
+                  <input
+                    id="catalog-search"
+                    type="search"
+                    value={searchQuery}
+                    onChange={event => {
+                      setSearchQuery(event.target.value);
+                      setSearchError("");
+                    }}
+                    placeholder="Título, autor, artista ou obra..."
+                    className={`${inputClassName} pl-11`}
+                  />
+                  {isSearching && (
+                    <LoaderCircle className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-brand-primary" />
+                  )}
+                </div>
+                <p className="text-[11px] text-text-secondary">
+                  A pesquisa é atualizada automaticamente enquanto você digita.
                 </p>
               </div>
-            )}
 
-            {!isSearching && !hasSearched && !searchError && (
-              <p className="text-xs text-[#68716A] py-3">
-                Digite um termo para pesquisar nas fontes conectadas.
-              </p>
-            )}
+              {searchError && <AlertMessage>{searchError}</AlertMessage>}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto p-1">
-              {catalogResults.map((item, index) => {
-                const mappedItem = mapCatalogItem(item);
-                const selectable = mappedItem !== null;
+              <div className="space-y-4">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                  <div>
+                    <h3 className="font-heading text-base font-bold text-brand-primary">
+                      Resultados do acervo
+                    </h3>
+                    <p className="mt-1 text-xs text-text-secondary">
+                      {hasSearched
+                        ? `${filteredCatalogResults.length} itens nesta seleção`
+                        : "Escolha uma fonte ou inicie uma pesquisa"}
+                    </p>
+                  </div>
 
-                const selected =
-                  selectable &&
-                  selectedItem?.externalId === item.externalId &&
-                  selectedItem?.source === mappedItem.source;
+                  {hasSearched && catalogResults.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {SOURCES.map(option => {
+                        const count =
+                          option.value === "ALL"
+                            ? catalogResults.length
+                            : catalogResults.filter(
+                                item =>
+                                  getApiSourceFromItem(item) === option.value,
+                              ).length;
 
-                return (
-                  <button
-                    key={`${item.sourceUrl}-${item.externalId}-${index}`}
-                    type="button"
-                    disabled={!selectable || isSearching}
-                    onClick={() => handleSelectItem(item)}
-                    className={`p-3 rounded-xl border flex items-center gap-3 text-left transition-all ${
-                      !selectable
-                        ? "border-[#E2DDD2] opacity-60 cursor-not-allowed"
-                        : selected
-                          ? "border-[#123D2F] bg-[#123D2F]/5 ring-1 ring-[#123D2F]"
-                          : "border-[#E2DDD2] hover:border-[#CDC5B4]"
-                    }`}
-                  >
-                    {item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        loading="lazy"
-                        className="w-14 h-14 rounded-lg object-cover shrink-0"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 rounded-lg bg-[#FAF7F2] border border-[#E2DDD2] shrink-0 flex items-center justify-center">
-                        <Search className="w-5 h-5 text-[#9A9385]" />
+                        const isActive = sourceFilter === option.value;
+
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            disabled={count === 0}
+                            onClick={() => setSourceFilter(option.value)}
+                            className={`rounded-lg border px-2.5 py-2 text-[10px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+                              isActive
+                                ? "border-brand-primary bg-brand-primary text-white"
+                                : "border-border-subtle bg-white text-text-secondary hover:border-brand-primary/50 hover:text-brand-primary"
+                            }`}
+                          >
+                            {option.shortLabel}
+                            <span
+                              className={`ml-1.5 font-mono ${
+                                isActive ? "text-accent-gold" : "opacity-70"
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {isSearching && catalogResults.length === 0 && (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="flex animate-pulse gap-3 rounded-xl border border-border-subtle p-3"
+                      >
+                        <div className="h-20 w-20 shrink-0 rounded-lg bg-border-subtle" />
+                        <div className="flex flex-1 flex-col justify-center gap-2">
+                          <div className="h-2 w-1/3 rounded bg-border-subtle" />
+                          <div className="h-3 w-4/5 rounded bg-border-subtle" />
+                          <div className="h-2 w-1/2 rounded bg-border-subtle" />
+                        </div>
                       </div>
-                    )}
+                    ))}
+                  </div>
+                )}
 
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[10px] text-[#68716A] block truncate">
-                        {mappedItem?.source ?? "Origem não identificada"}
-                      </span>
-                      <h4 className="font-heading font-semibold text-xs text-[#222923]">
-                        {item.title}
-                      </h4>
-                      <p className="text-[10px] text-[#68716A] truncate">
-                        {item.creator ?? "Autoria não informada"}
+                {!isSearching && hasSearched && catalogResults.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-border-strong bg-surface-base px-5 py-12 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-text-secondary shadow-sm">
+                      <Search className="h-5 w-5" />
+                    </div>
+                    <h4 className="mt-4 font-heading text-base font-bold text-brand-primary">
+                      Nenhum resultado encontrado
+                    </h4>
+                    <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-text-secondary">
+                      Tente outro termo ou escolha uma fonte diferente para
+                      explorar o acervo.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void loadCatalogPage({
+                          query: searchQuery,
+                          offset: 0,
+                          mode: "replace",
+                        })
+                      }
+                      className={`${secondaryButtonClassName} mt-5`}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Tentar novamente
+                    </button>
+                  </div>
+                )}
+
+                {!isSearching && !hasSearched && !searchError && (
+                  <div className="rounded-2xl border border-dashed border-border-strong bg-surface-base px-5 py-10 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-primary shadow-sm">
+                      <ImageIcon className="h-5 w-5" />
+                    </div>
+                    <p className="mt-4 font-heading text-sm font-bold text-brand-primary">
+                      Seu próximo lote começa aqui
+                    </p>
+                    <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-text-secondary">
+                      Escolha uma das coleções acima ou digite um termo para
+                      consultar os itens disponíveis.
+                    </p>
+                  </div>
+                )}
+
+                {filteredCatalogResults.length > 0 && (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {filteredCatalogResults.map((item, index) => {
+                      const mappedItem = mapCatalogItem(item);
+                      const selectable = mappedItem !== null;
+                      const selected =
+                        selectable &&
+                        selectedItem?.externalId === item.externalId &&
+                        selectedItem?.source === mappedItem.source;
+
+                      return (
+                        <button
+                          key={`${item.sourceUrl}-${item.externalId}-${index}`}
+                          type="button"
+                          disabled={!selectable || isSearching}
+                          onClick={() => handleSelectItem(item)}
+                          className={`group relative flex min-w-0 gap-3 rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 ${
+                            selected
+                              ? "border-brand-primary bg-brand-primary/[0.04] ring-2 ring-brand-primary/10"
+                              : "border-border-subtle bg-white hover:border-brand-primary/40"
+                          }`}
+                        >
+                          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-surface-base sm:h-28 sm:w-28">
+                            <ItemImage
+                              src={item.imageUrl}
+                              alt={item.title}
+                              seed={`${item.externalId}-${item.title}`}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              showLabel={false}
+                            />
+                          </div>
+
+                          <div className="flex min-w-0 flex-1 flex-col py-1">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">
+                              {mappedItem?.source ?? "Origem não identificada"}
+                            </span>
+                            <h4 className="mt-1 line-clamp-2 font-heading text-sm font-bold leading-snug text-brand-primary">
+                              {item.title}
+                            </h4>
+                            <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
+                              {item.creator ?? "Autoria não informada"}
+                            </p>
+                            <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+                              <span className="text-[10px] text-text-secondary">
+                                {item.date ?? "Data não informada"}
+                              </span>
+                              {selected ? (
+                                <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-primary" />
+                              ) : (
+                                <ArrowUpRight className="h-4 w-4 shrink-0 text-text-secondary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-primary" />
+                              )}
+                            </div>
+                          </div>
+
+                          {selected && (
+                            <span className="absolute right-2 top-2 rounded-full bg-brand-primary px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white">
+                              Selecionado
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {hasSearched &&
+                  filteredCatalogResults.length > 0 &&
+                  hasMore && (
+                    <div className="flex justify-center border-t border-border-subtle pt-4">
+                      <button
+                        type="button"
+                        disabled={isLoadingMore || isSearching}
+                        onClick={() =>
+                          void loadCatalogPage({
+                            query: searchQuery,
+                            offset: catalogResults.length,
+                            mode: "append",
+                          })
+                        }
+                        className={primaryButtonClassName}
+                      >
+                        {isLoadingMore ? (
+                          <>
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                            Carregando...
+                          </>
+                        ) : (
+                          <>
+                            Carregar mais
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+              </div>
+
+              {selectedItem && (
+                <div className="flex flex-col gap-4 rounded-2xl border border-brand-primary/15 bg-brand-primary/[0.04] p-4 sm:flex-row sm:items-center">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-brand-primary shadow-sm">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-primary">
+                      Item selecionado
+                    </p>
+                    <p className="mt-1 truncate font-heading text-sm font-bold text-text-primary">
+                      {selectedItem.title}
+                    </p>
+                    <p className="mt-1 text-xs text-text-secondary">
+                      {selectedItem.source}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div
+                ref={selectionActionsRef}
+                className="flex scroll-mt-8 flex-col-reverse justify-between gap-3 border-t border-border-subtle pt-5 sm:flex-row sm:items-center"
+              >
+                <p className="text-[11px] text-text-secondary">
+                  A procedência e os direitos da peça serão revisados na próxima
+                  etapa.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  disabled={!selectedItem}
+                  className={primaryButtonClassName}
+                >
+                  Avançar para revisão
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </section>
+          )}
+
+          {currentStep === 2 && selectedItem && (
+            <section className="space-y-6 rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+              <SectionHeading
+                eyebrow="02 · Verificação"
+                title="Revise a peça e sua procedência"
+                description="Confira os dados fornecidos pela coleção de origem antes de criar o lote."
+              />
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+                <div className="overflow-hidden rounded-2xl border border-border-subtle bg-surface-base">
+                  <div className="aspect-[4/3]">
+                    <ItemImage
+                      src={selectedItem.primaryImageUrl}
+                      alt={selectedItem.title}
+                      seed={`${selectedItem.externalId}-${selectedItem.title}`}
+                      className="h-full w-full object-cover"
+                      showLabel={false}
+                    />
+                  </div>
+                  <div className="space-y-2 p-4">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                      Registro de origem
+                    </span>
+                    <p className="font-heading text-base font-bold text-brand-primary">
+                      {selectedItem.title}
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      {selectedItem.source}
+                    </p>
+                    <a
+                      href={selectedItem.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 pt-2 text-xs font-semibold text-brand-primary underline decoration-brand-primary/30 underline-offset-4 transition-colors hover:decoration-brand-primary"
+                    >
+                      Abrir registro original
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">
+                      Título da obra
+                    </p>
+                    <h3 className="mt-1 font-heading text-xl font-bold leading-snug text-brand-primary">
+                      {selectedItem.title}
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="rounded-xl bg-surface-base p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+                        Autor / atribuição
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-text-primary">
+                        {selectedItem.creator}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-surface-base p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+                        Data
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-text-primary">
+                        {selectedItem.dateOrYear}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-surface-base p-3 sm:col-span-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+                        Técnica / material
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-text-primary">
+                        {selectedItem.medium}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-text-primary">
+                      Descrição fornecida pela fonte
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                      {selectedItem.description}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-border-subtle p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+                      Identificador externo
+                    </p>
+                    <p className="mt-1 break-all font-mono text-xs text-text-primary">
+                      {selectedItem.externalId}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-800 shadow-sm">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-amber-950">
+                      Verificação de direitos e procedência
+                    </h3>
+                    <p className="mt-1 text-xs leading-relaxed text-amber-900/80">
+                      {selectedItem.licenseNotes} A existência de uma imagem na
+                      API não garante autorização para uso comercial. Verifique
+                      as condições da fonte original antes de prosseguir.
+                    </p>
+                  </div>
+                </div>
+
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200/80 bg-white/70 p-4 transition-colors hover:bg-white">
+                  <input
+                    type="checkbox"
+                    checked={verifiedRights}
+                    onChange={event => setVerifiedRights(event.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-border-strong accent-brand-primary"
+                  />
+                  <span className="text-xs leading-relaxed text-text-primary">
+                    Confirmo que verifiquei a adequação das condições de imagem,
+                    procedência e dados para a criação deste lote.
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex flex-col-reverse justify-between gap-3 border-t border-border-subtle pt-5 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => goToStep(1)}
+                  className={secondaryButtonClassName}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar ao acervo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToStep(3)}
+                  disabled={!verifiedRights}
+                  className={primaryButtonClassName}
+                >
+                  Configurar lote
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </section>
+          )}
+
+          {currentStep === 3 && selectedItem && (
+            <section className="space-y-6 rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+              <SectionHeading
+                eyebrow="03 · Configuração"
+                title="Defina os parâmetros do pregão"
+                description="Configure preço, incremento mínimo, agenda e condições que serão vinculadas ao lote."
+              />
+
+              {publishError && <AlertMessage>{publishError}</AlertMessage>}
+
+              <div className="flex items-center gap-4 rounded-2xl bg-surface-base p-3">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white">
+                  <ItemImage
+                    src={selectedItem.primaryImageUrl}
+                    alt={selectedItem.title}
+                    seed={`${selectedItem.externalId}-${selectedItem.title}`}
+                    className="h-full w-full object-cover"
+                    showLabel={false}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                    Peça selecionada
+                  </p>
+                  <p className="mt-1 truncate font-heading text-sm font-bold text-brand-primary">
+                    {selectedItem.title}
+                  </p>
+                  <p className="mt-1 truncate text-xs text-text-secondary">
+                    {selectedItem.source}
+                  </p>
+                </div>
+              </div>
+
+              <FormField label="Título de exibição do lote" htmlFor="lot-title">
+                <input
+                  id="lot-title"
+                  type="text"
+                  value={title}
+                  onChange={event => setTitle(event.target.value)}
+                  maxLength={200}
+                  className={inputClassName}
+                  placeholder="Digite o título que será exibido"
+                />
+                <div className="flex justify-end">
+                  <span className="text-[10px] text-text-secondary">
+                    {title.length}/200
+                  </span>
+                </div>
+              </FormField>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <FormField
+                  label="Categoria"
+                  htmlFor="lot-category"
+                  hint="A categoria é gravada no lote e utilizada pelos filtros do catálogo."
+                >
+                  <select
+                    id="lot-category"
+                    value={category}
+                    onChange={event =>
+                      setCategory(event.target.value as Lot["category"])
+                    }
+                    className={inputClassName}
+                  >
+                    {!LOT_CATEGORIES.includes(
+                      category as (typeof LOT_CATEGORIES)[number],
+                    ) &&
+                      category !== "" && (
+                        <option value={category}>{category}</option>
+                      )}
+                    {LOT_CATEGORIES.map(option => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                    <option value="">Sem categoria</option>
+                  </select>
+                </FormField>
+
+                <FormField
+                  label="Lance inicial (R$)"
+                  htmlFor="starting-price"
+                  hint="Valor mínimo para iniciar os lances."
+                >
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-text-secondary">
+                      R$
+                    </span>
+                    <input
+                      id="starting-price"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={startingPriceBRL}
+                      onChange={event =>
+                        setStartingPriceBRL(Number(event.target.value))
+                      }
+                      className={`${inputClassName} pl-11 font-mono`}
+                    />
+                  </div>
+                </FormField>
+
+                <FormField
+                  label="Incremento mínimo (R$)"
+                  htmlFor="minimum-increment"
+                  hint="Diferença mínima entre lances consecutivos."
+                >
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-text-secondary">
+                      R$
+                    </span>
+                    <input
+                      id="minimum-increment"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={minIncrementBRL}
+                      onChange={event =>
+                        setMinIncrementBRL(Number(event.target.value))
+                      }
+                      className={`${inputClassName} pl-11 font-mono`}
+                    />
+                  </div>
+                </FormField>
+
+                <FormField
+                  label="Início do pregão"
+                  htmlFor="auction-start"
+                  hint="O horário é calculado a partir do momento da publicação."
+                >
+                  <select
+                    id="auction-start"
+                    value={startsAtHours}
+                    onChange={event =>
+                      setStartsAtHours(Number(event.target.value))
+                    }
+                    className={inputClassName}
+                  >
+                    <option value={0}>Agora</option>
+                    <option value={0.0833}>Em 5 minutos</option>
+                    <option value={1}>Em 1 hora</option>
+                    <option value={12}>Em 12 horas</option>
+                    <option value={24}>Em 24 horas</option>
+                    <option value={48}>Em 48 horas</option>
+                  </select>
+                </FormField>
+
+                <FormField
+                  label="Duração do pregão"
+                  htmlFor="auction-duration"
+                  hint="Tempo total entre o início e o encerramento."
+                >
+                  <select
+                    id="auction-duration"
+                    value={durationHours}
+                    onChange={event =>
+                      setDurationHours(Number(event.target.value))
+                    }
+                    className={inputClassName}
+                  >
+                    <option value={0.0833}>5 minutos · teste</option>
+                    <option value={0.5}>30 minutos · teste</option>
+                    <option value={1}>1 hora</option>
+                    <option value={6}>6 horas</option>
+                    <option value={12}>12 horas</option>
+                    <option value={24}>24 horas</option>
+                    <option value={48}>48 horas</option>
+                    <option value={72}>72 horas</option>
+                  </select>
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5">
+                <FormField
+                  label="Condições especiais do lote"
+                  htmlFor="lot-conditions"
+                  hint="Inclua informações relevantes para o arremate, como forma de pagamento, prazo de retirada, envio ou laudos."
+                >
+                  <textarea
+                    id="lot-conditions"
+                    rows={4}
+                    value={conditions}
+                    onChange={event => setConditions(event.target.value)}
+                    className={`${inputClassName} resize-y leading-relaxed`}
+                    placeholder="Informe as condições de venda e retirada..."
+                  />
+                </FormField>
+
+                <FormField
+                  label="Observações do leiloeiro (opcional)"
+                  htmlFor="lot-seller-notes"
+                  hint="Observações adicionais para complementar o cadastro."
+                >
+                  <textarea
+                    id="lot-seller-notes"
+                    rows={3}
+                    value={sellerNotes}
+                    onChange={event => setSellerNotes(event.target.value)}
+                    placeholder="Ex.: retirada apenas em São Paulo, mediante agendamento."
+                    className={`${inputClassName} resize-y leading-relaxed`}
+                  />
+                </FormField>
+              </div>
+
+              <div className="rounded-2xl border border-border-subtle bg-surface-base p-4 sm:p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <CircleDollarSign className="h-4 w-4 text-accent-gold" />
+                  <h3 className="text-xs font-bold text-brand-primary">
+                    Resumo financeiro
+                  </h3>
+                </div>
+                <SummaryRow
+                  label="Lance inicial"
+                  value={formatBRL(Math.round(startingPriceBRL * 100))}
+                  emphasized
+                />
+                <SummaryRow
+                  label="Incremento mínimo"
+                  value={formatBRL(Math.round(minIncrementBRL * 100))}
+                />
+                <SummaryRow
+                  label="Categoria"
+                  value={category || "Sem categoria"}
+                />
+              </div>
+
+              <div className="flex flex-col-reverse justify-between gap-3 border-t border-border-subtle pt-5 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  className={secondaryButtonClassName}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar à revisão
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const error = validateLot();
+
+                    if (error) {
+                      setPublishError(error);
+                      return;
+                    }
+
+                    setPublishError("");
+                    goToStep(4);
+                  }}
+                  className={primaryButtonClassName}
+                >
+                  Pré-visualizar lote
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </section>
+          )}
+
+          {currentStep === 4 && selectedItem && (
+            <section className="space-y-6">
+              <div className="rounded-2xl border border-border-subtle bg-white p-5 shadow-sm sm:p-7">
+                <SectionHeading
+                  eyebrow="04 · Conferência final"
+                  title="Pré-visualização do lote"
+                  description="Confira os dados e os valores antes de enviar o cadastro para a API."
+                />
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-border-subtle bg-white shadow-sm">
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                  <div className="relative min-h-64 bg-surface-base sm:min-h-80">
+                    <ItemImage
+                      src={selectedItem.primaryImageUrl}
+                      alt={title}
+                      seed={`${selectedItem.externalId}-${title}`}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      showLabel={false}
+                    />
+                    <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold backdrop-blur">
+                      Prévia do lote
+                    </div>
+                  </div>
+
+                  <div className="space-y-6 p-5 sm:p-7 lg:p-8">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-gold">
+                        {category || "Sem categoria"}
+                      </p>
+                      <h2 className="mt-2 font-heading text-2xl font-bold leading-tight text-brand-primary sm:text-3xl">
+                        {title}
+                      </h2>
+                      <p className="mt-2 text-xs text-text-secondary">
+                        {selectedItem.creator} · {selectedItem.dateOrYear}
                       </p>
                     </div>
 
-                    {selected && (
-                      <CheckCircle2 className="w-4 h-4 text-[#123D2F] shrink-0" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                    <div className="rounded-2xl bg-brand-deep p-5 text-white">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
+                        Lance inicial
+                      </p>
+                      <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-accent-gold">
+                        {formatBRL(Math.round(startingPriceBRL * 100))}
+                      </p>
+                      <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+                        <span className="text-xs text-white/60">
+                          Incremento mínimo
+                        </span>
+                        <span className="font-mono text-sm font-semibold text-white">
+                          {formatBRL(Math.round(minIncrementBRL * 100))}
+                        </span>
+                      </div>
+                    </div>
 
-          {selectedItem && (
-            <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#E2DDD2] text-xs">
-              <span className="text-[#68716A]">Item selecionado:</span>{" "}
-              <strong className="text-[#123D2F]">{selectedItem.title}</strong>
-            </div>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold" />
+                        <div>
+                          <p className="text-xs font-semibold text-text-primary">
+                            Início previsto
+                          </p>
+                          <p className="mt-1 text-xs text-text-secondary">
+                            {new Date(
+                              Date.now() + startsAtHours * 60 * 60 * 1000,
+                            ).toLocaleString("pt-BR")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-accent-gold" />
+                        <div>
+                          <p className="text-xs font-semibold text-text-primary">
+                            Duração do pregão
+                          </p>
+                          <p className="mt-1 text-xs text-text-secondary">
+                            {durationHours < 1
+                              ? `${Math.round(durationHours * 60)} minutos`
+                              : `${durationHours} ${
+                                  durationHours === 1 ? "hora" : "horas"
+                                }`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-semibold text-text-primary">
+                        Sobre a peça
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                        {selectedItem.description}
+                      </p>
+                    </div>
+
+                    {conditions.trim() && (
+                      <div className="border-t border-border-subtle pt-4">
+                        <p className="text-xs font-semibold text-text-primary">
+                          Condições do leiloeiro
+                        </p>
+                        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-secondary">
+                          {conditions}
+                        </p>
+                      </div>
+                    )}
+
+                    {sellerNotes.trim() && (
+                      <div className="border-t border-border-subtle pt-4">
+                        <p className="text-xs font-semibold text-text-primary">
+                          Observações adicionais
+                        </p>
+                        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-secondary">
+                          {sellerNotes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-border-subtle bg-surface-base p-5 sm:p-7">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-primary" />
+                    <div>
+                      <p className="text-xs font-bold text-brand-primary">
+                        Procedência revisada
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                        Você confirmou a verificação das condições de imagem,
+                        procedência e dados da peça. A publicação enviará o
+                        cadastro para a API.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {publishError && <AlertMessage>{publishError}</AlertMessage>}
+
+              {isPublishing && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="rounded-2xl border border-brand-primary/15 bg-brand-primary/[0.04] p-5"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-brand-primary shadow-sm">
+                      <LoaderCircle className="h-5 w-5 animate-spin" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-brand-primary">
+                        Publicando seu lote
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                        Importando a peça e registrando os parâmetros do pregão.
+                        Não feche esta página até a confirmação.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-brand-primary/10">
+                    <div className="h-full w-2/3 animate-pulse rounded-full bg-accent-gold" />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col-reverse justify-between gap-3 rounded-2xl border border-border-subtle bg-white p-4 sm:flex-row sm:items-center sm:p-5">
+                <button
+                  type="button"
+                  disabled={isPublishing}
+                  onClick={() => goToStep(3)}
+                  className={secondaryButtonClassName}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Editar parâmetros
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePublish}
+                  disabled={isPublishing}
+                  className={`${primaryButtonClassName} min-w-44`}
+                >
+                  {isPublishing ? (
+                    <>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      Publicando...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 text-accent-gold" />
+                      Publicar lote
+                    </>
+                  )}
+                </button>
+              </div>
+            </section>
           )}
 
-          <div className="flex justify-end pt-4 border-t border-[#E2DDD2]">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(2)}
-              disabled={!selectedItem}
-              className="px-6 py-2.5 rounded-xl bg-[#123D2F] text-[#F5F1E7] font-semibold text-xs disabled:opacity-40 flex items-center gap-2"
-            >
-              Avançar para Revisão
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </section>
-      )}
+          {currentStep === 5 && selectedItem && publishedLot && (
+            <section className="overflow-hidden rounded-3xl border border-border-subtle bg-white shadow-xl shadow-brand-deep/5">
+              <div className="relative overflow-hidden bg-brand-deep px-5 py-10 text-center text-white sm:px-10 sm:py-14">
+                <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full border border-white/10" />
+                <div className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full border border-accent-gold/20" />
 
-      {/* ETAPA 2 — Procedência */}
-      {currentStep === 2 && selectedItem && (
-        <section className="bg-white rounded-2xl border border-[#E2DDD2] p-6 space-y-6">
-          <div>
-            <h2 className="font-heading font-bold text-lg text-[#123D2F]">
-              Etapa 2 — Revisão do Item e Direitos
-            </h2>
-            <p className="text-xs text-[#68716A] mt-1">
-              Confira os metadados antes de prosseguir.
-            </p>
-          </div>
+                <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-accent-gold/30 bg-white/5 text-accent-gold shadow-lg shadow-black/10">
+                  <CheckCircle2 className="h-10 w-10" />
+                </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-[#FAF7F2] border border-[#E2DDD2]">
-              {renderImage(
-                selectedItem.primaryImageUrl,
-                selectedItem.title,
-                "w-full h-full object-cover",
-              )}
-            </div>
-
-            <div className="md:col-span-2 space-y-3 text-xs">
-              <div>
-                <span className="text-[#68716A] block text-[11px]">
-                  Fonte identificada
-                </span>
-                <span className="font-semibold text-[#123D2F]">
-                  {selectedItem.source}
-                </span>
-                <span className="text-[#68716A] text-[10px] ml-2 font-mono">
-                  ID externo: {selectedItem.externalId}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[#68716A] block text-[11px]">Título</span>
-                <span className="font-bold text-sm text-[#222923]">
-                  {selectedItem.title}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[#68716A] block text-[11px]">
-                  Autor / atribuição
-                </span>
-                <span className="font-medium text-[#222923]">
-                  {selectedItem.creator}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[#68716A] block text-[11px]">Data</span>
-                <span className="text-[#222923]">
-                  {selectedItem.dateOrYear}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[#68716A] block text-[11px]">
-                  Descrição
-                </span>
-                <p className="text-[#68716A] leading-relaxed mt-0.5">
-                  {selectedItem.description}
+                <p className="relative mt-6 text-[10px] font-bold uppercase tracking-[0.22em] text-accent-gold">
+                  Cadastro concluído
+                </p>
+                <h2 className="relative mt-2 font-heading text-3xl font-bold sm:text-4xl">
+                  Lote publicado<span className="text-accent-gold">.</span>
+                </h2>
+                <p className="relative mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
+                  A API confirmou o cadastro. Os dados do lote estão registrados
+                  e disponíveis para consulta.
                 </p>
               </div>
 
-              <a
-                href={selectedItem.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#123D2F] underline underline-offset-2 inline-block"
-              >
-                Consultar registro na fonte original
-              </a>
-            </div>
-          </div>
-
-          <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-2">
-            <div className="flex items-center gap-2 text-xs font-semibold text-amber-800">
-              <AlertTriangle className="w-4 h-4" />
-              Verificação de direitos e procedência
-            </div>
-
-            <p className="text-[11px] text-[#68716A] leading-relaxed">
-              {selectedItem.licenseNotes} A existência de uma imagem na API não
-              garante autorização para seu uso comercial. Verifique as condições
-              da fonte original.
-            </p>
-
-            <label className="flex items-start gap-2 pt-1 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={verifiedRights}
-                onChange={event => setVerifiedRights(event.target.checked)}
-                className="mt-0.5 rounded border-[#CDC5B4] text-[#123D2F]"
-              />
-              <span className="text-xs font-medium text-[#222923]">
-                Confirmo que verifiquei a adequação das condições de imagem,
-                procedência e dados para criação deste lote.
-              </span>
-            </label>
-          </div>
-
-          <div className="flex justify-between pt-4 border-t border-[#E2DDD2]">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(1)}
-              className="px-4 py-2.5 rounded-xl border border-[#E2DDD2] text-[#68716A] text-xs font-medium flex items-center gap-1.5"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setCurrentStep(3)}
-              disabled={!verifiedRights}
-              className="px-6 py-2.5 rounded-xl bg-[#123D2F] text-[#F5F1E7] font-semibold text-xs disabled:opacity-40 flex items-center gap-2"
-            >
-              Configurar Parâmetros
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </section>
-      )}
-
-      {/* ETAPA 3 — Parâmetros */}
-      {currentStep === 3 && selectedItem && (
-        <section className="bg-white rounded-2xl border border-[#E2DDD2] p-6 space-y-6">
-          <div>
-            <h2 className="font-heading font-bold text-lg text-[#123D2F]">
-              Etapa 3 — Parâmetros do Pregão
-            </h2>
-            <p className="text-xs text-[#68716A] mt-1">
-              Os preços serão enviados à API em centavos de real.
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <label
-              htmlFor="lot-title"
-              className="text-xs font-semibold text-[#222923] block"
-            >
-              Título de exibição do lote
-            </label>
-            <input
-              id="lot-title"
-              type="text"
-              value={title}
-              onChange={event => setTitle(event.target.value)}
-              maxLength={200}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#CDC5B4] text-xs focus:ring-2 focus:ring-[#123D2F] focus:outline-hidden"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label
-                htmlFor="lot-category"
-                className="text-xs font-semibold text-[#222923] block"
-              >
-                Categoria
-              </label>
-              <select
-                id="lot-category"
-                value={category}
-                onChange={event =>
-                  setCategory(event.target.value as Lot["category"])
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#CDC5B4] text-xs bg-white"
-              >
-                <option value="Arte">Arte</option>
-                <option value="Esculturas">Esculturas</option>
-                <option value="Objetos de coleção">Objetos de coleção</option>
-                <option value="Mobiliário">Mobiliário</option>
-                <option value="Discos e edições musicais">
-                  Discos e edições musicais
-                </option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label
-                htmlFor="starting-price"
-                className="text-xs font-semibold text-[#222923] block"
-              >
-                Lance inicial (R$)
-              </label>
-              <input
-                id="starting-price"
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={startingPriceBRL}
-                onChange={event =>
-                  setStartingPriceBRL(Number(event.target.value))
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#CDC5B4] text-xs"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label
-                htmlFor="minimum-increment"
-                className="text-xs font-semibold text-[#222923] block"
-              >
-                Incremento mínimo (R$)
-              </label>
-              <input
-                id="minimum-increment"
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={minIncrementBRL}
-                onChange={event =>
-                  setMinIncrementBRL(Number(event.target.value))
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#CDC5B4] text-xs"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label
-                htmlFor="auction-start"
-                className="text-xs font-semibold text-[#222923] block"
-              >
-                Início do pregão
-              </label>
-              <select
-                id="auction-start"
-                value={startsAtHours}
-                onChange={event => setStartsAtHours(Number(event.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#CDC5B4] text-xs bg-white"
-              >
-                <option value={1}>Em 1 hora</option>
-                <option value={12}>Em 12 horas</option>
-                <option value={24}>Em 24 horas</option>
-                <option value={48}>Em 48 horas</option>
-              </select>
-            </div>
-
-            <div className="space-y-1 sm:col-span-2">
-              <label
-                htmlFor="auction-duration"
-                className="text-xs font-semibold text-[#222923] block"
-              >
-                Duração do pregão
-              </label>
-              <select
-                id="auction-duration"
-                value={durationHours}
-                onChange={event => setDurationHours(Number(event.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#CDC5B4] text-xs bg-white"
-              >
-                <option value={1}>1 hora</option>
-                <option value={6}>6 horas</option>
-                <option value={12}>12 horas</option>
-                <option value={24}>24 horas</option>
-                <option value={48}>48 horas</option>
-                <option value={72}>72 horas</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label
-              htmlFor="lot-conditions"
-              className="text-xs font-semibold text-[#222923] block"
-            >
-              Condições especiais e observações do leiloeiro
-            </label>
-            <textarea
-              id="lot-conditions"
-              rows={3}
-              value={conditions}
-              onChange={event => setConditions(event.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#CDC5B4] text-xs leading-relaxed"
-            />
-            <p className="text-[10px] text-[#68716A]">
-              Observação: o endpoint atual de criação não recebe esse campo. Ele
-              permanece na interface, mas ainda não é persistido.
-            </p>
-          </div>
-
-          <div className="flex justify-between pt-4 border-t border-[#E2DDD2]">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(2)}
-              className="px-4 py-2.5 rounded-xl border border-[#E2DDD2] text-[#68716A] text-xs font-medium flex items-center gap-1.5"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                const error = validateLot();
-                if (error) {
-                  setPublishError(error);
-                  return;
-                }
-                setPublishError("");
-                setCurrentStep(4);
-              }}
-              className="px-6 py-2.5 rounded-xl bg-[#123D2F] text-[#F5F1E7] font-semibold text-xs flex items-center gap-2"
-            >
-              Pré-visualizar Lote
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </section>
-      )}
-
-      {/* ETAPA 4 — Prévia */}
-      {currentStep === 4 && selectedItem && (
-        <section className="space-y-6">
-          <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#CDC5B4]">
-            <h2 className="font-heading font-bold text-base text-[#123D2F]">
-              Etapa 4 — Pré-visualização do Lote
-            </h2>
-            <p className="text-xs text-[#68716A] mt-1">
-              Revise as informações antes de publicar na API.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#E2DDD2] p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-[#FAF7F2] border border-[#E2DDD2]">
-              {renderImage(
-                selectedItem.primaryImageUrl,
-                title,
-                "w-full h-full object-cover",
-              )}
-            </div>
-
-            <div className="space-y-4 text-xs">
-              <div>
-                <span className="text-[10px] text-[#68716A] block">
-                  PRÉ-VISUALIZAÇÃO
-                </span>
-                <span className="text-[#68716A] text-[10px] block">
-                  {category}
-                </span>
-                <h3 className="font-heading font-bold text-xl text-[#123D2F] leading-snug mt-1">
-                  {title}
-                </h3>
-              </div>
-
-              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#E2DDD2] space-y-2">
-                <div className="flex justify-between gap-3">
-                  <span className="text-[#68716A]">Lance inicial:</span>
-                  <span className="font-mono font-bold text-base text-[#123D2F]">
-                    {formatBRL(Math.round(startingPriceBRL * 100))}
-                  </span>
+              <div className="space-y-6 p-5 sm:p-8">
+                <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
+                  <div className="h-32 overflow-hidden rounded-2xl bg-surface-base sm:h-32">
+                    <ItemImage
+                      src={selectedItem.primaryImageUrl}
+                      alt={title}
+                      seed={`${selectedItem.externalId}-${title}`}
+                      className="h-full w-full object-cover"
+                      showLabel={false}
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-col justify-center">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
+                      {category || "Sem categoria"}
+                    </span>
+                    <h3 className="mt-1 font-heading text-xl font-bold text-brand-primary">
+                      {title}
+                    </h3>
+                    <p className="mt-1 text-xs text-text-secondary">
+                      Identificador:{" "}
+                      <span className="break-all font-mono text-text-primary">
+                        {publishedLot.id}
+                      </span>
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex justify-between gap-3">
-                  <span className="text-[#68716A]">Incremento mínimo:</span>
-                  <span className="font-semibold text-[#222923]">
-                    {formatBRL(Math.round(minIncrementBRL * 100))}
-                  </span>
+                <div className="mx-auto max-w-3xl rounded-2xl border border-border-subtle bg-surface-base p-4 sm:p-6">
+                  <SummaryRow
+                    label="Lance inicial"
+                    value={formatBRL(publishedLot.startingPriceCents)}
+                    emphasized
+                  />
+                  <SummaryRow
+                    label="Incremento mínimo"
+                    value={formatBRL(publishedLot.minIncrementCents)}
+                  />
+                  <SummaryRow label="Status" value={publishedLot.status} />
+                  <SummaryRow
+                    label="Início do pregão"
+                    value={new Date(publishedLot.startsAt).toLocaleString(
+                      "pt-BR",
+                    )}
+                  />
+                  <SummaryRow
+                    label="Encerramento"
+                    value={new Date(publishedLot.endsAt).toLocaleString(
+                      "pt-BR",
+                    )}
+                  />
                 </div>
 
-                <div className="flex justify-between gap-3">
-                  <span className="text-[#68716A]">Início:</span>
-                  <span className="font-semibold text-[#222923]">
-                    {new Date(
-                      Date.now() + startsAtHours * 60 * 60 * 1000,
-                    ).toLocaleString("pt-BR")}
-                  </span>
-                </div>
-
-                <div className="flex justify-between gap-3">
-                  <span className="text-[#68716A]">Duração:</span>
-                  <span className="font-semibold text-[#222923]">
-                    {durationHours} hora(s)
-                  </span>
+                <div className="flex flex-col justify-center gap-3 border-t border-border-subtle pt-6 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => navigateTo("/lotes")}
+                    className={primaryButtonClassName}
+                  >
+                    Abrir catálogo de lotes
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigateTo("/leiloeiro/lotes")}
+                    className={secondaryButtonClassName}
+                  >
+                    Voltar à gestão de lotes
+                  </button>
                 </div>
               </div>
-
-              <p className="text-[#68716A] leading-relaxed">
-                {selectedItem.description}
-              </p>
-
-              {conditions.trim() && (
-                <div>
-                  <span className="font-semibold text-[#222923] block mb-1">
-                    Condições do leiloeiro
-                  </span>
-                  <p className="text-[#68716A] leading-relaxed">{conditions}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {publishError && (
-            <div
-              role="alert"
-              className="p-3 rounded-xl border border-red-200 bg-red-50 text-xs text-red-800"
-            >
-              {publishError}
-            </div>
+            </section>
           )}
+        </div>
 
-          <div className="flex justify-between pt-4 gap-3">
-            <button
-              type="button"
-              disabled={isPublishing}
-              onClick={() => {
-                setPublishError("");
-                setCurrentStep(3);
-              }}
-              className="px-4 py-2.5 rounded-xl border border-[#E2DDD2] text-[#68716A] text-xs font-medium flex items-center gap-1.5 disabled:opacity-50"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Editar Parâmetros
-            </button>
-
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={isPublishing}
-              className="px-6 py-3 rounded-xl bg-[#123D2F] text-[#F5F1E7] font-semibold text-xs disabled:opacity-50 flex items-center gap-2"
-            >
-              {isPublishing ? (
-                <>
-                  <LoaderCircle className="w-4 h-4 animate-spin" />
-                  Publicando...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 text-[#C8A96A]" />
-                  Publicar Lote
-                </>
-              )}
-            </button>
-          </div>
-        </section>
-      )}
-
-      {/* ETAPA 5 — Confirmação da publicação real */}
-      {currentStep === 5 && selectedItem && publishedLot && (
-        <section className="bg-white rounded-2xl border border-[#E2DDD2] p-8 text-center space-y-5 shadow-lg">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[#EAF7EE] text-[#1E7E34] flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10" />
-          </div>
-
-          <div className="space-y-1">
-            <h2 className="font-heading font-bold text-2xl text-[#123D2F]">
-              Lote publicado
-            </h2>
-            <p className="text-xs text-[#68716A]">
-              A API confirmou o cadastro do lote.
+        {currentStep < 5 && (
+          <footer className="flex flex-col items-center justify-center gap-2 py-2 text-center">
+            <div className="flex items-center gap-2 text-text-secondary">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-medium">
+                Cadastro integrado ao acervo e à API da Lance
+              </span>
+            </div>
+            <p className="text-[10px] text-text-secondary/70">
+              Revise as informações antes de concluir a publicação.
             </p>
-          </div>
-
-          <div className="p-4 bg-[#FAF7F2] rounded-xl border border-[#E2DDD2] max-w-md mx-auto text-xs text-left space-y-3">
-            <div className="flex justify-between gap-3">
-              <span className="text-[#68716A]">Identificador:</span>
-              <span className="font-mono font-semibold text-[#222923] break-all">
-                {publishedLot.id}
-              </span>
-            </div>
-
-            <div className="flex justify-between gap-3">
-              <span className="text-[#68716A]">Título:</span>
-              <span className="font-semibold text-[#222923]">{title}</span>
-            </div>
-
-            <div className="flex justify-between gap-3">
-              <span className="text-[#68716A]">Lance inicial:</span>
-              <span className="font-mono font-bold text-[#123D2F]">
-                {formatBRL(publishedLot.startingPriceCents)}
-              </span>
-            </div>
-
-            <div className="flex justify-between gap-3">
-              <span className="text-[#68716A]">Status:</span>
-              <span className="font-semibold text-[#123D2F]">
-                {publishedLot.status}
-              </span>
-            </div>
-
-            <div className="flex justify-between gap-3">
-              <span className="text-[#68716A]">Início:</span>
-              <span className="text-right">
-                {new Date(publishedLot.startsAt).toLocaleString("pt-BR")}
-              </span>
-            </div>
-
-            <div className="flex justify-between gap-3">
-              <span className="text-[#68716A]">Encerramento:</span>
-              <span className="text-right">
-                {new Date(publishedLot.endsAt).toLocaleString("pt-BR")}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => navigateTo("/lotes")}
-              className="px-5 py-2.5 rounded-xl bg-[#123D2F] text-[#F5F1E7] font-semibold text-xs"
-            >
-              Abrir Catálogo de Lotes
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigateTo("/leiloeiro/lotes")}
-              className="px-5 py-2.5 rounded-xl border border-[#123D2F] text-[#123D2F] font-semibold text-xs"
-            >
-              Voltar à Gestão de Lotes
-            </button>
-          </div>
-        </section>
-      )}
-    </div>
+          </footer>
+        )}
+      </div>
+    </main>
   );
 };

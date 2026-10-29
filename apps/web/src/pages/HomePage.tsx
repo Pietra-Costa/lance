@@ -1,331 +1,475 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { LotCard } from "../components/domain/LotCard";
-import { Search, ArrowRight, Shield, Clock } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  CheckCircle2,
+  Clock3,
+  Gavel,
+  Search,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 export const HomePage: React.FC = () => {
   const { lots, navigateTo } = useApp();
   const [searchTerm, setSearchTerm] = useState("");
 
   const featuredLots = lots
-    .filter(l => l.featured || l.status === "LIVE")
+    .filter(lot => lot.featured || lot.status === "LIVE")
     .slice(0, 3);
-  const liveLots = lots.filter(l => l.status === "LIVE");
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      navigateTo(`/lotes?q=${encodeURIComponent(searchTerm.trim())}`);
-    } else {
-      navigateTo("/lotes");
-    }
+  const liveLots = lots.filter(lot => lot.status === "LIVE");
+
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const query = searchTerm.trim();
+
+    navigateTo(query ? `/lotes?q=${encodeURIComponent(query)}` : "/lotes");
   };
 
-  const categories = [
-    { name: "Arte", count: "12 obras", query: "cat=Arte" },
-    { name: "Esculturas", count: "6 peças", query: "cat=Esculturas" },
-    {
-      name: "Objetos de coleção",
-      count: "9 itens",
-      query: "cat=Objetos de coleção",
-    },
-    { name: "Mobiliário", count: "4 exemplares", query: "cat=Mobiliário" },
-    {
-      name: "Discos e edições musicais",
-      count: "8 títulos",
-      query: "cat=Discos",
-    },
-  ];
+  const categories = useMemo(() => {
+    const labels: Record<string, string> = {
+      Arte: "obras",
+      Esculturas: "peças",
+      "Objetos de coleção": "itens",
+      Mobiliário: "exemplares",
+      "Discos e edições musicais": "títulos",
+    };
+
+    const visibleLots = lots.filter(lot => lot.status !== "CANCELED");
+
+    return Object.entries(labels).map(([name, unit]) => {
+      const matchingLots = visibleLots.filter(lot => lot.category === name);
+
+      return {
+        name,
+        unit,
+        count: matchingLots.length,
+        query: `cat=${encodeURIComponent(name)}`,
+      };
+    });
+  }, [lots]);
 
   return (
-    <div className="space-y-20 pb-16">
-      {/* 1. Hero Section - Editorial and Contemporary */}
-      <section className="relative overflow-hidden pt-8 pb-16 sm:pb-24 border-b border-[#E2DDD2]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7 space-y-6">
-              <h1 className="font-heading font-bold text-4xl sm:text-5xl lg:text-6xl text-[#123D2F] tracking-tight leading-[1.1]">
-                Arte, objetos de coleção e discos.
-              </h1>
+    <main className="overflow-hidden bg-[#F7F5EF] text-[#202820]">
+      {/* HERO */}
+      <section className="relative bg-[#10392D] text-[#F7F5EF]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -right-32 -top-40 h-110 w-110 rounded-full border border-white/[0.07]" />
+          <div className="absolute -right-16 -top-24 h-77.5 w-77.5 rounded-full border border-white/[0.07]" />
+          <div className="absolute bottom-0 left-1/2 h-px w-2/3 bg-linear-to-r from-transparent via-[#C8AA70]/30 to-transparent" />
+        </div>
 
-              <p className="text-base sm:text-lg text-[#68716A] leading-relaxed max-w-xl font-body">
-                Explore lotes singulares com procedência catalogada, participe
-                de disputas em tempo real e acompanhe cada etapa com regras
-                claras e auditoria verificável.
-              </p>
+        <div className="relative mx-auto grid max-w-350 items-center gap-10 px-5 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12 lg:pb-24 lg:pt-20">
+          <div className="relative z-10">
+            <div className="mb-7 inline-flex items-center gap-2 border border-white/15 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D7C49B] sm:text-[11px]">
+              <Sparkles className="h-3.5 w-3.5" />
+              Curadoria · Procedência · Transparência
+            </div>
 
-              {/* Search Bar */}
-              <form
-                onSubmit={handleSearchSubmit}
-                className="max-w-lg w-full relative"
+            <h1 className="max-w-3xl font-heading text-[2.8rem] font-medium leading-[1.04] tracking-[-0.045em] sm:text-6xl lg:text-[4.7rem]">
+              Objetos com
+              <br />
+              <span className="font-normal italic text-[#D2B77E]">
+                história.
+              </span>
+              <br />
+              Novos destinos.
+            </h1>
+
+            <p className="mt-6 max-w-xl text-sm leading-7 text-white/70 sm:mt-7 sm:text-base sm:leading-8">
+              Uma seleção de arte, antiguidades e objetos de coleção. Descubra
+              peças singulares e participe de leilões com regras claras e
+              acompanhamento transparente.
+            </p>
+
+            <form
+              onSubmit={handleSearchSubmit}
+              className="mt-8 flex w-full max-w-xl items-center gap-2 border border-white/20 bg-white/6 p-1.5 backdrop-blur-sm transition-colors focus-within:border-[#D2B77E]/70 sm:mt-10"
+            >
+              <Search className="ml-3 h-5 w-5 shrink-0 text-white/50" />
+
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={event => setSearchTerm(event.target.value)}
+                placeholder="Busque por peça, autor ou categoria"
+                aria-label="Buscar lotes"
+                className="min-w-0 flex-1 bg-transparent px-1 py-3 text-sm text-white outline-none placeholder:text-white/45"
+              />
+
+              <button
+                type="submit"
+                className="inline-flex shrink-0 items-center gap-2 bg-[#D2B77E] px-4 py-3 text-xs font-semibold text-[#17382C] transition-colors hover:bg-[#E1CAA0] sm:px-5"
               >
-                <div className="relative flex items-center">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#68716A] absolute left-3.5 sm:left-4 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="Buscar por obra, autor, categoria..."
-                    className="w-full pl-10 sm:pl-11 pr-20 sm:pr-24 py-3 sm:py-3.5 rounded-xl border border-[#CDC5B4] bg-white text-xs sm:text-sm text-[#222923] placeholder-[#68716A] focus:outline-hidden focus:ring-2 focus:ring-[#123D2F] focus:border-transparent transition-all shadow-xs"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-1.5 sm:right-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#123D2F] hover:bg-[#0A2B22] text-[#F5F1E7] text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-                  >
-                    Buscar
-                  </button>
-                </div>
-              </form>
+                Buscar
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/50">
+              <span>Explore por categoria</span>
+              <span className="text-white/20">/</span>
+              <span>Consulte os lotes disponíveis</span>
+            </div>
+
+            <div className="mt-10 grid max-w-xl grid-cols-2 gap-5 border-t border-white/15 pt-6 sm:mt-12 sm:gap-8">
+              <div>
+                <div className="flex items-center gap-2 text-[#D2B77E]">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.13em] sm:text-[11px]">
+                    Transparência
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-white/60 sm:text-sm">
+                  Trilha pública de auditoria
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 text-[#D2B77E]">
+                  <Clock3 className="h-4 w-4" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.13em] sm:text-[11px]">
+                    Tempo real
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-white/60 sm:text-sm">
+                  Acompanhamento dos lances
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Imagem editorial */}
+          <div className="relative mx-auto w-full max-w-140 lg:ml-auto">
+            <div className="absolute -right-3 -top-3 h-24 w-24 border-r border-t border-[#D2B77E]/60 sm:-right-5 sm:-top-5 sm:h-32 sm:w-32" />
+
+            <div className="relative aspect-[4/4.1] overflow-hidden bg-[#E4DED0] sm:aspect-[4/3.8]">
+              <img
+                src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=85"
+                alt="Detalhes de uma obra de arte em ambiente de galeria"
+                className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.03]"
+                loading="eager"
+              />
+
+              <div className="absolute inset-0 bg-linear-to-t from-[#102B22]/90 via-[#102B22]/10 to-transparent" />
+
+              <div className="absolute left-5 top-5 flex items-center gap-2 border border-white/30 bg-[#17382C]/75 px-3 py-2 backdrop-blur-sm sm:left-7 sm:top-7">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#D2B77E]" />
+                <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white sm:text-[10px]">
+                  Um olhar sobre o acervo
+                </span>
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-[#D2B77E] sm:text-[11px]">
+                  A arte de descobrir
+                </p>
+                <h2 className="mt-3 max-w-sm font-heading text-2xl leading-tight text-white sm:text-3xl">
+                  Cada peça tem algo a contar.
+                </h2>
                 <button
                   onClick={() => navigateTo("/lotes")}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#123D2F] hover:bg-[#0A2B22] text-[#F5F1E7] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:shadow-md"
+                  className="mt-5 inline-flex items-center gap-2 border-b border-[#D2B77E]/70 pb-1.5 text-xs font-medium text-white transition-colors hover:text-[#D2B77E]"
                 >
-                  <span>Explorar leilões</span>
-                  <ArrowRight className="w-4 h-4" />
+                  Explorar o catálogo
+                  <ArrowUpRight className="h-4 w-4" />
                 </button>
-
-                <button
-                  onClick={() => {
-                    const el = document.getElementById("como-funciona");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-[#CDC5B4] hover:bg-white text-[#222923] font-semibold text-sm transition-all text-center cursor-pointer"
-                >
-                  Como funciona
-                </button>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="pt-6 border-t border-[#E2DDD2] flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-[#68716A]">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-[#123D2F] shrink-0" />
-                  <span>Cadeia de auditoria criptográfica</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#123D2F] shrink-0" />
-                  <span>Prorrogação anti-sniping 2 min</span>
-                </div>
               </div>
             </div>
 
-            {/* Right Column: Featured Object Spotlight */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                {/* Decorative border backdrop */}
-                <div className="absolute -inset-2 bg-gradient-to-tr from-[#123D2F]/15 to-[#C8A96A]/20 rounded-2xl transform rotate-1"></div>
-
-                <div className="relative bg-white p-4 rounded-2xl border border-[#E2DDD2] shadow-xl overflow-hidden">
-                  <div className="aspect-4/3 w-full rounded-xl overflow-hidden bg-[#FAF7F2] relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=1000&q=80"
-                      alt="Destaque: Vaso Art Nouveau em Vidro Favrile"
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute top-3 left-3 bg-[#123D2F] text-[#F5F1E7] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      LOTE EM DESTAQUE
-                    </div>
-                    <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[11px] px-2.5 py-1 rounded-md">
-                      The Met Collection · Louis Comfort Tiffany
-                    </div>
-                  </div>
-
-                  <div className="p-4 space-y-2">
-                    <span className="text-[11px] font-mono text-[#68716A]">
-                      LANCE-2026-001
-                    </span>
-                    <h3 className="font-heading font-semibold text-lg text-[#123D2F] leading-snug">
-                      Vaso Art Nouveau em Vidro Favrile Iridescente
-                    </h3>
-                    <div className="flex items-center justify-between pt-2">
-                      <div>
-                        <span className="text-[10px] text-[#68716A] block">
-                          Lance atual
-                        </span>
-                        <span className="font-heading font-bold text-xl text-[#123D2F]">
-                          R$ 18.000,00
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => navigateTo("/lotes/lot-001")}
-                        className="px-3.5 py-2 rounded-lg bg-[#123D2F] text-[#F5F1E7] text-xs font-semibold hover:bg-[#0A2B22] transition-colors cursor-pointer"
-                      >
-                        Participar
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <div className="absolute -bottom-4 -left-2 flex items-center gap-3 border border-[#E7E0D2] bg-[#F7F5EF] px-4 py-3 shadow-lg sm:-bottom-5 sm:-left-5 sm:px-5 sm:py-4">
+              <div className="flex h-9 w-9 items-center justify-center bg-[#10392D] text-[#D2B77E]">
+                <Gavel className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-[#202820]">
+                  Leilões com regras claras
+                </p>
+                <p className="mt-1 text-[10px] text-[#74796F]">
+                  Da oferta ao arremate
+                </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="relative border-t border-white/10">
+          <div className="mx-auto flex max-w-350 items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12">
+            <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 sm:text-[10px]">
+              LANCE — CASA DE LEILÕES
+            </span>
+            <span className="text-right text-[9px] uppercase tracking-[0.15em] text-white/40 sm:text-[10px]">
+              Colecionar é preservar histórias
+            </span>
           </div>
         </div>
       </section>
 
-      {/* 2. Categorias de Catálogo */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
+      {/* CATEGORIAS */}
+      <section className="mx-auto max-w-350 px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-            <h2 className="font-heading font-bold text-2xl text-[#123D2F]">
-              Categorias em Destaque
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#947844] sm:text-[11px]">
+              Explore o acervo
+            </p>
+            <h2 className="mt-3 font-heading text-3xl font-medium tracking-tight text-[#17382C] sm:text-4xl">
+              Encontre sua próxima descoberta.
             </h2>
-            <p className="text-xs text-[#68716A] mt-0.5">
-              Acervos mapeados através de adaptadores The Met, AIC e MusicBrainz
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[#72776D]">
+              Diferentes universos, reunidos em um único catálogo.
             </p>
           </div>
+
           <button
             onClick={() => navigateTo("/lotes")}
-            className="text-xs font-semibold text-[#123D2F] hover:underline flex items-center gap-1 cursor-pointer"
+            className="inline-flex w-fit items-center gap-2 border-b border-[#17382C]/30 pb-2 text-xs font-semibold text-[#17382C] transition-colors hover:border-[#947844] hover:text-[#947844]"
           >
-            <span>Ver catálogo completo</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            Ver catálogo completo
+            <ArrowRight className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {categories.map((cat, idx) => (
+        <div className="mt-9 grid grid-cols-1 gap-px border border-[#E4DFD3] bg-[#E4DFD3] sm:grid-cols-2 lg:grid-cols-5">
+          {categories.map((category, index) => (
             <button
-              key={idx}
-              onClick={() => navigateTo(`/lotes?${cat.query}`)}
-              className={`p-4 rounded-xl bg-white border border-[#E2DDD2] hover:border-[#123D2F] hover:shadow-xs transition-all text-left group cursor-pointer ${
-                idx === 4 ? "col-span-2 sm:col-span-1" : ""
-              }`}
+              key={category.name}
+              onClick={() => navigateTo(`/lotes?${category.query}`)}
+              className="group flex min-h-38.75 flex-col justify-between bg-[#FBFAF6] p-5 text-left transition-colors hover:bg-[#10392D] sm:min-h-43.75 sm:p-6"
             >
-              <h4 className="font-heading font-semibold text-sm text-[#222923] group-hover:text-[#123D2F] transition-colors">
-                {cat.name}
-              </h4>
-              <p className="text-[11px] text-[#68716A] mt-1">{cat.count}</p>
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-heading text-3xl font-normal text-[#C9B990] transition-colors group-hover:text-[#D2B77E]">
+                  0{index + 1}
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-[#A4A398] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#D2B77E]" />
+              </div>
+
+              <div>
+                <h3 className="font-heading text-base font-semibold leading-snug text-[#17382C] transition-colors group-hover:text-white sm:text-lg">
+                  {category.name}
+                </h3>
+                <p className="mt-2 text-xs text-[#85877C] transition-colors group-hover:text-white/60">
+                  {category.count > 0
+                    ? `${category.count} ${category.unit}`
+                    : "Explorar categoria"}
+                </p>
+              </div>
             </button>
           ))}
         </div>
       </section>
 
-      {/* 3. Lotes em Disputa (Ao Vivo) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-          <div>
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-[#123D2F]">
-              Lotes em Disputa ao Vivo
-            </h2>
-            <p className="text-xs sm:text-sm text-[#68716A] mt-1">
-              Peças recebendo lances concorrentes com atualização de liderança
-              em tempo real.
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigateTo("/lotes?status=LIVE")}
-            className="px-4 py-2 rounded-lg border border-[#123D2F] text-[#123D2F] hover:bg-[#123D2F] hover:text-[#F5F1E7] text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-          >
-            <span>Ver todos os lotes ao vivo ({liveLots.length})</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredLots.map(lot => (
-            <LotCard key={lot.id} lot={lot} />
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Como Funciona (3 Etapas Conforme Manual) */}
-      <section
-        id="como-funciona"
-        className="bg-[#FAF7F2] border-y border-[#E2DDD2] py-16"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-            <span className="text-xs uppercase font-mono tracking-widest text-[#C8A96A] font-bold">
-              DINÂMICA OPERACIONAL
-            </span>
-            <h2 className="font-heading font-bold text-3xl text-[#123D2F]">
-              Como Funciona a Lance
-            </h2>
-            <p className="text-sm text-[#68716A]">
-              Sem surpresas ou urgências artificiais. Uma experiência clara de
-              leilão desenhada para proteger o licitante e o leiloeiro.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="p-6 bg-white rounded-2xl border border-[#E2DDD2] space-y-3 relative">
-              <span className="font-heading font-black text-3xl text-[#C8A96A]/60">
-                01
-              </span>
-              <h3 className="font-heading font-semibold text-lg text-[#123D2F]">
-                Explore os lotes
-              </h3>
-              <p className="text-xs text-[#68716A] leading-relaxed">
-                Navegue pelas categorias, consulte o catálogo de peças com
-                procedência registrada de acervos reconhecidos e avalie as
-                características antes da abertura do pregão.
+      {/* LOTES EM DESTAQUE */}
+      <section className="border-y border-[#E4DFD3] bg-[#F0EDE4]">
+        <div className="mx-auto max-w-350 px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <div>
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#947844] sm:text-[11px]">
+                <Sparkles className="h-3.5 w-3.5" />
+                Seleção do catálogo
+              </div>
+              <h2 className="mt-3 font-heading text-3xl font-medium tracking-tight text-[#17382C] sm:text-4xl">
+                Peças que merecem atenção.
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-[#72776D]">
+                Conheça os lotes em destaque e descubra os detalhes de cada
+                peça.
               </p>
             </div>
 
-            {/* Step 2 */}
-            <div className="p-6 bg-white rounded-2xl border border-[#E2DDD2] space-y-3 relative">
-              <span className="font-heading font-black text-3xl text-[#C8A96A]/60">
-                02
-              </span>
-              <h3 className="font-heading font-semibold text-lg text-[#123D2F]">
-                Dê seu lance
-              </h3>
-              <p className="text-xs text-[#68716A] leading-relaxed">
-                Confira o próximo valor mínimo e o incremento obrigatório. Ao
-                confirmar, o saldo é reservado na sua carteira. Se você for
-                superado, sua reserva é liberada de imediato.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="p-6 bg-white rounded-2xl border border-[#E2DDD2] space-y-3 relative">
-              <span className="font-heading font-black text-3xl text-[#C8A96A]/60">
-                03
-              </span>
-              <h3 className="font-heading font-semibold text-lg text-[#123D2F]">
-                Acompanhe o resultado
-              </h3>
-              <p className="text-xs text-[#68716A] leading-relaxed">
-                Veja o encerramento do pregão em tempo real. Caso seu lance seja
-                vencedor, consulte o comprovante de arremate digital verificado
-                na trilha pública de auditoria.
-              </p>
-            </div>
+            <button
+              onClick={() => navigateTo("/lotes")}
+              className="inline-flex w-fit items-center gap-2 border-b border-[#17382C]/30 pb-2 text-xs font-semibold text-[#17382C] transition-colors hover:border-[#947844] hover:text-[#947844]"
+            >
+              Explorar todos os lotes
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
-        </div>
-      </section>
 
-      {/* 5. Transparência & Garantias de Arquitetura */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#0A2B22] text-[#F5F1E7] rounded-3xl p-8 sm:p-12 border border-[#123D2F] relative overflow-hidden">
-          <div className="relative z-10 max-w-3xl space-y-4">
-            <span className="text-xs font-mono uppercase tracking-widest text-[#C8A96A] font-bold">
-              TRANSPARÊNCIA E AUDITORIA PÚBLICA
-            </span>
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-[#F5F1E7]">
-              Histórico rastreável e pseudonimizado
-            </h2>
-            <p className="text-xs sm:text-sm text-[#F5F1E7]/75 leading-relaxed font-body">
-              Cada lance, reserva e encerramento homologado gera um bloco
-              encadeado criptograficamente com assinatura digital Ed25519 e
-              verificação por OpenTimestamps. A identidade dos licitantes
-              permanece rigorosamente protegida por pseudônimos.
-            </p>
-            <div className="pt-2">
+          {featuredLots.length > 0 ? (
+            <div className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+              {featuredLots.map(lot => (
+                <LotCard key={lot.id} lot={lot} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-9 border border-dashed border-[#D6D0C2] bg-[#F7F5EF] px-5 py-12 text-center sm:py-16">
+              <Gavel className="mx-auto h-8 w-8 text-[#A69A7D]" />
+              <h3 className="mt-4 font-heading text-xl text-[#17382C]">
+                Novas peças em preparação
+              </h3>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#72776D]">
+                Enquanto isso, explore o catálogo completo de lotes disponíveis.
+              </p>
               <button
-                onClick={() => navigateTo("/auditoria")}
-                className="px-5 py-3 rounded-xl bg-[#C8A96A] hover:bg-[#C8A96A]/90 text-[#0A2B22] font-semibold text-xs transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
+                onClick={() => navigateTo("/lotes")}
+                className="mt-5 inline-flex items-center gap-2 bg-[#10392D] px-5 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#1B4D3D]"
               >
-                <span>Consultar Trilha de Auditoria</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                Abrir catálogo
+                <ArrowRight className="h-4 w-4" />
               </button>
             </div>
+          )}
+
+          <div className="mt-8 flex flex-col justify-between gap-4 border-t border-[#DCD6C9] pt-5 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2 text-xs text-[#72776D]">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#467C58] opacity-50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#467C58]" />
+              </span>
+              <span>
+                {liveLots.length}{" "}
+                {liveLots.length === 1 ? "leilão ao vivo" : "leilões ao vivo"}{" "}
+                no catálogo
+              </span>
+            </div>
+
+            <button
+              onClick={() => navigateTo("/lotes?status=LIVE")}
+              className="inline-flex w-fit items-center gap-2 text-xs font-semibold text-[#17382C] transition-colors hover:text-[#947844]"
+            >
+              Acompanhar disputas ao vivo
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </section>
-    </div>
+
+      {/* COMO FUNCIONA */}
+      <section
+        id="como-funciona"
+        className="mx-auto max-w-350 px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24"
+      >
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#947844] sm:text-[11px]">
+              Simplicidade em cada etapa
+            </p>
+            <h2 className="mt-3 max-w-md font-heading text-3xl font-medium leading-tight tracking-tight text-[#17382C] sm:text-4xl">
+              Do primeiro olhar ao arremate.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-7 text-[#72776D]">
+              Uma experiência de leilão pensada para que você saiba o que está
+              acontecendo em cada etapa, com informações claras e acompanhamento
+              dos resultados.
+            </p>
+
+            <button
+              onClick={() => navigateTo("/lotes")}
+              className="mt-7 inline-flex items-center gap-2 bg-[#10392D] px-5 py-3.5 text-xs font-semibold text-white transition-colors hover:bg-[#1B4D3D]"
+            >
+              Começar a explorar
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="border-t border-[#DCD6C9]">
+            {[
+              {
+                number: "01",
+                title: "Explore os lotes",
+                description:
+                  "Navegue pelas categorias, examine as informações disponíveis e avalie cada peça antes de participar.",
+              },
+              {
+                number: "02",
+                title: "Faça seu lance",
+                description:
+                  "Confira o próximo valor mínimo e o incremento obrigatório. O sistema gerencia a reserva e a liberação do saldo conforme as regras do leilão.",
+              },
+              {
+                number: "03",
+                title: "Acompanhe o resultado",
+                description:
+                  "Acompanhe a disputa e consulte as informações do arremate caso seu lance seja vencedor.",
+              },
+            ].map(step => (
+              <div
+                key={step.number}
+                className="group grid grid-cols-[42px_1fr] gap-4 border-b border-[#DCD6C9] py-6 sm:grid-cols-[58px_1fr] sm:gap-6 sm:py-8"
+              >
+                <span className="font-heading text-2xl font-normal text-[#B7A67E] transition-colors group-hover:text-[#947844] sm:text-3xl">
+                  {step.number}
+                </span>
+                <div>
+                  <h3 className="font-heading text-lg font-semibold text-[#17382C] sm:text-xl">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-[#72776D]">
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TRANSPARÊNCIA */}
+      <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:px-12 lg:pb-24">
+        <div className="relative mx-auto max-w-350 overflow-hidden bg-[#10392D] px-6 py-10 text-white sm:px-10 sm:py-14 lg:px-16 lg:py-16">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full border border-white/8 sm:-right-10 sm:-top-32 sm:h-96 sm:w-96" />
+          <div className="pointer-events-none absolute -right-5 -top-10 h-56 w-56 rounded-full border border-white/8 sm:h-72 sm:w-72" />
+
+          <div className="relative grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#D2B77E] sm:text-[11px]">
+                <ShieldCheck className="h-4 w-4" />
+                Transparência e auditoria pública
+              </div>
+
+              <h2 className="mt-4 max-w-2xl font-heading text-3xl font-medium leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                Confiança também faz parte do acervo.
+              </h2>
+
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">
+                Consulte a trilha de auditoria e conheça os registros encadeados
+                por hash SHA-256, com mecanismos de verificação pública e
+                proteção da identidade dos licitantes por pseudônimos.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-x-5 gap-y-3 text-xs text-white/70">
+                <span className="inline-flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-[#D2B77E]" />
+                  Registros verificáveis
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-[#D2B77E]" />
+                  Identidades protegidas
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigateTo("/auditoria")}
+              className="inline-flex w-fit items-center justify-center gap-3 bg-[#D2B77E] px-5 py-4 text-xs font-semibold text-[#17382C] transition-colors hover:bg-[#E1CAA0] sm:px-6"
+            >
+              Consultar auditoria
+              <ArrowDownRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* RODAPÉ DA HOME */}
+      <footer className="border-t border-[#E4DFD3] bg-[#F0EDE4]">
+        <div className="mx-auto flex max-w-350 flex-col gap-3 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <div className="flex items-center gap-2">
+            <Gavel className="h-4 w-4 text-[#947844]" />
+            <span className="font-heading text-sm font-semibold tracking-wide text-[#17382C]">
+              LANCE
+            </span>
+            <span className="text-xs text-[#85877C]">Casa de Leilões</span>
+          </div>
+          <p className="text-[10px] leading-5 text-[#85877C] sm:text-right sm:text-xs">
+            Arte, história e transparência em cada disputa.
+          </p>
+        </div>
+      </footer>
+    </main>
   );
 };

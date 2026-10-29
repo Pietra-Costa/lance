@@ -1,20 +1,29 @@
-import React, { useState } from "react";
-import { useApp } from "../context/AppContext";
+﻿import React, { useState } from "react";
+import {
+  useApp } from "../context/AppContext";
 import {
   Wallet as WalletIcon,
   Gavel,
   FileCheck,
-  Clock,
-  ArrowUpRight,
-  ShieldCheck,
   User,
   History,
   AlertTriangle,
   CheckCircle2,
   Lock,
+  Plus,
+  Loader2,
+  X,
+  ArrowDownLeft,
+  Building2,
+  CircleDollarSign,
+  Sparkles,
+  ChevronDown,
+  ArrowUpRight,
+  ShieldCheck
 } from "lucide-react";
 import { formatBRL, formatDateTimeBR } from "../logic/auctionRules";
 import { LotStatusBadge } from "../components/domain/LotStatusBadge";
+import { ItemImage } from "../components/domain/ItemImage";
 
 export interface BidderAreaProps {
   initialTab?:
@@ -25,6 +34,36 @@ export interface BidderAreaProps {
     | "transacoes"
     | "perfil";
 }
+
+type Tab =
+  "dashboard" | "lances" | "arrematados" | "carteira" | "transacoes" | "perfil";
+
+type DepositStage = "form" | "connecting" | "transferring" | "success";
+
+const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
+  { id: "dashboard", label: "VisÃ£o geral", icon: Gavel },
+  { id: "lances", label: "Meus lances", icon: History },
+  { id: "arrematados", label: "Arrematados", icon: FileCheck },
+  { id: "carteira", label: "Carteira", icon: WalletIcon },
+  { id: "transacoes", label: "Extrato", icon: ArrowUpRight },
+  { id: "perfil", label: "Meu perfil", icon: User },
+];
+
+const QUICK_DEPOSIT_AMOUNTS = [10_000, 50_000, 100_000, 500_000];
+
+const panelClass = "rounded-2xl border border-border-subtle bg-white";
+
+const eyebrowClass =
+  "text-[10px] font-semibold uppercase tracking-[0.16em] text-text-secondary";
+
+const primaryButtonClass =
+  "inline-flex min-w-0 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-3 text-xs font-semibold text-surface-base transition-colors hover:bg-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A96A] disabled:cursor-not-allowed disabled:opacity-60";
+
+const secondaryButtonClass =
+  "inline-flex min-w-0 items-center justify-center gap-2 rounded-xl border border-border-strong bg-white px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:border-brand-primary hover:bg-[#FAF7F2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A96A]";
+
+const wait = (milliseconds: number) =>
+  new Promise<void>(resolve => window.setTimeout(resolve, milliseconds));
 
 export const BidderArea: React.FC<BidderAreaProps> = ({
   initialTab = "dashboard",
@@ -38,20 +77,21 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
     myBids,
     navigateTo,
     setSelectedReceiptForModal,
+    deposit,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<
-    | "dashboard"
-    | "lances"
-    | "arrematados"
-    | "carteira"
-    | "transacoes"
-    | "perfil"
-  >(initialTab);
+  const [depositModalOpen, setDepositModalOpen] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositError, setDepositError] = useState<string | null>(null);
+  const [depositSubmitting, setDepositSubmitting] = useState(false);
+  const [depositStage, setDepositStage] = useState<DepositStage>("form");
+  const [completedDepositCents, setCompletedDepositCents] = useState(0);
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   const myBidsLots = lots.filter(lot =>
     myBids.some(bid => bid.lotId === lot.id),
   );
+
   const leadingLots = lots.filter(
     lot =>
       lot.status === "LIVE" && lot.currentLeaderBidderId === currentUser?.id,
@@ -64,699 +104,1324 @@ export const BidderArea: React.FC<BidderAreaProps> = ({
 
   const wonReceipts = receipts;
 
+  const openDepositModal = () => {
+    setDepositError(null);
+    setDepositStage("form");
+    setCompletedDepositCents(0);
+    setDepositModalOpen(true);
+  };
+
+  const closeDepositModal = () => {
+    if (depositSubmitting) return;
+
+    setDepositModalOpen(false);
+    setDepositError(null);
+    setDepositStage("form");
+    setCompletedDepositCents(0);
+  };
+
+  const handleDeposit = async () => {
+    if (depositSubmitting) return;
+
+    setDepositError(null);
+
+    const normalized = depositAmount.replace(/\./g, "").replace(",", ".");
+    const parsed = Number(normalized);
+
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setDepositError("Informe um valor de depÃ³sito vÃ¡lido.");
+      return;
+    }
+
+    const amountCents = Math.round(parsed * 100);
+
+    if (amountCents <= 0 || amountCents > 100_000_000) {
+      setDepositError("O valor deve estar entre R$ 0,01 e R$ 1.000.000,00.");
+      return;
+    }
+
+    setDepositSubmitting(true);
+    setDepositStage("connecting");
+    setCompletedDepositCents(amountCents);
+
+    try {
+      const depositPromise = deposit(amountCents);
+
+      await wait(750);
+      setDepositStage("transferring");
+
+      await Promise.all([depositPromise, wait(1450)]);
+
+      setDepositStage("success");
+
+      await wait(1450);
+
+      setDepositModalOpen(false);
+      setDepositAmount("");
+      setDepositError(null);
+      setDepositStage("form");
+      setCompletedDepositCents(0);
+    } catch (error) {
+      setDepositStage("form");
+      setDepositError(
+        error instanceof Error
+          ? error.message
+          : "NÃ£o foi possÃ­vel registrar o depÃ³sito.",
+      );
+    } finally {
+      setDepositSubmitting(false);
+    }
+  };
+
+  const renderLotSituation = (lot: (typeof lots)[number]) => {
+    const isLeading =
+      lot.status === "LIVE" && lot.currentLeaderBidderId === currentUser?.id;
+
+    const isWon =
+      lot.status === "ENDED" && lot.currentLeaderBidderId === currentUser?.id;
+
+    if (isLeading) {
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-semantic-success/20 bg-semantic-success-bg px-2.5 py-1 text-[10px] font-semibold text-semantic-success">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          Liderando
+        </span>
+      );
+    }
+
+    if (isWon) {
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-gold/40 bg-surface-base px-2.5 py-1 text-[10px] font-semibold text-brand-primary">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          Arrematado
+        </span>
+      );
+    }
+
+    if (lot.status === "LIVE") {
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-semantic-warning/20 bg-semantic-warning-bg px-2.5 py-1 text-[10px] font-semibold text-semantic-warning">
+          <AlertTriangle className="h-3.5 w-3.5" />
+          Superado
+        </span>
+      );
+    }
+
+    return (
+      <span className="text-[10px] font-medium text-text-secondary">
+        NÃ£o arrematado
+      </span>
+    );
+  };
+
+  const selectedTab = tabs.find(tab => tab.id === activeTab) ?? tabs[0];
+  const SelectedTabIcon = selectedTab.icon;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Bidder Header */}
-      <div className="bg-white rounded-2xl border border-[#E2DDD2] p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-[#123D2F] text-[#F5F1E7] flex items-center justify-center font-bold text-xl overflow-hidden border-2 border-[#C8A96A]/40 shrink-0">
-            {currentUser?.avatarUrl ? (
-              <img
-                src={currentUser.avatarUrl}
-                alt={currentUser.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              currentUser?.name.charAt(0)
-            )}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-heading font-bold text-2xl text-[#123D2F]">
-                {currentUser?.name || "Área do Licitante"}
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#123D2F]/10 text-[#123D2F] border border-[#123D2F]/20 uppercase">
-                Licitante Homologado
-              </span>
-            </div>
-            <p className="text-xs text-[#68716A] mt-0.5 font-mono">
-              {currentUser?.email}
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen overflow-x-clip bg-surface-base">
+      <style>{`
+        @keyframes deposit-bank-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(200, 169, 106, 0.12);
+            transform: translateY(0);
+          }
+          50% {
+            box-shadow: 0 0 0 10px rgba(200, 169, 106, 0);
+            transform: translateY(-3px);
+          }
+        }
 
-        {/* Quick Wallet Summary Pill */}
-        <div className="flex items-center justify-between sm:justify-start gap-4 bg-[#FAF7F2] p-3 rounded-xl border border-[#E2DDD2] w-full sm:w-auto">
-          <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-[#68716A] block">
-              SALDO DISPONÍVEL
-            </span>
-            <span className="font-heading font-bold text-xl text-[#123D2F]">
-              {formatBRL(wallet.availableCents)}
-            </span>
-          </div>
-          <div className="h-8 w-px bg-[#E2DDD2]" />
-          <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-[#68716A] block">
-              RESERVAS ATIVAS
-            </span>
-            <span className="font-heading font-semibold text-sm text-[#B45309]">
-              {formatBRL(wallet.reservedCents)}
-            </span>
-          </div>
-        </div>
-      </div>
+        @keyframes deposit-wallet-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(30, 126, 52, 0.10);
+            transform: translateY(0);
+          }
+          50% {
+            box-shadow: 0 0 0 10px rgba(30, 126, 52, 0);
+            transform: translateY(-3px);
+          }
+        }
 
-      {/* Navigation Tabs */}
-      <div className="flex gap-2 border-b border-[#E2DDD2] overflow-x-auto pb-1 text-xs no-scrollbar">
-        <button
-          onClick={() => setActiveTab("dashboard")}
-          className={`px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === "dashboard"
-              ? "bg-[#123D2F] text-[#F5F1E7]"
-              : "text-[#68716A] hover:bg-white hover:text-[#222923]"
-          }`}
-        >
-          <Gavel className="w-3.5 h-3.5" />
-          <span>Visão Geral</span>
-        </button>
+        @keyframes deposit-coin-travel {
+          0% {
+            left: 8%;
+            opacity: 0;
+            transform: translateY(-50%) scale(0.65) rotate(-20deg);
+          }
+          12% { opacity: 1; }
+          45% { transform: translateY(-75%) scale(1) rotate(0deg); }
+          85% { opacity: 1; }
+          100% {
+            left: 88%;
+            opacity: 0;
+            transform: translateY(-50%) scale(0.7) rotate(20deg);
+          }
+        }
 
-        <button
-          onClick={() => setActiveTab("lances")}
-          className={`px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === "lances"
-              ? "bg-[#123D2F] text-[#F5F1E7]"
-              : "text-[#68716A] hover:bg-white hover:text-[#222923]"
-          }`}
-        >
-          <History className="w-3.5 h-3.5" />
-          <span>Meus Lances ({myBidsLots.length})</span>
-        </button>
+        @keyframes deposit-track-glow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
 
-        <button
-          onClick={() => setActiveTab("arrematados")}
-          className={`px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === "arrematados"
-              ? "bg-[#123D2F] text-[#F5F1E7]"
-              : "text-[#68716A] hover:bg-white hover:text-[#222923]"
-          }`}
-        >
-          <FileCheck className="w-3.5 h-3.5" />
-          <span>Arrematados & Comprovantes ({wonReceipts.length})</span>
-        </button>
+        @keyframes deposit-success-pop {
+          0% { opacity: 0; transform: scale(0.55); }
+          70% { opacity: 1; transform: scale(1.08); }
+          100% { opacity: 1; transform: scale(1); }
+        }
 
-        <button
-          onClick={() => setActiveTab("carteira")}
-          className={`px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === "carteira"
-              ? "bg-[#123D2F] text-[#F5F1E7]"
-              : "text-[#68716A] hover:bg-white hover:text-[#222923]"
-          }`}
-        >
-          <WalletIcon className="w-3.5 h-3.5" />
-          <span>Carteira</span>
-        </button>
+        @keyframes deposit-success-ring {
+          0% { opacity: 0.8; transform: scale(0.7); }
+          100% { opacity: 0; transform: scale(1.65); }
+        }
 
-        <button
-          onClick={() => setActiveTab("transacoes")}
-          className={`px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === "transacoes"
-              ? "bg-[#123D2F] text-[#F5F1E7]"
-              : "text-[#68716A] hover:bg-white hover:text-[#222923]"
-          }`}
-        >
-          <History className="w-3.5 h-3.5" />
-          <span>Extrato & Ledger</span>
-        </button>
+        @keyframes deposit-content-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
 
-        <button
-          onClick={() => setActiveTab("perfil")}
-          className={`px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === "perfil"
-              ? "bg-[#123D2F] text-[#F5F1E7]"
-              : "text-[#68716A] hover:bg-white hover:text-[#222923]"
-          }`}
-        >
-          <User className="w-3.5 h-3.5" />
-          <span>Perfil & Regras</span>
-        </button>
-      </div>
+        .deposit-bank-animation {
+          animation: deposit-bank-pulse 1.8s ease-in-out infinite;
+        }
 
-      {/* Tab 1: Dashboard */}
-      {activeTab === "dashboard" && (
-        <div className="space-y-8">
-          {/* Metrics 4-Card Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-[#E2DDD2] shadow-2xs space-y-1">
-              <span className="text-[11px] text-[#68716A] block">
-                Lotes que Você Lidera
-              </span>
-              <p className="font-heading font-extrabold text-2xl text-[#1E7E34]">
-                {leadingLots.length}
-              </p>
-              <span className="text-[10px] text-[#68716A]">
-                Lances ativos no momento
-              </span>
-            </div>
+        .deposit-wallet-animation {
+          animation: deposit-wallet-pulse 1.8s ease-in-out infinite;
+          animation-delay: 0.5s;
+        }
 
-            <div className="bg-white p-5 rounded-2xl border border-[#E2DDD2] shadow-2xs space-y-1">
-              <span className="text-[11px] text-[#68716A] block">
-                Lances Superados
-              </span>
-              <p className="font-heading font-extrabold text-2xl text-[#B45309]">
-                {outbidLots.length}
-              </p>
-              <span className="text-[10px] text-[#68716A]">
-                Aguardando novo lance
-              </span>
+        .deposit-coin-animation {
+          animation: deposit-coin-travel 1.5s cubic-bezier(.45,0,.35,1) infinite;
+        }
+
+        .deposit-track-animation {
+          animation: deposit-track-glow 1.2s ease-in-out infinite;
+        }
+
+        .deposit-success-animation {
+          animation: deposit-success-pop 0.5s cubic-bezier(.2,.8,.2,1) both;
+        }
+
+        .deposit-success-ring {
+          animation: deposit-success-ring 0.8s ease-out both;
+        }
+
+        .deposit-content-animation {
+          animation: deposit-content-in 0.3s ease-out both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .deposit-bank-animation,
+          .deposit-wallet-animation,
+          .deposit-coin-animation,
+          .deposit-track-animation,
+          .deposit-success-animation,
+          .deposit-success-ring,
+          .deposit-content-animation {
+            animation: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="mx-auto w-full min-w-0 max-w-7xl space-y-5 px-3 py-4 sm:space-y-7 sm:px-6 sm:py-9 lg:px-8">
+        {/* CabeÃ§alho */}
+        <header className="relative overflow-hidden rounded-2xl bg-brand-primary text-surface-base">
+          <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border border-accent-gold/20" />
+          <div className="pointer-events-none absolute -right-4 -top-12 h-52 w-52 rounded-full border border-accent-gold/20" />
+          <div className="pointer-events-none absolute bottom-0 right-24 h-40 w-40 rounded-full bg-accent-gold/5 blur-2xl" />
+
+          <div className="relative grid min-w-0 gap-5 p-4 sm:gap-7 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,auto)] lg:items-end lg:p-9">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-accent-gold/50 bg-surface-base/10 text-xl font-bold text-accent-gold sm:h-18 sm:w-18 sm:text-2xl">
+                {currentUser?.avatarUrl ? (
+                  <img
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  currentUser?.name?.charAt(0)?.toUpperCase() || "L"
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-gold sm:tracking-[0.2em]">
+                    Ãrea do licitante
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-surface-base">
+                    <ShieldCheck className="h-3 w-3 text-accent-gold" />
+                    Homologado
+                  </span>
+                </div>
+
+                <h1 className="wrap-break-word font-heading text-xl font-semibold tracking-tight sm:text-3xl">
+                  {currentUser?.name || "Ãrea do Licitante"}
+                </h1>
+
+                <p className="mt-1 break-all text-xs text-surface-base/65">
+                  {currentUser?.email}
+                </p>
+              </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-[#E2DDD2] shadow-2xs space-y-1">
-              <span className="text-[11px] text-[#68716A] block">
-                Lotes Arrematados
-              </span>
-              <p className="font-heading font-extrabold text-2xl text-[#123D2F]">
-                {wonReceipts.length}
-              </p>
-              <span className="text-[10px] text-[#68716A]">
-                Comprovantes emitidos
-              </span>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-[#E2DDD2] shadow-2xs space-y-1">
-              <span className="text-[11px] text-[#68716A] block">
-                Saldo Total em Custódia
-              </span>
-              <p className="font-heading font-extrabold text-2xl text-[#123D2F]">
-                {formatBRL(wallet.balanceCents)}
-              </p>
-              <span className="text-[10px] text-[#68716A]">
-                Disponível: {formatBRL(wallet.availableCents)}
-              </span>
+            <div className="grid min-w-0 grid-cols-2 divide-x divide-white/15 rounded-xl border border-white/15 bg-black/10 lg:min-w-85">
+              <div className="min-w-0 p-3 sm:p-5">
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-surface-base/60 sm:tracking-[0.15em]">
+                  Saldo disponÃ­vel
+                </span>
+                <p className="mt-2 break-all font-heading text-sm font-semibold tabular-nums sm:text-xl">
+                  {formatBRL(wallet.availableCents)}
+                </p>
+              </div>
+              <div className="min-w-0 p-3 sm:p-5">
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-surface-base/60 sm:tracking-[0.15em]">
+                  Em reserva
+                </span>
+                <p className="mt-2 break-all font-heading text-sm font-semibold tabular-nums sm:text-xl">
+                  {formatBRL(wallet.reservedCents)}
+                </p>
+              </div>
             </div>
           </div>
+        </header>
 
-          {/* Active Leading Lots Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-heading font-bold text-lg text-[#123D2F] flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-[#1E7E34]" />
-                <span>Lotes que você está liderando atualmente</span>
-              </h3>
-              <button
-                onClick={() => setActiveTab("lances")}
-                className="text-xs font-semibold text-[#123D2F] hover:underline cursor-pointer"
+        {/* NavegaÃ§Ã£o: dropdown no mobile e abas no desktop */}
+        <nav aria-label="NavegaÃ§Ã£o da Ã¡rea do licitante" className="min-w-0">
+          <div className="relative sm:hidden">
+            <label
+              htmlFor="bidder-tab-select"
+              className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-text-secondary"
+            >
+              Navegar pela sua Ã¡rea
+            </label>
+
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-accent-gold">
+                <SelectedTabIcon className="h-4 w-4" />
+              </div>
+
+              <select
+                id="bidder-tab-select"
+                value={activeTab}
+                onChange={event => setActiveTab(event.target.value as Tab)}
+                className="w-full appearance-none rounded-xl border border-border-strong bg-white py-4 pl-11 pr-11 text-sm font-semibold text-brand-primary shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
               >
-                Ver todos os lances
-              </button>
+                {tabs.map(({ id, label }) => {
+                  const count =
+                    id === "lances"
+                      ? myBidsLots.length
+                      : id === "arrematados"
+                        ? wonReceipts.length
+                        : null;
+
+                  return (
+                    <option key={id} value={id}>
+                      {label}
+                      {count !== null ? ` (${count})` : ""}
+                    </option>
+                  );
+                })}
+              </select>
+
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+            </div>
+          </div>
+
+          <div className="hidden overflow-x-auto overflow-y-hidden border-b border-border-strong sm:block">
+            <div className="flex min-w-max">
+              {tabs.map(({ id, label, icon: Icon }) => {
+                const selected = activeTab === id;
+                const count =
+                  id === "lances"
+                    ? myBidsLots.length
+                    : id === "arrematados"
+                      ? wonReceipts.length
+                      : null;
+
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    aria-current={selected ? "page" : undefined}
+                    className={`relative inline-flex shrink-0 items-center gap-2 px-4 py-4 text-xs font-semibold transition-colors ${
+                      selected
+                        ? "text-brand-primary"
+                        : "text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${
+                        selected ? "text-brand-primary" : "text-text-secondary"
+                      }`}
+                    />
+                    <span>{label}</span>
+                    {count !== null && (
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${
+                          selected
+                            ? "bg-brand-primary text-surface-base"
+                            : "bg-border-subtle text-text-secondary"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                    {selected && (
+                      <span className="absolute inset-x-0 -bottom-px h-0.5 bg-accent-gold" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
+
+        {/* VisÃ£o geral */}
+        {activeTab === "dashboard" && (
+          <div className="min-w-0 space-y-8">
+            <section>
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className={eyebrowClass}>Seu painel</p>
+                  <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                    VisÃ£o geral
+                  </h2>
+                </div>
+                <span className="hidden text-xs text-text-secondary sm:block">
+                  Resumo da sua atividade na Lance
+                </span>
+              </div>
+
+              <div className="grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 xl:grid-cols-4">
+                <div className="min-w-0 rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                  <span className="text-xs leading-relaxed text-text-secondary">
+                    Lotes liderados
+                  </span>
+                  <p className="mt-4 font-heading text-3xl font-semibold tabular-nums text-brand-primary">
+                    {leadingLots.length}
+                  </p>
+                  <p className="mt-1 text-[10px] text-text-secondary">
+                    Lances ativos na lideranÃ§a
+                  </p>
+                </div>
+
+                <div className="min-w-0 rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                  <span className="text-xs leading-relaxed text-text-secondary">
+                    Lances superados
+                  </span>
+                  <p className="mt-4 font-heading text-3xl font-semibold tabular-nums text-semantic-warning">
+                    {outbidLots.length}
+                  </p>
+                  <p className="mt-1 text-[10px] text-text-secondary">
+                    PregÃµes ainda em andamento
+                  </p>
+                </div>
+
+                <div className="min-w-0 rounded-2xl border border-border-subtle bg-white p-4 sm:p-5">
+                  <span className="text-xs leading-relaxed text-text-secondary">
+                    Arrematados
+                  </span>
+                  <p className="mt-4 font-heading text-3xl font-semibold tabular-nums text-brand-primary">
+                    {wonReceipts.length}
+                  </p>
+                  <p className="mt-1 text-[10px] text-text-secondary">
+                    Comprovantes emitidos
+                  </p>
+                </div>
+
+                <div className="min-w-0 rounded-2xl border border-accent-gold/50 bg-brand-primary p-4 text-surface-base sm:p-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-accent-gold">
+                      <WalletIcon className="h-4 w-4" />
+                    </span>
+                  </div>
+                  <p className="mt-4 break-all font-heading text-xl font-semibold tabular-nums sm:text-3xl">
+                    {formatBRL(wallet.balanceCents)}
+                  </p>
+                  <p className="mt-1 wrap-break-word text-[10px] text-white/60">
+                    DisponÃ­vel: {formatBRL(wallet.availableCents)}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="flex min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border-subtle bg-white p-4 sm:flex-row sm:items-center sm:p-6">
+              <div className="min-w-0">
+                <p className={eyebrowClass}>Acesso rÃ¡pido</p>
+                <h3 className="mt-1 font-heading text-lg font-semibold text-brand-primary">
+                  O que deseja fazer?
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                  Gerencie seus recursos ou encontre seu prÃ³ximo lote.
+                </p>
+              </div>
+
+              <div className="grid w-full grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:w-auto sm:flex sm:flex-wrap">
+                <button
+                  onClick={openDepositModal}
+                  className={`${primaryButtonClass} w-full sm:w-auto`}
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  Depositar saldo
+                </button>
+                <button
+                  onClick={() => setActiveTab("carteira")}
+                  className={`${secondaryButtonClass} w-full sm:w-auto`}
+                >
+                  Minha carteira
+                </button>
+                <button
+                  onClick={() => navigateTo("/lotes")}
+                  className={`${secondaryButtonClass} w-full sm:w-auto`}
+                >
+                  Explorar lotes
+                  <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
+                </button>
+              </div>
+            </section>
+
+            <section className="min-w-0">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <p className={eyebrowClass}>PregÃµes em andamento</p>
+                  <h3 className="mt-1 font-heading text-lg font-semibold text-brand-primary sm:text-xl">
+                    Lotes sob sua lideranÃ§a
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setActiveTab("lances")}
+                  className="shrink-0 text-xs font-semibold text-brand-primary underline decoration-accent-gold underline-offset-4 hover:text-brand-deep"
+                >
+                  Ver meus lances
+                </button>
+              </div>
+
+              {leadingLots.length > 0 ? (
+                <div className="grid min-w-0 gap-3 lg:grid-cols-2">
+                  {leadingLots.map(lot => (
+                    <article
+                      key={lot.id}
+                      className="flex min-w-0 flex-col gap-3 rounded-2xl border border-semantic-success/25 bg-white p-4 transition-colors hover:border-semantic-success/50 min-[480px]:flex-row min-[480px]:items-center min-[480px]:gap-4"
+                    >
+                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-base">
+                        <ItemImage
+                          src={lot.itemSnapshot.primaryImageUrl}
+                          alt={lot.title}
+                          seed={lot.id}
+                          className="h-full w-full object-cover"
+                          showLabel={false}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="font-mono text-[10px] font-semibold text-text-secondary">
+                          {lot.code}
+                        </span>
+                        <h4 className="wrap-break-word font-heading text-sm font-semibold text-text-primary">
+                          {lot.title}
+                        </h4>
+                        <p className="mt-1 wrap-break-word text-xs font-semibold text-semantic-success">
+                          Seu lance: {formatBRL(lot.currentBidCents)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => navigateTo(`/lotes/${lot.id}`)}
+                        className={`${secondaryButtonClass} w-full sm:w-auto`}
+                      >
+                        Acompanhar
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className={`${panelClass} px-5 py-12 text-center`}>
+                  <Gavel className="mx-auto h-7 w-7 text-accent-gold" />
+                  <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                    Nenhum lote sob sua lideranÃ§a
+                  </p>
+                  <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-text-secondary">
+                    Explore o catÃ¡logo para encontrar lotes e participar dos
+                    prÃ³ximos pregÃµes.
+                  </p>
+                  <button
+                    onClick={() => navigateTo("/lotes")}
+                    className={`${primaryButtonClass} mt-5 w-full sm:w-auto`}
+                  >
+                    Explorar catÃ¡logo
+                    <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+
+        {/* Meus lances */}
+        {activeTab === "lances" && (
+          <section className={`${panelClass} min-w-0 overflow-hidden`}>
+            <div className="border-b border-border-subtle p-4 sm:p-7">
+              <p className={eyebrowClass}>Sua atividade</p>
+              <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                    HistÃ³rico de lances
+                  </h2>
+                  <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                    Acompanhe sua posiÃ§Ã£o e os valores atuais de cada lote.
+                  </p>
+                </div>
+                <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-primary">
+                  {myBidsLots.length}{" "}
+                  {myBidsLots.length === 1 ? "lote" : "lotes"}
+                </span>
+              </div>
             </div>
 
-            {leadingLots.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {leadingLots.map(lot => (
-                  <div
+            {myBidsLots.length > 0 ? (
+              <div className="divide-y divide-border-subtle">
+                {myBidsLots.map(lot => (
+                  <article
                     key={lot.id}
-                    className="p-4 bg-white rounded-2xl border border-[#1E7E34]/30 shadow-xs flex items-center justify-between gap-4"
+                    className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5"
                   >
-                    <img
-                      src={lot.itemSnapshot.primaryImageUrl}
-                      alt={lot.title}
-                      className="w-16 h-16 rounded-xl object-cover shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <span className="font-mono text-[10px] text-[#123D2F] font-bold">
-                        {lot.code}
-                      </span>
-                      <h4 className="font-heading font-semibold text-xs text-[#222923] truncate">
-                        {lot.title}
-                      </h4>
-                      <p className="text-xs font-bold text-[#1E7E34] mt-0.5">
-                        Seu lance líder: {formatBRL(lot.currentBidCents)}
-                      </p>
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-base">
+                        <ItemImage
+                          src={lot.itemSnapshot.primaryImageUrl}
+                          alt={lot.title}
+                          seed={lot.id}
+                          className="h-full w-full object-cover"
+                          showLabel={false}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-[10px] text-text-secondary">
+                            {lot.code}
+                          </span>
+                          <LotStatusBadge status={lot.status} size="sm" />
+                        </div>
+                        <h3 className="wrap-break-word font-heading text-sm font-semibold text-text-primary">
+                          {lot.title}
+                        </h3>
+                        <div className="mt-2">{renderLotSituation(lot)}</div>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => navigateTo(`/lotes/${lot.id}`)}
-                      className="px-3 py-2 rounded-lg bg-[#123D2F] text-[#F5F1E7] text-xs font-medium hover:bg-[#0A2B22] cursor-pointer shrink-0"
-                    >
-                      Acompanhar
-                    </button>
-                  </div>
+
+                    <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border-subtle pt-3 sm:border-0 sm:pt-0">
+                      <div className="min-w-0">
+                        <span className={eyebrowClass}>Lance atual</span>
+                        <p className="mt-1 wrap-break-word font-heading text-base font-semibold text-brand-primary">
+                          {formatBRL(lot.currentBidCents)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => navigateTo(`/lotes/${lot.id}`)}
+                        className={`${secondaryButtonClass} shrink-0`}
+                      >
+                        Abrir lote
+                        <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
+                      </button>
+                    </div>
+                  </article>
                 ))}
               </div>
             ) : (
-              <div className="p-8 bg-white rounded-2xl border border-[#E2DDD2] text-center text-xs text-[#68716A]">
-                Você ainda não lidera nenhum lote no momento. Explore o catálogo
-                para enviar ofertas!
+              <div className="px-5 py-14 text-center">
+                <History className="mx-auto h-7 w-7 text-accent-gold" />
+                <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                  Nenhum lance registrado
+                </p>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Seus lotes participantes aparecerÃ£o nesta Ã¡rea.
+                </p>
+                <button
+                  onClick={() => navigateTo("/lotes")}
+                  className={`${primaryButtonClass} mt-5 w-full sm:w-auto`}
+                >
+                  Explorar lotes
+                </button>
               </div>
             )}
-          </div>
-        </div>
-      )}
+          </section>
+        )}
 
-      {/* Tab 2: Meus Lances */}
-      {activeTab === "lances" && (
-        <div className="bg-white rounded-2xl border border-[#E2DDD2] overflow-hidden shadow-2xs">
-          <div className="p-6 border-b border-[#E2DDD2]">
-            <h3 className="font-heading font-bold text-lg text-[#123D2F]">
-              Histórico de Participação em Lotes
-            </h3>
-            <p className="text-xs text-[#68716A] mt-0.5">
-              Acompanhe a posição dos seus lances e valores vigentes em cada
-              pregão.
-            </p>
-          </div>
-
-          {myBidsLots.length > 0 ? (
+        {/* Arrematados */}
+        {activeTab === "arrematados" && (
+          <section className="min-w-0 space-y-5">
             <div>
-              {/* Mobile Card List (sm:hidden) */}
-              <div className="block sm:hidden divide-y divide-[#E2DDD2]">
-                {myBidsLots.map(lot => {
-                  const isLeading =
-                    lot.status === "LIVE" &&
-                    lot.currentLeaderBidderId === currentUser?.id;
-                  const isWon =
-                    lot.status === "ENDED" &&
-                    lot.currentLeaderBidderId === currentUser?.id;
+              <p className={eyebrowClass}>HistÃ³rico de aquisiÃ§Ãµes</p>
+              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                Arrematados e comprovantes
+              </h2>
+              <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                Consulte os dados dos lotes arrematados e seus certificados
+                digitais de verificaÃ§Ã£o.
+              </p>
+            </div>
 
-                  return (
-                    <div key={lot.id} className="p-4 space-y-3">
-                      <div className="flex items-start gap-3">
-                        <img
-                          src={lot.itemSnapshot.primaryImageUrl}
-                          alt={lot.title}
-                          className="w-14 h-14 rounded-xl object-cover shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[10px] text-[#68716A] font-bold">
-                              {lot.code}
-                            </span>
-                            <LotStatusBadge status={lot.status} size="sm" />
-                          </div>
-                          <h4 className="font-heading font-semibold text-xs text-[#222923] mt-0.5 line-clamp-1">
-                            {lot.title}
-                          </h4>
-                          <div className="mt-1">
-                            {isLeading ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#1E7E34] bg-[#EAF7EE] px-2 py-0.5 rounded-full">
-                                <CheckCircle2 className="w-3 h-3" />
-                                Liderando
-                              </span>
-                            ) : isWon ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#123D2F] bg-[#F5F1E7] px-2 py-0.5 rounded-full">
-                                <CheckCircle2 className="w-3 h-3 text-[#1E7E34]" />
-                                Arrematado
-                              </span>
-                            ) : lot.status === "LIVE" ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#B45309] bg-[#FEF3C7] px-2 py-0.5 rounded-full">
-                                <AlertTriangle className="w-3 h-3" />
-                                Superado
-                              </span>
-                            ) : (
-                              <span className="text-[10px] text-[#68716A]">
-                                Não arrematado
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-2.5 bg-[#FAF7F2] rounded-xl border border-[#E2DDD2] flex items-center justify-between text-xs">
-                        <div>
-                          <span className="text-[10px] text-[#68716A] block">
-                            Lance Atual:
-                          </span>
-                          <span className="font-mono font-bold text-sm text-[#123D2F]">
-                            {formatBRL(lot.currentBidCents)}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => navigateTo(`/lotes/${lot.id}`)}
-                          className="px-3 py-1.5 rounded-lg bg-[#123D2F] text-[#F5F1E7] font-semibold text-xs hover:bg-[#0A2B22] transition-colors cursor-pointer"
-                        >
-                          Abrir lote
-                        </button>
+            {wonReceipts.length > 0 ? (
+              <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+                {wonReceipts.map(rec => (
+                  <article
+                    key={rec.id}
+                    className={`${panelClass} min-w-0 overflow-hidden transition-shadow hover:shadow-md`}
+                  >
+                    <div className="flex min-w-0 gap-3 p-4 sm:gap-4 sm:p-5">
+                      <img
+                        src={rec.itemImageUrl}
+                        alt={rec.lotTitle}
+                        className="h-20 w-20 shrink-0 rounded-xl bg-surface-base object-cover sm:h-28 sm:w-28"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="font-mono text-[10px] font-semibold tracking-wider text-text-secondary">
+                          {rec.lotCode}
+                        </span>
+                        <h3 className="mt-1 wrap-break-word font-heading text-base font-semibold leading-snug text-text-primary">
+                          {rec.lotTitle}
+                        </h3>
+                        <p className="mt-2 text-[11px] text-text-secondary">
+                          Arrematado em {formatDateTimeBR(rec.closedAt)}
+                        </p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
 
-              {/* Desktop Table (hidden sm:block) */}
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FAF7F2] text-[#68716A] font-medium border-b border-[#E2DDD2]">
-                    <tr>
-                      <th className="py-3 px-4">Lote</th>
-                      <th className="py-3 px-4">Estado do Pregão</th>
-                      <th className="py-3 px-4">Seu Lance</th>
-                      <th className="py-3 px-4">Lance Atual</th>
-                      <th className="py-3 px-4">Sua Situação</th>
-                      <th className="py-3 px-4 text-right">Ação</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E2DDD2]">
-                    {myBidsLots.map(lot => {
-                      const isLeading =
-                        lot.status === "LIVE" &&
-                        lot.currentLeaderBidderId === currentUser?.id;
-                      const isWon =
-                        lot.status === "ENDED" &&
-                        lot.currentLeaderBidderId === currentUser?.id;
+                    <div className="mx-4 border-t border-dashed border-border-strong sm:mx-5" />
 
-                      return (
-                        <tr
-                          key={lot.id}
-                          className="hover:bg-[#FAF7F2]/50 transition-colors"
-                        >
-                          <td className="py-4 px-4 flex items-center gap-3">
-                            <img
-                              src={lot.itemSnapshot.primaryImageUrl}
-                              alt={lot.title}
-                              className="w-12 h-12 rounded-lg object-cover shrink-0"
-                            />
-                            <div>
-                              <span className="font-mono text-[10px] text-[#68716A] block">
-                                {lot.code}
-                              </span>
-                              <span className="font-heading font-semibold text-xs text-[#222923]">
-                                {lot.title}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <LotStatusBadge status={lot.status} size="sm" />
-                          </td>
-                          <td className="py-4 px-4 font-mono font-bold text-[#222923]">
-                            {formatBRL(lot.currentBidCents)}
-                          </td>
-                          <td className="py-4 px-4 font-mono text-[#123D2F] font-semibold">
-                            {formatBRL(lot.currentBidCents)}
-                          </td>
-                          <td className="py-4 px-4">
-                            {isLeading ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1E7E34] bg-[#EAF7EE] px-2 py-0.5 rounded-full">
-                                <CheckCircle2 className="w-3 h-3" />
-                                Liderando
-                              </span>
-                            ) : isWon ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#123D2F] bg-[#F5F1E7] px-2 py-0.5 rounded-full">
-                                <CheckCircle2 className="w-3 h-3 text-[#1E7E34]" />
-                                Arrematado
-                              </span>
-                            ) : lot.status === "LIVE" ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#B45309] bg-[#FEF3C7] px-2 py-0.5 rounded-full">
-                                <AlertTriangle className="w-3 h-3" />
-                                Superado
-                              </span>
-                            ) : (
-                              <span className="text-[11px] text-[#68716A]">
-                                Não arrematado
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-4 px-4 text-right">
-                            <button
-                              onClick={() => navigateTo(`/lotes/${lot.id}`)}
-                              className="px-3 py-1.5 rounded-lg border border-[#123D2F] text-[#123D2F] font-semibold text-xs hover:bg-[#123D2F] hover:text-[#F5F1E7] transition-all cursor-pointer"
-                            >
-                              Abrir lote
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            <div className="p-12 text-center text-xs text-[#68716A]">
-              Nenhum lance registrado até o momento.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tab 3: Arrematados & Comprovantes */}
-      {activeTab === "arrematados" && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-[#E2DDD2] p-6 shadow-2xs">
-            <h3 className="font-heading font-bold text-lg text-[#123D2F]">
-              Lotes Arrematados & Certificados Digitais
-            </h3>
-            <p className="text-xs text-[#68716A] mt-0.5">
-              Consulte comprovantes com código de verificação emitidos após a
-              liquidação.
-            </p>
-          </div>
-
-          {wonReceipts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {wonReceipts.map(rec => (
-                <div
-                  key={rec.id}
-                  className="bg-white rounded-2xl border border-[#E2DDD2] p-5 shadow-xs space-y-4"
-                >
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={rec.itemImageUrl}
-                      alt={rec.lotTitle}
-                      className="w-20 h-20 rounded-xl object-cover shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className="font-mono text-xs font-bold text-[#123D2F]">
-                        {rec.lotCode}
-                      </span>
-                      <h4 className="font-heading font-semibold text-sm text-[#222923] line-clamp-2">
-                        {rec.lotTitle}
-                      </h4>
-                      <p className="text-xs text-[#68716A] mt-1">
-                        Arrematado em: {formatDateTimeBR(rec.closedAt)}
-                      </p>
+                    <div className="grid min-w-0 grid-cols-1 gap-3 p-4 min-[420px]:grid-cols-2 sm:gap-4 sm:p-5">
+                      <div className="min-w-0">
+                        <span className={eyebrowClass}>Valor final</span>
+                        <p className="mt-1 wrap-break-word font-heading text-base font-semibold tabular-nums text-brand-primary sm:text-lg">
+                          {formatBRL(rec.finalPriceCents)}
+                        </p>
+                      </div>
+                      <div className="min-w-0 min-[420px]:text-right">
+                        <span className={eyebrowClass}>VerificaÃ§Ã£o</span>
+                        <p className="mt-2 break-all font-mono text-xs font-semibold text-brand-primary">
+                          {rec.verificationCode}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#E2DDD2] flex items-center justify-between text-xs">
-                    <div>
-                      <span className="text-[#68716A] block text-[10px]">
-                        Valor Final:
-                      </span>
-                      <span className="font-heading font-bold text-base text-[#123D2F]">
-                        {formatBRL(rec.finalPriceCents)}
-                      </span>
+                    <div className="border-t border-border-subtle bg-[#FAF7F2] p-4 sm:px-5">
+                      <button
+                        onClick={() => setSelectedReceiptForModal(rec)}
+                        className={`${primaryButtonClass} w-full`}
+                      >
+                        <FileCheck className="h-4 w-4 shrink-0 text-accent-gold" />
+                        Visualizar comprovante oficial
+                      </button>
                     </div>
-                    <div className="text-right">
-                      <span className="text-[#68716A] block text-[10px]">
-                        Autenticidade:
-                      </span>
-                      <span className="font-mono text-[11px] font-semibold text-[#123D2F]">
-                        {rec.verificationCode}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setSelectedReceiptForModal(rec)}
-                    className="w-full py-2.5 rounded-xl bg-[#123D2F] hover:bg-[#0A2B22] text-[#F5F1E7] text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                  >
-                    <FileCheck className="w-4 h-4 text-[#C8A96A]" />
-                    <span>Visualizar Comprovante Oficial</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-2xl border border-[#E2DDD2] p-12 text-center text-xs text-[#68716A] space-y-3">
-              <p>Você ainda não arrematou lotes.</p>
-              <button
-                onClick={() => navigateTo("/lotes")}
-                className="px-4 py-2 rounded-xl bg-[#123D2F] text-[#F5F1E7] font-semibold text-xs cursor-pointer"
-              >
-                Explorar Lotes no Catálogo
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tab 4: Carteira */}
-      {activeTab === "carteira" && (
-        <div className="space-y-6">
-          <div className="bg-[#FAF7F2] rounded-2xl border border-[#CDC5B4] p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <WalletIcon className="w-5 h-5 text-[#123D2F]" />
-              <h3 className="font-heading font-bold text-lg text-[#123D2F]">
-                Carteira & Gestão de Saldos
-              </h3>
-            </div>
-            <p className="text-xs text-[#68716A] leading-relaxed">
-              Em conformidade com a especificação técnica da plataforma Lance, o
-              valor comprometido no seu maior lance ativo fica reservado. Quando
-              superado, a reserva é devolvida automaticamente ao saldo
-              disponível.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="bg-white p-4 rounded-xl border border-[#E2DDD2]">
-                <span className="text-[11px] text-[#68716A] block">
-                  Saldo Total em Custódia
-                </span>
-                <span className="font-heading font-bold text-2xl text-[#222923]">
-                  {formatBRL(wallet.balanceCents)}
-                </span>
+                  </article>
+                ))}
               </div>
-              <div className="bg-white p-4 rounded-xl border border-[#E2DDD2]">
-                <span className="text-[11px] text-[#68716A] block">
-                  Valor Reservado (Lances Ativos)
-                </span>
-                <span className="font-heading font-bold text-2xl text-[#B45309]">
-                  {formatBRL(wallet.reservedCents)}
-                </span>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-[#1E7E34]/40">
-                <span className="text-[11px] text-[#1E7E34] block font-semibold">
-                  Saldo Líquido Disponível
-                </span>
-                <span className="font-heading font-bold text-2xl text-[#1E7E34]">
-                  {formatBRL(wallet.availableCents)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab 5: Extrato & Ledger */}
-      {activeTab === "transacoes" && (
-        <div className="bg-white rounded-2xl border border-[#E2DDD2] overflow-hidden shadow-2xs">
-          <div className="p-6 border-b border-[#E2DDD2]">
-            <h3 className="font-heading font-bold text-lg text-[#123D2F]">
-              Ledger de Transações da Carteira
-            </h3>
-            <p className="text-xs text-[#68716A] mt-0.5">
-              Registro append-only de aportes, bloqueios e liberações de
-              reservas com chave de idempotência.
-            </p>
-          </div>
-
-          {/* Mobile Card List (sm:hidden) */}
-          <div className="block sm:hidden divide-y divide-[#E2DDD2]">
-            {transactions.map(tx => (
-              <div key={tx.id} className="p-4 space-y-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded bg-[#F5F1E7] text-[#123D2F] border border-[#CDC5B4]">
-                    {tx.type}
-                  </span>
-                  <span
-                    className={`font-mono font-bold text-sm ${
-                      tx.type === "DEPOSIT"
-                        ? "text-[#1E7E34]"
-                        : tx.type === "RESERVATION_HOLD"
-                          ? "text-[#B45309]"
-                          : "text-[#222923]"
-                    }`}
-                  >
-                    {tx.type === "DEPOSIT" ? "+" : ""}
-                    {formatBRL(tx.amountCents)}
-                  </span>
-                </div>
-                <p className="font-medium text-[#222923] text-xs leading-snug">
-                  {tx.description}
+            ) : (
+              <div className={`${panelClass} px-5 py-14 text-center`}>
+                <FileCheck className="mx-auto h-7 w-7 text-accent-gold" />
+                <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                  Nenhum lote arrematado
                 </p>
-                <div className="flex items-center justify-between text-[10px] text-[#68716A] pt-1">
-                  <span>{formatDateTimeBR(tx.createdAt)}</span>
-                  <span className="font-mono truncate max-w-[150px]">
-                    {tx.idempotencyKey}
+                <p className="mt-1 text-xs text-text-secondary">
+                  Seus comprovantes estarÃ£o disponÃ­veis aqui apÃ³s os arremates.
+                </p>
+                <button
+                  onClick={() => navigateTo("/lotes")}
+                  className={`${primaryButtonClass} mt-5 w-full sm:w-auto`}
+                >
+                  Explorar catÃ¡logo
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Carteira */}
+        {activeTab === "carteira" && (
+          <section className="min-w-0 space-y-5">
+            <div>
+              <p className={eyebrowClass}>GestÃ£o financeira</p>
+              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                Sua carteira
+              </h2>
+              <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                Consulte seus saldos e acompanhe os valores comprometidos em
+                lances ativos.
+              </p>
+            </div>
+
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-accent-gold/50 bg-brand-primary text-surface-base">
+              <div className="flex min-w-0 flex-col gap-5 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-7">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-accent-gold">
+                    <WalletIcon className="h-5 w-5 shrink-0" />
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] sm:tracking-[0.18em]">
+                      Saldo total em custÃ³dia
+                    </span>
+                  </div>
+                  <p className="mt-3 break-all font-heading text-2xl font-semibold tabular-nums sm:text-4xl">
+                    {formatBRL(wallet.balanceCents)}
+                  </p>
+                  <p className="mt-2 text-xs text-white/60">
+                    Total mantido na carteira simulada.
+                  </p>
+                </div>
+                <button
+                  onClick={openDepositModal}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-gold px-4 py-3 text-xs font-semibold text-brand-primary transition-colors hover:bg-[#D8BC82] sm:w-auto sm:shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  Depositar saldo
+                </button>
+              </div>
+
+              <div className="grid min-w-0 grid-cols-1 divide-y divide-white/10 border-t border-white/15 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+                <div className="min-w-0 p-4 sm:p-5">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
+                    DisponÃ­vel
                   </span>
+                  <p className="mt-2 break-all font-heading text-lg font-semibold tabular-nums text-surface-base sm:text-xl">
+                    {formatBRL(wallet.availableCents)}
+                  </p>
+                  <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-accent-gold"
+                      style={{
+                        width: `${
+                          wallet.balanceCents > 0
+                            ? Math.min(
+                                100,
+                                (wallet.availableCents / wallet.balanceCents) *
+                                  100,
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="min-w-0 p-4 sm:p-5">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
+                    Reservado
+                  </span>
+                  <p className="mt-2 break-all font-heading text-lg font-semibold tabular-nums text-accent-gold sm:text-xl">
+                    {formatBRL(wallet.reservedCents)}
+                  </p>
+                  <p className="mt-2 text-[10px] leading-relaxed text-white/50">
+                    Valores comprometidos nos maiores lances ativos.
+                  </p>
+                </div>
+
+                <div className="min-w-0 p-4 sm:p-5">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
+                    DepÃ³sitos
+                  </span>
+                  <p className="mt-2 font-heading text-xl font-semibold text-surface-base">
+                    Simulados
+                  </p>
+                  <p className="mt-2 text-[10px] leading-relaxed text-white/50">
+                    Sem movimentaÃ§Ã£o financeira real.
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* Desktop Table (hidden sm:block) */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F2] text-[#68716A] font-medium border-b border-[#E2DDD2]">
-                <tr>
-                  <th className="py-3 px-4">Data / Hora</th>
-                  <th className="py-3 px-4">Tipo</th>
-                  <th className="py-3 px-4">Descrição</th>
-                  <th className="py-3 px-4">Chave de Idempotência</th>
-                  <th className="py-3 px-4 text-right">Valor</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E2DDD2]">
+            <div className={`${panelClass} p-4 sm:p-6`}>
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-base text-brand-primary">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-heading text-sm font-semibold text-brand-primary">
+                    Como funcionam as reservas
+                  </h3>
+                  <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                    O valor comprometido no seu maior lance ativo fica
+                    reservado. Quando seu lance Ã© superado, a reserva Ã©
+                    devolvida automaticamente ao saldo disponÃ­vel.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 border-t border-border-subtle pt-4">
+                <p className="text-[10px] leading-relaxed text-text-secondary">
+                  Os depÃ³sitos nesta demonstraÃ§Ã£o sÃ£o crÃ©ditos fictÃ­cios,
+                  registrados no extrato da carteira.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Extrato */}
+        {activeTab === "transacoes" && (
+          <section className={`${panelClass} min-w-0 overflow-hidden`}>
+            <div className="border-b border-border-subtle p-4 sm:p-7">
+              <p className={eyebrowClass}>MovimentaÃ§Ã£o da carteira</p>
+              <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                    Extrato de transaÃ§Ãµes
+                  </h2>
+                  <p className="mt-1 max-w-2xl text-xs leading-relaxed text-text-secondary">
+                    Registro de depÃ³sitos, bloqueios e liberaÃ§Ãµes de reservas,
+                    com chave de idempotÃªncia.
+                  </p>
+                </div>
+                <span className="rounded-lg bg-surface-base px-3 py-2 text-xs font-semibold text-brand-primary">
+                  {transactions.length}{" "}
+                  {transactions.length === 1 ? "registro" : "registros"}
+                </span>
+              </div>
+            </div>
+
+            {transactions.length === 0 ? (
+              <div className="px-5 py-14 text-center">
+                <History className="mx-auto h-7 w-7 text-accent-gold" />
+                <p className="mt-3 font-heading text-base font-semibold text-brand-primary">
+                  Nenhuma movimentaÃ§Ã£o registrada
+                </p>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Quando houver movimentaÃ§Ãµes, elas aparecerÃ£o neste extrato.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border-subtle">
                 {transactions.map(tx => (
-                  <tr key={tx.id} className="hover:bg-[#FAF7F2]/50">
-                    <td className="py-3 px-4 text-[#68716A] whitespace-nowrap">
-                      {formatDateTimeBR(tx.createdAt)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded bg-[#F5F1E7] text-[#123D2F] border border-[#CDC5B4]">
-                        {tx.type}
+                  <article
+                    key={tx.id}
+                    className="flex min-w-0 flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                  >
+                    <div className="flex min-w-0 items-start gap-3">
+                      <span
+                        className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                          tx.type === "DEPOSIT"
+                            ? "bg-semantic-success-bg text-semantic-success"
+                            : tx.type === "RESERVATION_HOLD"
+                              ? "bg-semantic-warning-bg text-semantic-warning"
+                              : "bg-surface-base text-brand-primary"
+                        }`}
+                      >
+                        {tx.type === "DEPOSIT" ? (
+                          <ArrowDownLeft className="h-4 w-4" />
+                        ) : (
+                          <ArrowUpRight className="h-4 w-4" />
+                        )}
                       </span>
-                    </td>
-                    <td className="py-3 px-4 font-medium text-[#222923]">
-                      {tx.description}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-[10px] text-[#68716A]">
-                      {tx.idempotencyKey}
-                    </td>
-                    <td
-                      className={`py-3 px-4 text-right font-mono font-bold ${
+
+                      <div className="min-w-0 flex-1">
+                        <p className="wrap-break-word text-xs font-semibold text-text-primary">
+                          {tx.description}
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <span className="rounded-md border border-border-subtle bg-[#FAF7F2] px-2 py-1 font-mono text-[9px] text-text-secondary">
+                            {tx.type}
+                          </span>
+                          <span className="text-[10px] text-text-secondary">
+                            {formatDateTimeBR(tx.createdAt)}
+                          </span>
+                        </div>
+                        <p className="mt-1 break-all font-mono text-[9px] text-text-secondary">
+                          ID: {tx.idempotencyKey}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p
+                      className={`wrap-break-word pl-12 font-mono text-sm font-semibold tabular-nums sm:shrink-0 sm:pl-0 ${
                         tx.type === "DEPOSIT"
-                          ? "text-[#1E7E34]"
+                          ? "text-semantic-success"
                           : tx.type === "RESERVATION_HOLD"
-                            ? "text-[#B45309]"
-                            : "text-[#222923]"
+                            ? "text-semantic-warning"
+                            : "text-text-primary"
                       }`}
                     >
                       {tx.type === "DEPOSIT" ? "+" : ""}
                       {formatBRL(tx.amountCents)}
-                    </td>
-                  </tr>
+                    </p>
+                  </article>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+              </div>
+            )}
+          </section>
+        )}
 
-      {/* Tab 6: Perfil & Regras */}
-      {activeTab === "perfil" && (
-        <div className="bg-white rounded-2xl border border-[#E2DDD2] p-8 space-y-6 shadow-2xs">
-          <h3 className="font-heading font-bold text-xl text-[#123D2F]">
-            Dados Cadastrais & Regras do Licitante
-          </h3>
+        {/* Perfil */}
+        {activeTab === "perfil" && (
+          <section className="min-w-0 space-y-5">
+            <div>
+              <p className={eyebrowClass}>Conta e permissÃµes</p>
+              <h2 className="mt-1 font-heading text-xl font-semibold text-brand-primary sm:text-2xl">
+                Dados cadastrais
+              </h2>
+              <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                InformaÃ§Ãµes da sua conta e regras de participaÃ§Ã£o na plataforma.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
-            <div>
-              <span className="text-[#68716A] block">Nome Completo:</span>
-              <span className="font-bold text-sm text-[#222923]">
-                {currentUser?.name}
-              </span>
+            <div className={`${panelClass} min-w-0 overflow-hidden`}>
+              <div className="flex min-w-0 items-center gap-3 border-b border-border-subtle bg-[#FAF7F2] p-4 sm:gap-4 sm:p-7">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-primary font-heading text-lg font-semibold text-accent-gold">
+                  {currentUser?.avatarUrl ? (
+                    <img
+                      src={currentUser.avatarUrl}
+                      alt={currentUser.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    currentUser?.name?.charAt(0)?.toUpperCase() || "L"
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <h3 className="wrap-break-word font-heading text-base font-semibold text-brand-primary sm:text-lg">
+                    {currentUser?.name}
+                  </h3>
+                  <p className="mt-1 text-xs text-text-secondary">
+                    Cadastro de licitante
+                  </p>
+                </div>
+
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-semantic-success/20 bg-semantic-success-bg px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-semantic-success sm:px-2.5">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Ativo
+                </span>
+              </div>
+
+              <div className="grid min-w-0 gap-0 sm:grid-cols-2">
+                <div className="min-w-0 border-b border-border-subtle p-4 sm:border-r sm:p-6">
+                  <span className={eyebrowClass}>Nome completo</span>
+                  <p className="mt-2 wrap-break-word text-sm font-semibold text-text-primary">
+                    {currentUser?.name || "â€”"}
+                  </p>
+                </div>
+                <div className="min-w-0 border-b border-border-subtle p-4 sm:p-6">
+                  <span className={eyebrowClass}>E-mail</span>
+                  <p className="mt-2 break-all text-sm font-medium text-text-primary">
+                    {currentUser?.email || "â€”"}
+                  </p>
+                </div>
+                <div className="min-w-0 p-4 sm:border-r sm:p-6">
+                  <span className={eyebrowClass}>PseudÃ´nimo pÃºblico</span>
+                  <p className="mt-2 wrap-break-word font-mono text-sm font-semibold text-brand-primary">
+                    {currentUser?.publicPseudonym || "â€”"}
+                  </p>
+                </div>
+                <div className="min-w-0 p-4 sm:p-6">
+                  <span className={eyebrowClass}>Tipo de conta</span>
+                  <p className="mt-2 text-sm font-semibold text-text-primary">
+                    Licitante
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <span className="text-[#68716A] block">E-mail:</span>
-              <span className="font-medium text-sm text-[#222923]">
-                {currentUser?.email}
-              </span>
+
+            <div className={`${panelClass} p-4 sm:p-6`}>
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-base text-brand-primary">
+                  <Lock className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-heading text-sm font-semibold text-brand-primary">
+                    Exclusividade de papÃ©is
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                    Esta conta possui papel exclusivo de{" "}
+                    <strong className="text-text-primary">LICITANTE</strong>.
+                    Conforme as regras de negÃ³cio da plataforma, um licitante
+                    nÃ£o pode administrar nem criar lotes, evitando conflitos de
+                    interesse durante os pregÃµes.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <span className="text-[#68716A] block">
-                Pseudônimo Público nos Pregões:
-              </span>
-              <span className="font-mono font-bold text-sm text-[#123D2F]">
-                {currentUser?.publicPseudonym}
-              </span>
+          </section>
+        )}
+
+        {/* Modal de depÃ³sito */}
+        {depositModalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-2 backdrop-blur-sm sm:p-4"
+            onMouseDown={event => {
+              if (event.target === event.currentTarget && !depositSubmitting) {
+                closeDepositModal();
+              }
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="deposit-title"
+              className="deposit-content-animation my-auto max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-accent-gold/40 bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)]"
+            >
+              <div className="relative overflow-hidden bg-brand-primary px-4 py-4 text-surface-base sm:px-6 sm:py-5">
+                <div className="pointer-events-none absolute -right-8 -top-12 h-36 w-36 rounded-full border border-accent-gold/20" />
+                <div className="relative flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-gold/30 bg-white/5 text-accent-gold">
+                      <WalletIcon className="h-5 w-5" />
+                    </div>
+                    <h2
+                      id="deposit-title"
+                      className="mt-4 font-heading text-xl font-semibold"
+                    >
+                      {depositStage === "success"
+                        ? "DepÃ³sito concluÃ­do"
+                        : depositStage !== "form"
+                          ? "Transferindo saldo"
+                          : "Adicionar saldo"}
+                    </h2>
+                    <p className="mt-1 text-xs text-white/60">
+                      {depositStage === "success"
+                        ? "O crÃ©dito foi registrado na sua carteira."
+                        : depositStage !== "form"
+                          ? "Aguarde enquanto registramos o crÃ©dito."
+                          : "DepÃ³sito simulado para sua carteira."}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={closeDepositModal}
+                    disabled={depositSubmitting}
+                    className="shrink-0 rounded-lg p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    aria-label="Fechar"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              {depositStage === "connecting" ||
+              depositStage === "transferring" ? (
+                <div className="px-4 py-7 sm:px-6 sm:py-8">
+                  <div className="text-center">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
+                      TransferÃªncia simulada
+                    </p>
+                    <p className="mt-2 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-primary sm:text-3xl">
+                      {formatBRL(completedDepositCents)}
+                    </p>
+                    <p className="mt-2 text-xs text-text-secondary">
+                      {depositStage === "connecting"
+                        ? "Estabelecendo conexÃ£o com a instituiÃ§Ã£o..."
+                        : "O valor estÃ¡ a caminho da sua carteira..."}
+                    </p>
+                  </div>
+
+                  <div className="relative mt-8">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex w-17 shrink-0 flex-col items-center gap-3 text-center sm:w-24">
+                        <div className="deposit-bank-animation flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-gold/50 bg-surface-base text-brand-primary sm:h-16 sm:w-16">
+                          <Building2 className="h-5 w-5 sm:h-7 sm:w-7" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-text-primary">
+                            Banco
+                          </p>
+                          <p className="mt-1 text-[10px] text-text-secondary">
+                            Origem
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="relative mx-1 mt-6 h-1 min-w-0 flex-1 overflow-visible rounded-full bg-border-subtle sm:mt-8">
+                        <div
+                          className={`absolute inset-y-0 left-0 rounded-full bg-accent-gold ${
+                            depositStage === "transferring"
+                              ? "deposit-track-animation"
+                              : ""
+                          }`}
+                          style={{
+                            width:
+                              depositStage === "transferring" ? "100%" : "25%",
+                            transition: "width 700ms ease",
+                          }}
+                        />
+
+                        {depositStage === "transferring" && (
+                          <div className="deposit-coin-animation absolute top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-accent-gold bg-white text-brand-primary shadow-md sm:h-8 sm:w-8">
+                            <CircleDollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex w-17 shrink-0 flex-col items-center gap-3 text-center sm:w-24">
+                        <div
+                          className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition-colors duration-500 sm:h-16 sm:w-16 ${
+                            depositStage === "transferring"
+                              ? "deposit-wallet-animation border-semantic-success/40 bg-semantic-success-bg text-semantic-success"
+                              : "border-border-subtle bg-[#FAF7F2] text-text-secondary"
+                          }`}
+                        >
+                          <WalletIcon className="h-5 w-5 sm:h-7 sm:w-7" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-text-primary">
+                            Carteira
+                          </p>
+                          <p className="mt-1 text-[10px] text-text-secondary">
+                            Destino
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-7 flex items-center justify-center gap-2 rounded-xl border border-border-subtle bg-[#FAF7F2] px-3 py-3 sm:mt-8 sm:px-4">
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-brand-primary" />
+                    <span className="text-center text-xs font-medium text-text-secondary">
+                      {depositStage === "connecting"
+                        ? "Validando solicitaÃ§Ã£o"
+                        : "Registrando crÃ©dito na carteira"}
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-center text-[10px] leading-relaxed text-text-secondary">
+                    NÃ£o feche esta janela atÃ© a conclusÃ£o da operaÃ§Ã£o.
+                  </p>
+                </div>
+              ) : depositStage === "success" ? (
+                <div className="deposit-content-animation px-4 py-8 text-center sm:px-6 sm:py-9">
+                  <div className="relative mx-auto flex h-24 w-24 items-center justify-center">
+                    <div className="deposit-success-ring absolute inset-0 rounded-full border-2 border-semantic-success/40" />
+                    <div className="deposit-success-animation flex h-20 w-20 items-center justify-center rounded-full bg-semantic-success-bg text-semantic-success">
+                      <CheckCircle2 className="h-11 w-11" />
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-semantic-success">
+                      OperaÃ§Ã£o confirmada
+                    </p>
+                    <h3 className="mt-2 font-heading text-2xl font-semibold text-brand-primary">
+                      Saldo adicionado
+                    </h3>
+                    <p className="mt-2 text-sm text-text-secondary">
+                      O valor foi creditado Ã  sua carteira.
+                    </p>
+                    <p className="mt-5 wrap-break-word font-heading text-2xl font-semibold tabular-nums text-brand-primary sm:text-3xl">
+                      +{formatBRL(completedDepositCents)}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-semantic-success/20 bg-semantic-success-bg px-3 py-3 text-xs font-medium text-semantic-success sm:px-4">
+                    <Sparkles className="h-4 w-4 shrink-0" />
+                    Atualizando seu extrato
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-5 p-4 sm:p-6">
+                  <div className="rounded-xl border border-border-subtle bg-[#FAF7F2] p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+                        Saldo disponÃ­vel atual
+                      </span>
+                      <WalletIcon className="h-4 w-4 shrink-0 text-brand-primary" />
+                    </div>
+                    <p className="mt-1 wrap-break-word font-heading text-lg font-semibold tabular-nums text-brand-primary sm:text-xl">
+                      {formatBRL(wallet.availableCents)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="deposit-amount"
+                      className="block text-xs font-semibold text-text-primary"
+                    >
+                      Valor do depÃ³sito
+                    </label>
+
+                    <div className="flex min-w-0 items-center rounded-xl border border-border-strong bg-white transition-colors focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/10">
+                      <span className="shrink-0 border-r border-border-subtle px-3 py-3 text-sm font-semibold text-text-secondary">
+                        R$
+                      </span>
+                      <input
+                        id="deposit-amount"
+                        type="text"
+                        inputMode="decimal"
+                        value={depositAmount}
+                        onChange={event => setDepositAmount(event.target.value)}
+                        onKeyDown={event => {
+                          if (event.key === "Enter" && !depositSubmitting) {
+                            void handleDeposit();
+                          }
+                        }}
+                        placeholder="0,00"
+                        className="min-w-0 flex-1 rounded-r-xl bg-transparent px-3 py-3 font-mono text-base text-brand-primary outline-none placeholder:text-border-strong"
+                        autoFocus
+                      />
+                    </div>
+
+                    <p className="text-[10px] leading-relaxed text-text-secondary">
+                      Valor permitido: R$ 0,01 a R$ 1.000.000,00.
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className={eyebrowClass}>Valores rÃ¡pidos</span>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      {QUICK_DEPOSIT_AMOUNTS.map(cents => {
+                        const quickAmount = (cents / 100)
+                          .toFixed(2)
+                          .replace(".", ",");
+
+                        return (
+                          <button
+                            key={cents}
+                            onClick={() => setDepositAmount(quickAmount)}
+                            disabled={depositSubmitting}
+                            className={`min-w-0 rounded-xl border px-2 py-3 text-xs font-semibold transition-colors sm:px-3 ${
+                              depositAmount === quickAmount
+                                ? "border-brand-primary bg-brand-primary/5 text-brand-primary"
+                                : "border-border-subtle bg-white text-text-secondary hover:border-accent-gold hover:text-brand-primary"
+                            }`}
+                          >
+                            {formatBRL(cents)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {depositError && (
+                    <p
+                      role="alert"
+                      className="wrap-break-word rounded-xl border border-semantic-error/20 bg-semantic-error-bg px-3 py-2.5 text-xs leading-relaxed text-semantic-error"
+                    >
+                      {depositError}
+                    </p>
+                  )}
+
+                  <div className="rounded-xl border border-accent-gold/30 bg-surface-base/70 p-3">
+                    <p className="text-[10px] leading-relaxed text-text-secondary">
+                      Esta Ã© uma operaÃ§Ã£o demonstrativa. O crÃ©dito Ã© fictÃ­cio e
+                      nÃ£o envolve transferÃªncia ou cobranÃ§a financeira real.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                    <button
+                      onClick={closeDepositModal}
+                      disabled={depositSubmitting}
+                      className={`${secondaryButtonClass} w-full flex-1 sm:w-auto`}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => void handleDeposit()}
+                      disabled={depositSubmitting}
+                      className={`${primaryButtonClass} w-full flex-1 sm:w-auto`}
+                    >
+                      Confirmar depÃ³sito
+                      <ArrowUpRight className="h-4 w-4 shrink-0" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          <div className="p-4 bg-[#FAF7F2] rounded-xl border border-[#E2DDD2] text-xs text-[#68716A] space-y-2">
-            <h4 className="font-bold text-[#123D2F] flex items-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-[#123D2F]" />
-              <span>Regra de Exclusividade de Papéis</span>
-            </h4>
-            <p className="leading-relaxed">
-              Esta conta possui papel exclusivo de <strong>LICITANTE</strong>.
-              Conforme regras de negócio da plataforma, um licitante não pode
-              administrar nem criar lotes para evitar conflitos de interesse
-              durante o pregão.
-            </p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
+
+
