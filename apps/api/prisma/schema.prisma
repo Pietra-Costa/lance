@@ -168,6 +168,9 @@ model Lot {
   sellerId           String
   currentLeaderId    String?
   status             LotStatus @default(SCHEDULED)
+  category           String?
+  specialConditions  String?
+  sellerNotes        String?
   startingPriceCents Int
   currentPriceCents  Int       @default(0)
   minIncrementCents  Int       @default(1)
@@ -187,6 +190,7 @@ model Lot {
   @@index([status, startsAt, endsAt])
   @@index([sellerId])
   @@index([currentLeaderId])
+  @@index([category])
 }
 
 model LotItemSnapshot {
@@ -201,6 +205,11 @@ model LotItemSnapshot {
   imageUrl         String?
   imageAttribution String?
   sourceUrl        String?
+  medium           String?
+  dimensions       String?
+  attribution      String?
+  period           String?
+  imageConditions  String?
   snapshotAt       DateTime      @default(now())
 
   lot         Lot          @relation(fields: [lotId], references: [id], onDelete: Restrict)
