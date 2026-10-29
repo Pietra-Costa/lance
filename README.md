@@ -140,6 +140,12 @@ As fontes são independentes: se uma cair ou estourar o tempo de resposta, ela e
 - Sessões de acesso curtas com refresh token rotativo e logout que revoga a sessão.
 - Socket.IO recusa conexão sem token válido e valida o lote antes de entrar na sala.
 
+## Capturas de tela
+
+As imagens ficam em `docs/images/` (`lance-banner.png` e as capturas citadas na
+visão geral). Se a pasta não existir no clone, os blocos de imagem do topo
+aparecem quebrados — rode a aplicação e salve as capturas nesse caminho.
+
 ## Identidade visual
 
 A paleta combina verde profundo, dourado e tons de creme, com contraste editorial e aparência institucional.
