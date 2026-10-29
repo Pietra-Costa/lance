@@ -1,20 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { RotateCw, Eye, Sparkles, ChevronDown, ChevronUp, ZoomIn } from 'lucide-react';
+﻿import React, { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import {
+  RotateCw,
+  Eye,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  ZoomIn,
+} from "lucide-react";
 
 export interface AuctionGavelSceneProps {
   className?: string;
 }
 
-type FinishMode = 'gold_mahogany' | 'titanium_walnut' | 'bronze_antique';
-type CameraView = 'overview' | 'gavel' | 'pedestal';
+type FinishMode = "gold_mahogany" | "titanium_walnut" | "bronze_antique";
+type CameraView = "overview" | "gavel" | "pedestal";
 
-export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className = '' }) => {
+export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({
+  className = "",
+}) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
-  const [activeFinish, setActiveFinish] = useState<FinishMode>('gold_mahogany');
-  const [activeView, setActiveView] = useState<CameraView>('overview');
+  const [activeFinish, setActiveFinish] = useState<FinishMode>("gold_mahogany");
+  const [activeView, setActiveView] = useState<CameraView>("overview");
   const [isControlsOpen, setIsControlsOpen] = useState(true);
   const [isGpuAccelerated, setIsGpuAccelerated] = useState(true);
 
@@ -25,7 +34,9 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
   const modelGroupRef = useRef<THREE.Group | null>(null);
   const gavelMeshGroupRef = useRef<THREE.Group | null>(null);
   const pedestalMeshGroupRef = useRef<THREE.Group | null>(null);
-  const materialsRef = useRef<{ [key: string]: THREE.MeshPhysicalMaterial | THREE.MeshStandardMaterial }>({});
+  const materialsRef = useRef<{
+    [key: string]: THREE.MeshPhysicalMaterial | THREE.MeshStandardMaterial;
+  }>({});
   const isRotatingRef = useRef(isAutoRotating);
   const targetCameraPosRef = useRef(new THREE.Vector3(0, 1.6, 3.8));
   const targetLookAtRef = useRef(new THREE.Vector3(0, 0.4, 0));
@@ -37,13 +48,13 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
 
   // Update camera target view
   useEffect(() => {
-    if (activeView === 'overview') {
+    if (activeView === "overview") {
       targetCameraPosRef.current.set(0, 1.6, 3.8);
       targetLookAtRef.current.set(0, 0.4, 0);
-    } else if (activeView === 'gavel') {
+    } else if (activeView === "gavel") {
       targetCameraPosRef.current.set(0.6, 1.2, 2.2);
       targetLookAtRef.current.set(0, 0.8, 0);
-    } else if (activeView === 'pedestal') {
+    } else if (activeView === "pedestal") {
       targetCameraPosRef.current.set(0, 0.7, 2.5);
       targetLookAtRef.current.set(0, 0.15, 0);
     }
@@ -52,51 +63,57 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
   // Update materials when finish changes
   useEffect(() => {
     const mats = materialsRef.current;
-    if (!mats.metalHead || !mats.woodHandle || !mats.pedestalBase || !mats.goldAccent) return;
+    if (
+      !mats.metalHead ||
+      !mats.woodHandle ||
+      !mats.pedestalBase ||
+      !mats.goldAccent
+    )
+      return;
 
-    if (activeFinish === 'gold_mahogany') {
-      (mats.metalHead as THREE.MeshPhysicalMaterial).color.set('#E6C37A');
+    if (activeFinish === "gold_mahogany") {
+      (mats.metalHead as THREE.MeshPhysicalMaterial).color.set("#E6C37A");
       (mats.metalHead as THREE.MeshPhysicalMaterial).metalness = 0.95;
       (mats.metalHead as THREE.MeshPhysicalMaterial).roughness = 0.18;
 
-      (mats.goldAccent as THREE.MeshPhysicalMaterial).color.set('#FFD700');
+      (mats.goldAccent as THREE.MeshPhysicalMaterial).color.set("#FFD700");
       (mats.goldAccent as THREE.MeshPhysicalMaterial).metalness = 0.98;
       (mats.goldAccent as THREE.MeshPhysicalMaterial).roughness = 0.12;
 
-      (mats.woodHandle as THREE.MeshStandardMaterial).color.set('#2D150A'); // Mahogany
+      (mats.woodHandle as THREE.MeshStandardMaterial).color.set("#2D150A"); // Mahogany
       (mats.woodHandle as THREE.MeshStandardMaterial).roughness = 0.35;
 
-      (mats.pedestalBase as THREE.MeshPhysicalMaterial).color.set('#1A1F1C'); // Polished dark obsidian
+      (mats.pedestalBase as THREE.MeshPhysicalMaterial).color.set("#1A1F1C"); // Polished dark obsidian
       (mats.pedestalBase as THREE.MeshPhysicalMaterial).metalness = 0.7;
       (mats.pedestalBase as THREE.MeshPhysicalMaterial).roughness = 0.15;
-    } else if (activeFinish === 'titanium_walnut') {
-      (mats.metalHead as THREE.MeshPhysicalMaterial).color.set('#C0C8D0');
+    } else if (activeFinish === "titanium_walnut") {
+      (mats.metalHead as THREE.MeshPhysicalMaterial).color.set("#C0C8D0");
       (mats.metalHead as THREE.MeshPhysicalMaterial).metalness = 0.96;
       (mats.metalHead as THREE.MeshPhysicalMaterial).roughness = 0.14;
 
-      (mats.goldAccent as THREE.MeshPhysicalMaterial).color.set('#E5E9EC');
+      (mats.goldAccent as THREE.MeshPhysicalMaterial).color.set("#E5E9EC");
       (mats.goldAccent as THREE.MeshPhysicalMaterial).metalness = 0.98;
       (mats.goldAccent as THREE.MeshPhysicalMaterial).roughness = 0.1;
 
-      (mats.woodHandle as THREE.MeshStandardMaterial).color.set('#1E1B18'); // Dark Walnut
+      (mats.woodHandle as THREE.MeshStandardMaterial).color.set("#1E1B18"); // Dark Walnut
       (mats.woodHandle as THREE.MeshStandardMaterial).roughness = 0.4;
 
-      (mats.pedestalBase as THREE.MeshPhysicalMaterial).color.set('#252A2D');
+      (mats.pedestalBase as THREE.MeshPhysicalMaterial).color.set("#252A2D");
       (mats.pedestalBase as THREE.MeshPhysicalMaterial).metalness = 0.85;
       (mats.pedestalBase as THREE.MeshPhysicalMaterial).roughness = 0.18;
-    } else if (activeFinish === 'bronze_antique') {
-      (mats.metalHead as THREE.MeshPhysicalMaterial).color.set('#A26D38');
+    } else if (activeFinish === "bronze_antique") {
+      (mats.metalHead as THREE.MeshPhysicalMaterial).color.set("#A26D38");
       (mats.metalHead as THREE.MeshPhysicalMaterial).metalness = 0.9;
       (mats.metalHead as THREE.MeshPhysicalMaterial).roughness = 0.28;
 
-      (mats.goldAccent as THREE.MeshPhysicalMaterial).color.set('#C88A3C');
+      (mats.goldAccent as THREE.MeshPhysicalMaterial).color.set("#C88A3C");
       (mats.goldAccent as THREE.MeshPhysicalMaterial).metalness = 0.92;
       (mats.goldAccent as THREE.MeshPhysicalMaterial).roughness = 0.22;
 
-      (mats.woodHandle as THREE.MeshStandardMaterial).color.set('#361C10');
+      (mats.woodHandle as THREE.MeshStandardMaterial).color.set("#361C10");
       (mats.woodHandle as THREE.MeshStandardMaterial).roughness = 0.45;
 
-      (mats.pedestalBase as THREE.MeshPhysicalMaterial).color.set('#1E1610');
+      (mats.pedestalBase as THREE.MeshPhysicalMaterial).color.set("#1E1610");
       (mats.pedestalBase as THREE.MeshPhysicalMaterial).metalness = 0.75;
       (mats.pedestalBase as THREE.MeshPhysicalMaterial).roughness = 0.25;
     }
@@ -108,12 +125,12 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
 
     // Detect software WebGL per Three.js skill
     const isSoftwareGl = (() => {
-      const gl = document.createElement('canvas').getContext('webgl2');
+      const gl = document.createElement("canvas").getContext("webgl2");
       if (!gl) return true;
-      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      const ext = gl.getExtension("WEBGL_debug_renderer_info");
       const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
       const gpu = String(gl.getParameter(param));
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
       return /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
     })();
     setIsGpuAccelerated(!isSoftwareGl);
@@ -121,14 +138,16 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({
       antialias: !isSoftwareGl,
-      powerPreference: 'high-performance',
+      powerPreference: "high-performance",
       alpha: true,
     });
     rendererRef.current = renderer;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
-    renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(
+      isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2),
+    );
     renderer.shadowMap.enabled = !isSoftwareGl;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -147,7 +166,10 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
 
     // Studio Environment Reflections via RoomEnvironment
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = pmremGenerator.fromScene(
+      new RoomEnvironment(),
+      0.04,
+    ).texture;
     pmremGenerator.dispose();
 
     // Studio 3-Point Lighting Rig
@@ -304,14 +326,14 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
     const shadowGeo = new THREE.PlaneGeometry(3.2, 3.2);
     shadowGeo.rotateX(-Math.PI / 2);
     // Procedural soft radial gradient shadow
-    const shadowCanvas = document.createElement('canvas');
+    const shadowCanvas = document.createElement("canvas");
     shadowCanvas.width = 128;
     shadowCanvas.height = 128;
-    const ctx = shadowCanvas.getContext('2d')!;
+    const ctx = shadowCanvas.getContext("2d")!;
     const grad = ctx.createRadialGradient(64, 64, 10, 64, 64, 60);
-    grad.addColorStop(0, 'rgba(0, 0, 0, 0.7)');
-    grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.25)');
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    grad.addColorStop(0, "rgba(0, 0, 0, 0.7)");
+    grad.addColorStop(0.5, "rgba(0, 0, 0, 0.25)");
+    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 128, 128);
 
@@ -334,20 +356,50 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
 
     // --- ANIMATION LOOP WITH SECOND-ORDER SPRING/DAMPING ---
     let frameId = 0;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const tick = () => {
       const delta = Math.min(clock.getDelta(), 0.1);
       const elapsed = clock.getElapsedTime();
 
       // Smooth camera interpolation towards target
-      camera.position.x = THREE.MathUtils.damp(camera.position.x, targetCameraPosRef.current.x, 3.5, delta);
-      camera.position.y = THREE.MathUtils.damp(camera.position.y, targetCameraPosRef.current.y, 3.5, delta);
-      camera.position.z = THREE.MathUtils.damp(camera.position.z, targetCameraPosRef.current.z, 3.5, delta);
+      camera.position.x = THREE.MathUtils.damp(
+        camera.position.x,
+        targetCameraPosRef.current.x,
+        3.5,
+        delta,
+      );
+      camera.position.y = THREE.MathUtils.damp(
+        camera.position.y,
+        targetCameraPosRef.current.y,
+        3.5,
+        delta,
+      );
+      camera.position.z = THREE.MathUtils.damp(
+        camera.position.z,
+        targetCameraPosRef.current.z,
+        3.5,
+        delta,
+      );
 
-      currentLookAtRef.current.x = THREE.MathUtils.damp(currentLookAtRef.current.x, targetLookAtRef.current.x, 3.5, delta);
-      currentLookAtRef.current.y = THREE.MathUtils.damp(currentLookAtRef.current.y, targetLookAtRef.current.y, 3.5, delta);
-      currentLookAtRef.current.z = THREE.MathUtils.damp(currentLookAtRef.current.z, targetLookAtRef.current.z, 3.5, delta);
+      currentLookAtRef.current.x = THREE.MathUtils.damp(
+        currentLookAtRef.current.x,
+        targetLookAtRef.current.x,
+        3.5,
+        delta,
+      );
+      currentLookAtRef.current.y = THREE.MathUtils.damp(
+        currentLookAtRef.current.y,
+        targetLookAtRef.current.y,
+        3.5,
+        delta,
+      );
+      currentLookAtRef.current.z = THREE.MathUtils.damp(
+        currentLookAtRef.current.z,
+        targetLookAtRef.current.z,
+        3.5,
+        delta,
+      );
       camera.lookAt(currentLookAtRef.current);
 
       // Model Rotation
@@ -357,8 +409,10 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
 
       // Gentle floating levitation oscillation on gavel
       if (gavelMeshGroupRef.current) {
-        gavelMeshGroupRef.current.position.y = 0.72 + Math.sin(elapsed * 1.8) * 0.035;
-        gavelMeshGroupRef.current.rotation.x = -0.25 + Math.sin(elapsed * 1.4) * 0.02;
+        gavelMeshGroupRef.current.position.y =
+          0.72 + Math.sin(elapsed * 1.8) * 0.035;
+        gavelMeshGroupRef.current.rotation.x =
+          -0.25 + Math.sin(elapsed * 1.4) * 0.02;
       }
 
       renderer.render(scene, camera);
@@ -378,11 +432,11 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
       renderer.setSize(w, h);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       cancelAnimationFrame(frameId);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       if (mount && renderer.domElement && mount.contains(renderer.domElement)) {
         mount.removeChild(renderer.domElement);
       }
@@ -404,15 +458,20 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
   }, []);
 
   return (
-    <div className={`relative w-full h-[460px] sm:h-[520px] lg:h-[600px] overflow-hidden select-none ${className}`}>
+    <div
+      className={`relative w-full h-[460px] sm:h-[520px] lg:h-[600px] overflow-hidden select-none ${className}`}
+    >
       {/* 3D WebGL Canvas Container */}
-      <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      <div
+        ref={mountRef}
+        className="w-full h-full cursor-grab active:cursor-grabbing"
+      />
 
       {/* Subtle Spec Tag at Top Left (Clean unboxed text) */}
       <div className="absolute top-4 left-4 z-10 pointer-events-none">
-        <div className="flex items-center gap-2 text-xs font-mono text-[#F5F1E7]/70 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-xs">
-          <Sparkles className="w-3.5 h-3.5 text-[#C8A96A]" />
-          <span>MOTOR 3D EM TEMPO REAL · LATÃO ESCOVADO & MOGNO</span>
+        <div className="flex items-center gap-2 text-xs font-mono text-surface-base/70 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-xs">
+          <Sparkles className="w-3.5 h-3.5 text-accent-gold" />
+          <span>MOTOR 3D EM TEMPO REAL Â· LATÃƒO ESCOVADO & MOGNO</span>
         </div>
       </div>
 
@@ -422,8 +481,12 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
         <div className="flex justify-center -mb-2">
           <button
             onClick={() => setIsControlsOpen(!isControlsOpen)}
-            className="px-3 py-1 rounded-t-lg bg-black/75 hover:bg-black/90 text-[11px] font-medium text-[#F5F1E7]/80 hover:text-white border-t border-x border-white/15 flex items-center gap-1 cursor-pointer transition-colors shadow-md"
-            title={isControlsOpen ? 'Recolher dock de controles 3D' : 'Expandir controles 3D'}
+            className="px-3 py-1 rounded-t-lg bg-black/75 hover:bg-black/90 text-[11px] font-medium text-surface-base/80 hover:text-white border-t border-x border-white/15 flex items-center gap-1 cursor-pointer transition-colors shadow-md"
+            title={
+              isControlsOpen
+                ? "Recolher dock de controles 3D"
+                : "Expandir controles 3D"
+            }
           >
             {isControlsOpen ? (
               <>
@@ -441,35 +504,35 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
 
         {/* Dock Surface */}
         {isControlsOpen && (
-          <div className="bg-[#0A0D0B]/90 backdrop-blur-md border border-[#C8A96A]/25 rounded-2xl p-2.5 sm:p-3 shadow-2xl flex flex-wrap items-center justify-between gap-2.5 text-xs text-[#F5F1E7]">
+          <div className="bg-[#0A0D0B]/90 backdrop-blur-md border border-accent-gold/25 rounded-2xl p-2.5 sm:p-3 shadow-2xl flex flex-wrap items-center justify-between gap-2.5 text-xs text-surface-base">
             {/* View presets */}
             <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
               <button
-                onClick={() => setActiveView('overview')}
+                onClick={() => setActiveView("overview")}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
-                  activeView === 'overview'
-                    ? 'bg-[#123D2F] text-white shadow-xs'
-                    : 'text-[#F5F1E7]/70 hover:text-white'
+                  activeView === "overview"
+                    ? "bg-brand-primary text-white shadow-xs"
+                    : "text-surface-base/70 hover:text-white"
                 }`}
               >
                 Geral
               </button>
               <button
-                onClick={() => setActiveView('gavel')}
+                onClick={() => setActiveView("gavel")}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
-                  activeView === 'gavel'
-                    ? 'bg-[#123D2F] text-white shadow-xs'
-                    : 'text-[#F5F1E7]/70 hover:text-white'
+                  activeView === "gavel"
+                    ? "bg-brand-primary text-white shadow-xs"
+                    : "text-surface-base/70 hover:text-white"
                 }`}
               >
                 Martelo
               </button>
               <button
-                onClick={() => setActiveView('pedestal')}
+                onClick={() => setActiveView("pedestal")}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
-                  activeView === 'pedestal'
-                    ? 'bg-[#123D2F] text-white shadow-xs'
-                    : 'text-[#F5F1E7]/70 hover:text-white'
+                  activeView === "pedestal"
+                    ? "bg-brand-primary text-white shadow-xs"
+                    : "text-surface-base/70 hover:text-white"
                 }`}
               >
                 Pedestal
@@ -478,38 +541,40 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
 
             {/* Finish Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-[#F5F1E7]/60 hidden sm:inline">Acabamento:</span>
+              <span className="text-[11px] text-surface-base/60 hidden sm:inline">
+                Acabamento:
+              </span>
               <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
                 <button
-                  onClick={() => setActiveFinish('gold_mahogany')}
+                  onClick={() => setActiveFinish("gold_mahogany")}
                   className={`px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
-                    activeFinish === 'gold_mahogany'
-                      ? 'bg-[#C8A96A] text-[#0A2B22] font-semibold'
-                      : 'text-[#F5F1E7]/70 hover:text-white'
+                    activeFinish === "gold_mahogany"
+                      ? "bg-accent-gold text-brand-deep font-semibold"
+                      : "text-surface-base/70 hover:text-white"
                   }`}
                   title="Ouro & Mogno Nobre"
                 >
                   Ouro Imperial
                 </button>
                 <button
-                  onClick={() => setActiveFinish('titanium_walnut')}
+                  onClick={() => setActiveFinish("titanium_walnut")}
                   className={`px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
-                    activeFinish === 'titanium_walnut'
-                      ? 'bg-[#C8A96A] text-[#0A2B22] font-semibold'
-                      : 'text-[#F5F1E7]/70 hover:text-white'
+                    activeFinish === "titanium_walnut"
+                      ? "bg-accent-gold text-brand-deep font-semibold"
+                      : "text-surface-base/70 hover:text-white"
                   }`}
-                  title="Titânio Escovado & Nogueira"
+                  title="TitÃ¢nio Escovado & Nogueira"
                 >
-                  Titânio
+                  TitÃ¢nio
                 </button>
                 <button
-                  onClick={() => setActiveFinish('bronze_antique')}
+                  onClick={() => setActiveFinish("bronze_antique")}
                   className={`px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
-                    activeFinish === 'bronze_antique'
-                      ? 'bg-[#C8A96A] text-[#0A2B22] font-semibold'
-                      : 'text-[#F5F1E7]/70 hover:text-white'
+                    activeFinish === "bronze_antique"
+                      ? "bg-accent-gold text-brand-deep font-semibold"
+                      : "text-surface-base/70 hover:text-white"
                   }`}
-                  title="Bronze Pátina Antiga"
+                  title="Bronze PÃ¡tina Antiga"
                 >
                   Bronze
                 </button>
@@ -521,13 +586,18 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
               onClick={() => setIsAutoRotating(!isAutoRotating)}
               className={`p-1.5 sm:px-2.5 sm:py-1 rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer text-[11px] ${
                 isAutoRotating
-                  ? 'bg-[#123D2F] text-[#C8A96A] border-[#C8A96A]/40'
-                  : 'bg-white/5 text-[#F5F1E7]/70 border-white/10 hover:text-white'
+                  ? "bg-brand-primary text-accent-gold border-accent-gold/40"
+                  : "bg-white/5 text-surface-base/70 border-white/10 hover:text-white"
               }`}
-              title="Alternar rotação contínua"
+              title="Alternar rotaÃ§Ã£o contÃ­nua"
             >
-              <RotateCw className={`w-3.5 h-3.5 ${isAutoRotating ? 'animate-spin' : ''}`} style={{ animationDuration: '6s' }} />
-              <span className="hidden sm:inline">{isAutoRotating ? 'Girando' : 'Pausado'}</span>
+              <RotateCw
+                className={`w-3.5 h-3.5 ${isAutoRotating ? "animate-spin" : ""}`}
+                style={{ animationDuration: "6s" }}
+              />
+              <span className="hidden sm:inline">
+                {isAutoRotating ? "Girando" : "Pausado"}
+              </span>
             </button>
           </div>
         )}
@@ -535,3 +605,4 @@ export const AuctionGavelScene: React.FC<AuctionGavelSceneProps> = ({ className 
     </div>
   );
 };
+

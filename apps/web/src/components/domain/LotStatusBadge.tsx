@@ -1,57 +1,58 @@
-import React from 'react';
-import { LotStatus } from '../../types/auction';
-import { Radio, Calendar, CheckCircle2, AlertOctagon } from 'lucide-react';
+﻿import React from "react";
+import { LotStatus } from "../../types/auction";
+import { Calendar, CheckCircle2, AlertOctagon } from "lucide-react";
 
 export interface LotStatusBadgeProps {
   status: LotStatus;
-  size?: 'sm' | 'md';
+  size?: "sm" | "md";
   className?: string;
 }
 
 export const LotStatusBadge: React.FC<LotStatusBadgeProps> = ({
   status,
-  size = 'md',
-  className = '',
+  size = "md",
+  className = "",
 }) => {
-  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs';
+  const sizeClasses =
+    size === "sm" ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs";
 
   switch (status) {
-    case 'LIVE':
+    case "LIVE":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-[#EAF7EE] text-[#1E7E34] border border-[#1E7E34]/30 ${sizeClasses} ${className}`}
+          className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-semantic-success-bg text-semantic-success border border-semantic-success/30 ${sizeClasses} ${className}`}
         >
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1E7E34] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1E7E34]"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-semantic-success"></span>
           </span>
           <span>Ao vivo</span>
         </span>
       );
-    case 'SCHEDULED':
+    case "SCHEDULED":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-[#FEF3C7] text-[#B45309] border border-[#B45309]/30 ${sizeClasses} ${className}`}
+          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-semantic-warning-bg text-semantic-warning border border-semantic-warning/30 ${sizeClasses} ${className}`}
         >
-          <Calendar className="w-3 h-3 text-[#B45309]" />
+          <Calendar className="w-3 h-3 text-semantic-warning" />
           <span>Em breve</span>
         </span>
       );
-    case 'ENDED':
+    case "ENDED":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-[#EFE9DB] text-[#68716A] border border-[#CDC5B4] ${sizeClasses} ${className}`}
+          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-[#EFE9DB] text-text-secondary border border-border-strong ${sizeClasses} ${className}`}
         >
-          <CheckCircle2 className="w-3 h-3 text-[#68716A]" />
+          <CheckCircle2 className="w-3 h-3 text-text-secondary" />
           <span>Encerrado</span>
         </span>
       );
-    case 'CANCELED':
+    case "CANCELED":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-[#FEE2E2] text-[#B91C1C] border border-[#B91C1C]/30 ${sizeClasses} ${className}`}
+          className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-semantic-error-bg text-semantic-error border border-semantic-error/30 ${sizeClasses} ${className}`}
         >
-          <AlertOctagon className="w-3 h-3 text-[#B91C1C]" />
+          <AlertOctagon className="w-3 h-3 text-semantic-error" />
           <span>Cancelado</span>
         </span>
       );
@@ -59,3 +60,4 @@ export const LotStatusBadge: React.FC<LotStatusBadgeProps> = ({
       return null;
   }
 };
+
