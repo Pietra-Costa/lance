@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthenticatedUser } from '../auth/auth.type';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { BidsService } from './bids.service';
@@ -24,6 +25,7 @@ export class BidsController {
   constructor(private readonly bidsService: BidsService) {}
 
   @Post()
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   createBid(
     @Req() request: AuthenticatedRequest,
     @Param('lotId') lotId: string,

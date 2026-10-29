@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthenticatedUser } from '../auth/auth.type';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateDepositDto } from './dto/create-deposit.dto';
 import { WalletService } from './wallet.service';
@@ -34,6 +35,7 @@ export class WalletController {
   }
 
   @Post('deposits')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   createDeposit(
     @Req() request: AuthenticatedRequest,
     @Body() dto: CreateDepositDto,

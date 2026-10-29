@@ -8,6 +8,7 @@
 } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
 import { UserRole } from '../../generated/prisma/enums';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -25,12 +26,37 @@ export class CatalogController {
     private readonly catalogImportService: CatalogImportService,
   ) {}
 
+  /**
+   * Busca no acervo externo com paginação.
+   *
+   * `q` é opcional: sem termo, a rota lista o acervo (usado pelos botões de
+   * fonte do assistente de criação de lote).
+   * `offset` e `limit` controlam a página (padrão 0 / 20, máximo 40).
+   */
   @Get('search')
-  async search(@Query('q') query?: string) {
-    if (!query?.trim()) {
-      throw new BadRequestException('Query parameter "q" is required');
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  async search(
+    @Query('q') query?: string,
+    @Query('offset') offset?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const parsedOffset = Number.parseInt(offset ?? '0', 10);
+    const parsedLimit = Number.parseInt(limit ?? '20', 10);
+
+    if (Number.isNaN(parsedOffset) || parsedOffset < 0) {
+      throw new BadRequestException('Query parameter "offset" inválido.');
     }
-    return this.catalogSearchService.search(query);
+
+    if (Number.isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > 40) {
+      throw new BadRequestException(
+        'Query parameter "limit" deve estar entre 1 e 40.',
+      );
+    }
+
+    return this.catalogSearchService.search(query ?? '', {
+      offset: parsedOffset,
+      limit: parsedLimit,
+    });
   }
 
   @Post(':source/:externalId/import')
