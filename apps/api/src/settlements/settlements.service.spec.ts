@@ -1,4 +1,4 @@
-﻿import { Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { SettlementsService } from './settlements.service';
 import { PrismaService } from '../infrastructure/database/prisma.service';
 
@@ -33,10 +33,10 @@ describe('SettlementsService', () => {
         .spyOn(Logger.prototype, 'error')
         .mockImplementation(() => undefined);
 
-      (prisma.lot.findMany as jest.Mock).mockResolvedValue([
-        { id: 'lot-1' },
-        { id: 'lot-2' },
-      ]);
+      // Primeira consulta: lotes SCHEDULED a ativar. Segunda: lotes LIVE vencidos.
+      (prisma.lot.findMany as jest.Mock)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ id: 'lot-1' }, { id: 'lot-2' }]);
 
       (prisma.$transaction as jest.Mock)
         .mockRejectedValueOnce(new Error('Falha simulada'))
@@ -44,6 +44,7 @@ describe('SettlementsService', () => {
 
       await service.reconcile();
 
+      // Apenas os dois lotes vencidos passam por transacao.
       expect(prisma.$transaction).toHaveBeenCalledTimes(2);
       expect(loggerError).toHaveBeenCalledWith(
         'Falha ao liquidar lote lot-1',

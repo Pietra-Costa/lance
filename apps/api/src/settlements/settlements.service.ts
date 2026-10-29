@@ -1,6 +1,7 @@
 ﻿import { Injectable, Logger } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { appendAuditEvent } from '../audit/audit-chain';
+import { AuthService } from '../auth/auth.service';
 import {
   BidReservationStatus,
   LotStatus,
@@ -108,7 +109,86 @@ export class SettlementsService {
     }
   }
 
+  /**
+   * Liquida um lote encerrado de forma atômica e idempotente.
+   *
+   * Em caso de falha, a transação principal é revertida (nenhum saldo é criado
+   * ou destruído) e o settlement é marcado como FAILED em uma segunda
+   * transação curta, para que a inconsistência fique visível e rastreável em
+   * vez de desaparecer em um rollback silencioso.
+   */
   async closeAndSettle(lotId: string) {
+    try {
+      return await this.settleInTransaction(lotId);
+    } catch (error) {
+      await this.markSettlementFailed(lotId, error);
+      throw error;
+    }
+  }
+
+  private async markSettlementFailed(lotId: string, error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message.slice(0, 1000)
+        : 'Erro desconhecido';
+
+    try {
+      // A transação principal foi revertida, então o settlement pode não
+      // existir. Nesse caso ele é criado já em FAILED, para que a
+      // inconsistência fique registrada em vez de desaparecer no rollback.
+      const existing = await this.prisma.auctionSettlement.findUnique({
+        where: { lotId },
+        select: { id: true, status: true },
+      });
+
+      if (existing?.status === SettlementStatus.COMPLETED) {
+        return;
+      }
+
+      const settlement =
+        existing ??
+        (await this.prisma.auctionSettlement.create({
+          data: {
+            lotId,
+            amountCents: 0,
+            status: SettlementStatus.FAILED,
+          },
+          select: { id: true, status: true },
+        }));
+
+      if (existing && existing.status !== SettlementStatus.FAILED) {
+        await this.prisma.auctionSettlement.update({
+          where: { id: settlement.id },
+          data: { status: SettlementStatus.FAILED },
+        });
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        await appendAuditEvent(tx, 'SETTLEMENT_FAILED', 'LOT', lotId, {
+          lotId,
+          settlementId: settlement.id,
+          reason: message,
+        });
+
+        await tx.outboxEvent.create({
+          data: {
+            eventKey: `settlement-failed:${settlement.id}:${Date.now()}`,
+            eventType: 'SETTLEMENT_FAILED',
+            aggregateType: 'LOT',
+            aggregateId: lotId,
+            payload: { lotId, settlementId: settlement.id, reason: message },
+          },
+        });
+      });
+    } catch (markError) {
+      this.logger.error(
+        `Falha ao marcar o settlement do lote ${lotId} como FAILED`,
+        markError instanceof Error ? markError.stack : undefined,
+      );
+    }
+  }
+
+  private async settleInTransaction(lotId: string) {
     return this.prisma.$transaction(
       async (tx) => {
         const locked = await tx.$queryRaw<
@@ -154,6 +234,14 @@ export class SettlementsService {
             winningBidId: winningBid.id,
             amountCents: winningBid.amountCents,
           });
+        } else if (wasLive) {
+          // Lote encerrado sem nenhum lance: evento próprio, sem vencedor
+          // e sem qualquer movimentação financeira.
+          await appendAuditEvent(tx, 'AUCTION_ENDED_NO_BIDS', 'LOT', lotId, {
+            lotId,
+            endedAt: new Date().toISOString(),
+            startingPriceCents: lot.startingPriceCents,
+          });
         }
         const settlement = await tx.auctionSettlement.upsert({
           where: { lotId },
@@ -166,6 +254,16 @@ export class SettlementsService {
           },
         });
         if (settlement.status === SettlementStatus.COMPLETED) return settlement;
+
+        // Retomada de um settlement que ficou em PROCESSING (processo
+        // interrompido no meio da liquidação). Os lançamentos financeiros são
+        // idempotentes pelas chaves de idempotência do ledger, então reprocessar
+        // é seguro.
+        if (settlement.status === SettlementStatus.PROCESSING) {
+          this.logger.warn(
+            `Retomando settlement ${settlement.id} do lote ${lotId} que estava em PROCESSING`,
+          );
+        }
         if (!lot.currentLeaderId) {
           const completedWithoutWinner = await tx.auctionSettlement.update({
             where: { id: settlement.id },
@@ -182,13 +280,39 @@ export class SettlementsService {
           include: { wallet: true },
         });
         if (!reservation)
-          throw new Error('Reserva ativa do vencedor nÃ£o encontrada.');
+          throw new Error('Reserva ativa do vencedor não encontrada.');
         const sellerWallet = await tx.wallet.findUnique({
           where: { userId: lot.sellerId },
         });
         if (!sellerWallet)
-          throw new Error('Carteira do leiloeiro nÃ£o encontrada.');
+          throw new Error('Carteira do leiloeiro não encontrada.');
         const amountCents = reservation.amountCents;
+
+        // Notifica o vencedor (evento AUCTION_WON). Gravado na mesma transação
+        // da liquidação: ou existe junto do crédito, ou não existe.
+        const alreadyNotified = await tx.notification.findFirst({
+          where: {
+            userId: lot.currentLeaderId,
+            type: 'AUCTION_WON',
+            payload: { path: ['lotId'], equals: lotId },
+          },
+          select: { id: true },
+        });
+
+        if (!alreadyNotified) {
+          await tx.notification.create({
+            data: {
+              userId: lot.currentLeaderId as string,
+              type: 'AUCTION_WON',
+              payload: {
+                lotId,
+                settlementId: settlement.id,
+                amountCents,
+              },
+            },
+          });
+        }
+
         await tx.auctionSettlement.update({
           where: { id: settlement.id },
           data: { status: SettlementStatus.PROCESSING },
@@ -238,12 +362,24 @@ export class SettlementsService {
             settlementId: settlement.id,
             verificationCode: randomBytes(16).toString('hex'),
             snapshot: {
+              // Snapshot imutável com os campos exigidos pelo comprovante.
               lotId,
-              title: lot.itemSnapshot?.title ?? 'Lote',
+              lotTitle: lot.itemSnapshot?.title ?? 'Lote',
               imageUrl: lot.itemSnapshot?.imageUrl ?? null,
+              sourceUrl: lot.itemSnapshot?.sourceUrl ?? null,
+              imageAttribution: lot.itemSnapshot?.imageAttribution ?? null,
+              houseName: 'Lance Casa de Leilões',
+              sellerPublicName: 'Leiloeiro credenciado Lance',
+              winnerPseudonym: AuthService.publicPseudonym(
+                lot.currentLeaderId as string,
+              ),
               endedAt: lot.endsAt.toISOString(),
+              settledAt: new Date().toISOString(),
               winningPriceCents: amountCents,
-              settlement: 'SIMULATED_COMPLETED',
+              settlementStatus: 'SIMULATED_COMPLETED',
+              // Deixa explícito que não é nota fiscal nem pagamento real.
+              disclaimer:
+                'Liquidação simulada em plataforma de saldo fictício. Não é nota fiscal, comprovante de pagamento real nem garantia de entrega.',
             },
           },
         });
