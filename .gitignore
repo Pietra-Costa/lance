@@ -27,6 +27,15 @@ node-compile-cache/
 *.log
 logs/
 
+# Artefatos de trabalho locais (backups de arquivos e dumps do banco)
+*.bak
+*.sql.bak
+backup-*.sql
+*.dump
+
+# Diretórios vazios deixados por ferramentas externas
+apps/web/public/assets/aistudio/
+
 # Sistema operacional / editor
 .DS_Store
 Thumbs.db
