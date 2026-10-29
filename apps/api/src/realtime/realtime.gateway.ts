@@ -8,6 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import type { Server, Socket } from 'socket.io';
+import { PrismaService } from '../infrastructure/database/prisma.service';
 
 interface SocketJwtPayload {
   sub: string;
@@ -22,12 +23,14 @@ export class RealtimeGateway {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async handleConnection(socket: Socket) {
     const token = socket.handshake.auth?.token;
 
     if (typeof token !== 'string' || !token) {
+      socket.disconnect(true);
       return;
     }
 
@@ -57,13 +60,44 @@ export class RealtimeGateway {
   }
 
   @SubscribeMessage('lot.subscribe')
-  subscribe(
+  async subscribe(
     @ConnectedSocket() socket: Socket,
     @MessageBody() body: { lotId?: string },
   ) {
-    if (body?.lotId && /^[a-zA-Z0-9_-]+$/.test(body.lotId)) {
-      void socket.join(`lot:${body.lotId}`);
+    const lotId = body?.lotId;
+
+    if (typeof lotId !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(lotId)) {
+      return { success: false, message: 'ID de lote inválido' };
     }
+
+    const lot = await this.prisma.lot.findUnique({
+      where: { id: lotId },
+      select: { id: true },
+    });
+
+    if (!lot) {
+      return { success: false, message: 'Lote não encontrado' };
+    }
+
+    await socket.join(`lot:${lotId}`);
+
+    return { success: true, lotId };
+  }
+
+  @SubscribeMessage('lot.unsubscribe')
+  async unsubscribe(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: { lotId?: string },
+  ) {
+    const lotId = body?.lotId;
+
+    if (typeof lotId !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(lotId)) {
+      return { success: false, message: 'ID de lote inválido' };
+    }
+
+    await socket.leave(`lot:${lotId}`);
+
+    return { success: true, lotId };
   }
 
   publishLot(lotId: string, eventType: string, payload: unknown) {
