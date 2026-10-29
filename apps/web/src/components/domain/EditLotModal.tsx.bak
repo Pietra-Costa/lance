@@ -1,0 +1,458 @@
+import React, { useEffect, useState } from "react";
+import { useApp } from "../../context/AppContext";
+import type { LotEditPatch } from "../../context/AppContext";
+import type { Lot } from "../../types/auction";
+import { formatBRL, formatDateTimeBR } from "../../logic/auctionRules";
+import { ItemImage } from "./ItemImage";
+import { X, Save, Loader2, Info } from "lucide-react";
+import { motion } from "motion/react";
+
+const LOT_CATEGORIES = [
+  "Arte",
+  "Esculturas",
+  "Objetos de coleção",
+  "Mobiliário",
+  "Discos e edições musicais",
+] as const;
+
+/** Converte ISO -> valor de `<input type="datetime-local">` (hora local). */
+const toLocalInput = (iso: string): string => {
+  const date = new Date(iso);
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+/**
+ * Modal de edição do lote antes de entrar ao vivo.
+ *
+ * Só é permitida em lotes `SCHEDULED` (o backend recusa com 409 caso o lote
+ * já esteja ao vivo). Cada campo alterado é registrado na trilha de auditoria
+ * como `LOT_UPDATED`, com o valor anterior e o novo, e aparece no histórico
+ * público do lote.
+ */
+export interface EditLotModalProps {
+  lot: Lot;
+  onClose: () => void;
+}
+
+export const EditLotModal: React.FC<EditLotModalProps> = ({ lot, onClose }) => {
+  const { updateLot } = useApp();
+
+  const [category, setCategory] = useState(lot.category || "");
+  const [startingPrice, setStartingPrice] = useState(
+    (lot.startingPriceCents / 100).toFixed(2).replace(".", ","),
+  );
+  const [minIncrement, setMinIncrement] = useState(
+    (lot.minIncrementCents / 100).toFixed(2).replace(".", ","),
+  );
+  const [startsAt, setStartsAt] = useState(toLocalInput(lot.startsAt));
+  const [endsAt, setEndsAt] = useState(toLocalInput(lot.endsAt));
+  const [specialConditions, setSpecialConditions] = useState(
+    lot.specialConditions ?? "",
+  );
+  const [sellerNotes, setSellerNotes] = useState(lot.sellerNotes ?? "");
+
+  // Detalhes do item (ficha técnica) — vindos do snapshot.
+  const [medium, setMedium] = useState(lot.itemSnapshot.medium ?? "");
+  const [dimensions, setDimensions] = useState(
+    lot.itemSnapshot.dimensions ?? "",
+  );
+  const [attribution, setAttribution] = useState(
+    lot.itemSnapshot.creator ?? "",
+  );
+  const [period, setPeriod] = useState(lot.itemSnapshot.dateOrYear ?? "");
+  const [imageConditions, setImageConditions] = useState(
+    (lot.itemSnapshot as unknown as { imageConditions?: string | null })
+      .imageConditions ?? "",
+  );
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isLocked = lot.status !== "SCHEDULED";
+
+  const parseMoney = (value: string): number | null => {
+    const parsed = Number(value.replace(/\./g, "").replace(",", "."));
+    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    return Math.round(parsed * 100);
+  };
+
+  const handleSave = async () => {
+    setError(null);
+
+    const startingPriceCents = parseMoney(startingPrice);
+    const minIncrementCents = parseMoney(minIncrement);
+
+    if (startingPriceCents === null || minIncrementCents === null) {
+      setError("Informe valores válidos para o lance inicial e o incremento.");
+      return;
+    }
+
+    const startDate = new Date(startsAt);
+    const endDate = new Date(endsAt);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      setError("Informe datas válidas de início e encerramento.");
+      return;
+    }
+
+    if (endDate <= startDate) {
+      setError("O encerramento deve ser posterior ao início.");
+      return;
+    }
+
+    const patch: LotEditPatch = {
+      category: category || undefined,
+      startingPriceCents,
+      minIncrementCents,
+      startsAt: startDate.toISOString(),
+      endsAt: endDate.toISOString(),
+      specialConditions,
+      sellerNotes,
+      medium,
+      dimensions,
+      attribution,
+      period,
+      imageConditions,
+    };
+
+    try {
+      setSubmitting(true);
+      await updateLot(lot.id, patch);
+      onClose();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Não foi possível salvar as alterações.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Trava o scroll do fundo enquanto a modal está aberta.
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 12 }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Editar lote"
+        className="bg-white w-full sm:max-w-2xl max-h-dvh sm:max-h-[92vh] sm:rounded-2xl border border-border-subtle shadow-2xl flex flex-col overflow-hidden"
+      >
+        <div className="bg-brand-deep text-surface-base px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0">
+          <div className="min-w-0">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-accent-gold block">
+              Editar lote · {lot.code}
+            </span>
+            <h3 className="font-heading font-semibold text-sm truncate">
+              {lot.title}
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded text-white/80 hover:text-white hover:bg-white/10 cursor-pointer shrink-0"
+            aria-label="Fechar edição"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-5">
+          {isLocked ? (
+            <div className="p-3 rounded-xl border border-[#B45309]/30 bg-semantic-warning-bg/50 text-xs text-semantic-warning">
+              Este lote já entrou ao vivo. Os campos ficam congelados — apenas o
+              encerramento pode ser estendido pela regra anti-sniping.
+            </div>
+          ) : (
+            <div className="p-3 rounded-xl border border-brand-primary/20 bg-[#FAF7F2] text-[11px] text-text-secondary flex items-start gap-2">
+              <Info className="w-3.5 h-3.5 text-brand-primary shrink-0 mt-0.5" />
+              <span>
+                Cada alteração é registrada na trilha de auditoria com o valor
+                anterior e o novo, e aparece no histórico público do lote.
+              </span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label
+                htmlFor="edit-category"
+                className="text-[11px] font-semibold text-text-primary block"
+              >
+                Categoria
+              </label>
+              <select
+                id="edit-category"
+                value={category}
+                disabled={isLocked}
+                onChange={(event) => setCategory(event.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs bg-white disabled:opacity-60"
+              >
+                <option value="">Sem categoria</option>
+                {LOT_CATEGORIES.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="edit-period"
+                className="text-[11px] font-semibold text-text-primary block"
+              >
+                Período / Ano
+              </label>
+              <input
+                id="edit-period"
+                value={period}
+                disabled={isLocked}
+                onChange={(event) => setPeriod(event.target.value)}
+                placeholder="Ex.: 1889"
+                className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="edit-starting"
+                className="text-[11px] font-semibold text-text-primary block"
+              >
+                Lance inicial (R$)
+              </label>
+              <input
+                id="edit-starting"
+                value={startingPrice}
+                disabled={isLocked}
+                onChange={(event) => setStartingPrice(event.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs font-mono disabled:opacity-60"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="edit-increment"
+                className="text-[11px] font-semibold text-text-primary block"
+              >
+                Incremento mínimo (R$)
+              </label>
+              <input
+                id="edit-increment"
+                value={minIncrement}
+                disabled={isLocked}
+                onChange={(event) => setMinIncrement(event.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs font-mono disabled:opacity-60"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="edit-starts"
+                className="text-[11px] font-semibold text-text-primary block"
+              >
+                Início
+              </label>
+              <input
+                id="edit-starts"
+                type="datetime-local"
+                value={startsAt}
+                disabled={isLocked}
+                onChange={(event) => setStartsAt(event.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="edit-ends"
+                className="text-[11px] font-semibold text-text-primary block"
+              >
+                Encerramento
+              </label>
+              <input
+                id="edit-ends"
+                type="datetime-local"
+                value={endsAt}
+                disabled={isLocked}
+                onChange={(event) => setEndsAt(event.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+              />
+            </div>
+          </div>
+
+          <fieldset className="space-y-3 border-t border-border-subtle pt-4">
+            <legend className="text-[11px] font-bold uppercase tracking-wider text-brand-primary">
+              Ficha técnica do item
+            </legend>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label
+                  htmlFor="edit-medium"
+                  className="text-[11px] font-semibold text-text-primary block"
+                >
+                  Material / Técnica
+                </label>
+                <input
+                  id="edit-medium"
+                  value={medium}
+                  disabled={isLocked}
+                  onChange={(event) => setMedium(event.target.value)}
+                  placeholder="Ex.: óleo sobre tela"
+                  className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label
+                  htmlFor="edit-dimensions"
+                  className="text-[11px] font-semibold text-text-primary block"
+                >
+                  Dimensões
+                </label>
+                <input
+                  id="edit-dimensions"
+                  value={dimensions}
+                  disabled={isLocked}
+                  onChange={(event) => setDimensions(event.target.value)}
+                  placeholder="Ex.: 60 × 80 cm"
+                  className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label
+                  htmlFor="edit-attribution"
+                  className="text-[11px] font-semibold text-text-primary block"
+                >
+                  Autor / Atribuição
+                </label>
+                <input
+                  id="edit-attribution"
+                  value={attribution}
+                  disabled={isLocked}
+                  onChange={(event) => setAttribution(event.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label
+                  htmlFor="edit-image-conditions"
+                  className="text-[11px] font-semibold text-text-primary block"
+                >
+                  Condições da imagem
+                </label>
+                <input
+                  id="edit-image-conditions"
+                  value={imageConditions}
+                  disabled={isLocked}
+                  onChange={(event) => setImageConditions(event.target.value)}
+                  placeholder="Ex.: domínio público, atribuição obrigatória"
+                  className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <div className="space-y-1">
+            <label
+              htmlFor="edit-conditions"
+              className="text-[11px] font-semibold text-text-primary block"
+            >
+              Condições especiais
+            </label>
+            <textarea
+              id="edit-conditions"
+              rows={2}
+              value={specialConditions}
+              disabled={isLocked}
+              onChange={(event) => setSpecialConditions(event.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label
+              htmlFor="edit-notes"
+              className="text-[11px] font-semibold text-text-primary block"
+            >
+              Observações do leiloeiro
+            </label>
+            <textarea
+              id="edit-notes"
+              rows={2}
+              value={sellerNotes}
+              disabled={isLocked}
+              onChange={(event) => setSellerNotes(event.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-border-strong text-xs disabled:opacity-60"
+            />
+          </div>
+
+          {error && (
+            <p
+              role="alert"
+              className="text-[11px] text-semantic-error bg-semantic-error-bg border border-semantic-error/30 rounded-lg px-3 py-2"
+            >
+              {error}
+            </p>
+          )}
+
+          <p className="text-[10px] text-text-secondary">
+            Estado atual: <strong>{lot.status}</strong> · Encerra em{" "}
+            {formatDateTimeBR(lot.endsAt)} · Lance atual{" "}
+            {formatBRL(lot.currentBidCents)}
+          </p>
+        </div>
+
+        <div className="p-4 border-t border-border-subtle flex items-center justify-end gap-2 shrink-0">
+          <button
+            onClick={onClose}
+            className="px-3.5 py-2 rounded-lg border border-border-subtle text-text-secondary text-xs hover:bg-surface-base cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={() => void handleSave()}
+            disabled={submitting || isLocked}
+            className="px-3.5 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:bg-brand-deep flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="w-3.5 h-3.5" />
+                Salvar alterações
+              </>
+            )}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
