@@ -22,8 +22,12 @@ type AuthenticatedRequest = Request & { user: AuthenticatedUser };
 @Controller()
 export class LotsController {
   constructor(private readonly lots: LotsService) {}
-  @Get('lots') list(@Query('status') status?: LotStatus) {
-    return this.lots.list(status);
+  @Get('lots')
+  list(
+    @Query('status') status?: LotStatus,
+    @Query('category') category?: string,
+  ) {
+    return this.lots.list(status, category);
   }
   @Get('lots/:id') get(@Param('id') id: string) {
     return this.lots.getPublic(id);
