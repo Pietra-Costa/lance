@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: #123D2F;
-  --color-brand-deep: #0A2B22;
-  --color-surface-base: #F5F1E7;
+  --color-brand-primary: #123d2f;
+  --color-brand-deep: #0a2b22;
+  --color-surface-base: #f5f1e7;
   --color-text-primary: #222923;
-  --color-text-secondary: #68716A;
-  --color-accent-gold: #C8A96A;
-  
-  --color-surface-card: #FFFFFF;
-  --color-surface-muted: #EFE9DB;
-  --color-border-subtle: #E2DDD2;
-  --color-border-strong: #CDC5B4;
+  --color-text-secondary: #68716a;
+  --color-accent-gold: #c8a96a;
 
-  --color-semantic-success: #1E7E34;
-  --color-semantic-success-bg: #EAF7EE;
-  --color-semantic-warning: #B45309;
-  --color-semantic-warning-bg: #FEF3C7;
-  --color-semantic-error: #B91C1C;
-  --color-semantic-error-bg: #FEE2E2;
-  --color-semantic-info: #1D4ED8;
-  --color-semantic-info-bg: #EFF6FF;
+  --color-surface-card: #ffffff;
+  --color-surface-muted: #efe9db;
+  --color-border-subtle: #e2ddd2;
+  --color-border-strong: #cdc5b4;
 
-  --font-heading: 'Sora', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --color-semantic-success: #1e7e34;
+  --color-semantic-success-bg: #eaf7ee;
+  --color-semantic-warning: #b45309;
+  --color-semantic-warning-bg: #fef3c7;
+  --color-semantic-error: #b91c1c;
+  --color-semantic-error-bg: #fee2e2;
+  --color-semantic-info: #1d4ed8;
+  --color-semantic-info-bg: #eff6ff;
+
+  --font-heading: "Sora", sans-serif;
+  --font-body: "Inter", sans-serif;
 }
 
 html {
@@ -43,7 +43,11 @@ body {
   max-width: 100vw;
 }
 
-h1, h2, h3, h4, .font-heading {
+h1,
+h2,
+h3,
+h4,
+.font-heading {
   font-family: var(--font-heading);
 }
 
@@ -62,18 +66,35 @@ h1, h2, h3, h4, .font-heading {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F5F1E7;
+  background: #f5f1e7;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CDC5B4;
+  background: #cdc5b4;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #68716A;
+  background: #68716a;
 }
 
-/* Subtle localized impact ripple for strike block */
 @keyframes strikeRipple {
-  0% { transform: scale(0.8); opacity: 0.9; }
-  100% { transform: scale(1.6); opacity: 0; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
