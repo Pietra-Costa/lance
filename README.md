@@ -1,398 +1,349 @@
-# Lance — Casa de Leilões
+ <div align="center">
 
-Plataforma de leilões online: leiloeiros criam lotes a partir de itens de APIs
-públicas de museus, licitantes disputam em tempo real com saldo simulado e
-qualquer pessoa pode auditar o histórico sem login.
+<img src="docs/images/lance-banner.png" alt="Lance — Casa de Leilões" width="100%">
 
-> **Escopo:** liquidação **simulada**. Não há pagamento real, nota fiscal,
-> revenda entre usuários nem garantia de entrega.
+# LANCE
 
----
+### Casa de Leilões · Plataforma SaaS em tempo real
 
-## Stack
+**Pregões ao vivo. Segurança transacional. Auditoria criptográfica.**
 
-| Camada    | Tecnologia                                    |
-| --------- | --------------------------------------------- |
-| Front-end | React 19 + Vite + TypeScript + Tailwind CSS 4 |
-| Back-end  | NestJS 10 + TypeScript                        |
-| Banco     | PostgreSQL 16 + Prisma 7                      |
-| Realtime  | Socket.IO (autenticado por JWT)               |
-| Testes    | Jest + Supertest (API), Vitest (web)          |
-| Infra     | Docker Compose (Postgres + API + Web)         |
+[![Produção](https://img.shields.io/badge/PRODUÇÃO-ONLINE-123D2F?style=for-the-badge)](https://lance-leiloes.vercel.app/)
+[![Frontend](https://img.shields.io/badge/FRONTEND-VERCEL-0A2B22?style=for-the-badge&logo=vercel&logoColor=F5F1E7)](https://lance-leiloes.vercel.app/)
+[![API](https://img.shields.io/badge/API-RENDER-123D2F?style=for-the-badge&logo=render&logoColor=F5F1E7)](https://lance-api-rfiz.onrender.com)
+[![Database](https://img.shields.io/badge/DATABASE-POSTGRESQL%2016-C8A96A?style=for-the-badge&logo=postgresql&logoColor=222923)](https://supabase.com/)
 
-Monorepo com npm workspaces: `apps/api`, `apps/web`.
+[**Acessar plataforma ↗**](https://lance-leiloes.vercel.app/) · [API](https://lance-api-rfiz.onrender.com) · [Healthcheck](https://lance-api-rfiz.onrender.com/health)
+
+</div>
 
 ---
 
-## Subir do zero (passo a passo)
+> **Aviso de escopo:** esta plataforma utiliza liquidação financeira simulada para demonstração e homologação. Não realiza cobranças bancárias reais nem remessas físicas.
 
-### 1. Pré-requisitos
+## Sobre o projeto
 
-- Node.js 20+
-- Docker (para o PostgreSQL)
+O **Lance** é uma plataforma SaaS para gestão, catalogação e realização de leilões online. Combina a elegância de uma casa de leilões tradicional com uma arquitetura moderna para processamento de lances em tempo real, gestão de saldos, governança e rastreabilidade criptográfica.
 
-### 2. Instalar dependências
+O sistema contempla fluxos transacionais, concorrência controlada, comunicação em tempo real e mecanismos de verificação da integridade dos eventos registrados.
+
+## Visão geral da plataforma
+
+<div align="center">
+
+|                 Vitrine e lotes                  |                 Pregão e gestão                 |
+| :----------------------------------------------: | :---------------------------------------------: |
+| ![Vitrine do Lance](docs/images/804shots_so.png) | ![Pregão do Lance](docs/images/453shots_so.png) |
+
+|               Carteira e operações                |               Interface adicional                |
+| :-----------------------------------------------: | :----------------------------------------------: |
+| ![Carteira do Lance](docs/images/406shots_so.png) | ![Plataforma Lance](docs/images/650shots_so.png) |
+
+</div>
+
+## Ambientes em produção
+
+| Serviço               | Tecnologia               | Endereço                                                    |
+| --------------------- | ------------------------ | ----------------------------------------------------------- |
+| Aplicação web         | React · Vite · Vercel    | [Abrir aplicação](https://lance-leiloes.vercel.app/)        |
+| API REST e WebSockets | NestJS · Render          | [Abrir API](https://lance-api-rfiz.onrender.com)            |
+| Healthcheck           | Render                   | [Verificar API](https://lance-api-rfiz.onrender.com/health) |
+| Banco de dados        | PostgreSQL 16 · Supabase | PostgreSQL gerenciado                                       |
+
+## Diferenciais da plataforma
+
+- **Pregão em tempo real:** sincronização de lances, liderança e cronômetros por WebSockets.
+- **Integridade criptográfica:** cadeia de eventos baseada em hashes SHA-256, com mecanismo de verificação.
+- **Gestão financeira simulada:** reservas de saldo, liberação de valores e registro de movimentações.
+- **Curadoria cultural:** integração com catálogos públicos de instituições culturais.
+- **Governança:** separação de permissões, termos digitais e registros de operações relevantes.
+- **Comprovantes verificáveis:** consulta pública de comprovantes de arremate.
+- **Design responsivo:** interface adaptada para diferentes tamanhos de tela.
+
+## Funcionalidades
+
+### 1. Sala de pregão ao vivo
+
+- Sincronização de lances, liderança e contagem regressiva com Socket.IO.
+- Extensão automática do pregão quando um lance é enviado nos dois minutos finais.
+- Validação no backend do incremento mínimo permitido.
+- Notificações de liderança e de lance superado.
+- Liberação da reserva quando outro participante supera o lance.
+- Proteção contra lances desnecessários do próprio líder.
+
+### 2. Curadoria e cadastro de lotes
+
+- Busca e importação de itens de acervos públicos.
+- Integração com o The Metropolitan Museum of Art e o Art Institute of Chicago.
+- Fluxo guiado para seleção, procedência, configuração do pregão e prévia.
+- Registro dos metadados e das referências das imagens no momento da publicação.
+
+### 3. Carteira digital e ledger
+
+- Consulta de saldo total, reservado e disponível.
+- Reserva de saldo associada a lances líderes.
+- Liberação de reservas quando um lance é superado.
+- Depósitos simulados para demonstração.
+- Extrato de transações e movimentações financeiras.
+
+### 4. Auditoria criptográfica
+
+- Encadeamento de eventos com SHA-256 e referência ao hash anterior.
+- Verificação da cadeia para identificar possíveis alterações ou exclusões.
+- Registro de ações críticas, como criação de lotes, lances e arremates.
+- Histórico público com pseudônimos para reduzir a exposição de dados pessoais.
+
+### 5. Comprovantes digitais
+
+- Geração de comprovantes de arremate com código de verificação.
+- Consulta pública por código, sem exigir login.
+- Registro das informações relevantes para conferência posterior.
+
+### 6. Gestão do leiloeiro
+
+- Painel de lotes agendados, ao vivo, arrematados e cancelados.
+- Termo digital de compromisso do leiloeiro.
+- Registro de justificativas para cancelamentos.
+- Tratamento das reservas de saldo associadas aos lotes cancelados.
+
+### 7. Experiência e design system
+
+- Interface responsiva para desktop, tablet e smartphone.
+- Componentes visuais consistentes.
+- Animações e notificações dentro da aplicação.
+- Identidade visual inspirada em casas de leilões tradicionais.
+
+## Identidade visual
+
+A paleta combina verde profundo, dourado e tons de creme, com contraste editorial e aparência institucional.
+
+| Cor                                                                                               | Código    | Aplicação                       |
+| ------------------------------------------------------------------------------------------------- | --------- | ------------------------------- |
+| <img src="https://singlecolorimage.com/get/123d2f/24x24" alt="Verde principal"> Verde principal   | `#123D2F` | Marca e elementos principais    |
+| <img src="https://singlecolorimage.com/get/0a2b22/24x24" alt="Verde profundo"> Verde profundo     | `#0A2B22` | Contraste e superfícies escuras |
+| <img src="https://singlecolorimage.com/get/c8a96a/24x24" alt="Dourado"> Dourado                   | `#C8A96A` | Destaques e acentos             |
+| <img src="https://singlecolorimage.com/get/f5f1e7/24x24" alt="Creme"> Creme                       | `#F5F1E7` | Fundos e superfícies claras     |
+| <img src="https://singlecolorimage.com/get/222923/24x24" alt="Texto principal"> Texto principal   | `#222923` | Conteúdo e títulos              |
+| <img src="https://singlecolorimage.com/get/68716a/24x24" alt="Texto secundário"> Texto secundário | `#68716A` | Informações auxiliares          |
+
+## Stack tecnológica
+
+| Camada         | Tecnologia                       | Responsabilidade                   |
+| -------------- | -------------------------------- | ---------------------------------- |
+| Frontend       | React 19 · TypeScript · Vite     | Interface e experiência do usuário |
+| Estilização    | Tailwind CSS 4 · Motion          | Layout, componentes e animações    |
+| Backend        | NestJS 10 · TypeScript           | API e regras de negócio            |
+| Banco de dados | PostgreSQL 16 · Prisma ORM       | Persistência e transações          |
+| Tempo real     | Socket.IO · WebSockets           | Comunicação entre participantes    |
+| Segurança      | Argon2id · JWT · SHA-256         | Senhas, sessões e integridade      |
+| Infraestrutura | Docker Compose · Vercel · Render | Execução e implantação             |
+| Testes         | Jest · Supertest · Vitest        | Testes automatizados               |
+
+## Arquitetura do monorepo
+
+```text
+lance/
+├── apps/
+│   ├── api/
+│   │   ├── prisma/
+│   │   └── src/
+│   │       ├── audit/           # Auditoria criptográfica
+│   │       ├── auth/            # Autenticação e autorização
+│   │       ├── bids/            # Processamento de lances
+│   │       ├── catalog/         # Integrações com catálogos
+│   │       ├── lots/            # Ciclo de vida dos lotes
+│   │       ├── outbox/          # Publicação de eventos
+│   │       ├── realtime/        # Gateway WebSocket
+│   │       ├── receipts/        # Comprovantes digitais
+│   │       ├── seller-agreements/
+│   │       ├── settlements/     # Liquidação e reconciliação
+│   │       └── wallet/          # Carteira e ledger
+│   └── web/
+│       └── src/
+│           ├── components/      # Componentes e design system
+│           ├── context/         # Sessão e estado da aplicação
+│           ├── logic/           # Regras de negócio do frontend
+│           ├── pages/           # Páginas da plataforma
+│           └── services/        # Cliente HTTP e serviços
+├── docs/
+│   └── images/                  # Banner e capturas de tela
+├── docker-compose.yml
+└── package.json
+```
+
+## Executar com Docker
+
+### Pré-requisitos
+
+- Docker instalado e em execução.
+- Docker Compose disponível.
+
+### Iniciar a aplicação
+
+Na raiz do repositório:
+
+```bash
+docker compose up --build
+```
+
+Para executar em segundo plano:
+
+```bash
+docker compose up -d --build
+```
+
+### Serviços locais
+
+| Serviço     | Endereço                     |
+| ----------- | ---------------------------- |
+| Frontend    | http://localhost:8080        |
+| API         | http://localhost:4000        |
+| Healthcheck | http://localhost:4000/health |
+| PostgreSQL  | `localhost:5432`             |
+
+Para encerrar os serviços:
+
+```bash
+docker compose down
+```
+
+## Desenvolvimento local
+
+### 1. Instalar dependências
+
+Requer Node.js 20 ou superior.
 
 ```bash
 npm install
 ```
 
-### 3. Configurar variáveis de ambiente
+### 2. Configurar variáveis de ambiente
 
 ```bash
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-Edite `apps/api/.env` e gere um `JWT_SECRET` real:
+Gere uma chave JWT para o ambiente local:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-### 4. Subir o PostgreSQL
+Configure as variáveis necessárias nos arquivos de ambiente. Não envie credenciais ou segredos ao repositório.
+
+### 3. Iniciar o banco de dados
 
 ```bash
 docker compose up -d postgres
 ```
 
-### 5. Migrar e semear o banco
+### 4. Gerar o cliente e executar as migrações
 
 ```bash
 npm run db:generate --workspace @lance/api
-npm run db:migrate  --workspace @lance/api
-npm run db:seed     --workspace @lance/api
+npm run db:migrate --workspace @lance/api
 ```
 
-O seed cria o cenário completo de demonstração (ver abaixo). Ele é
-**idempotente**: pode rodar várias vezes sem duplicar dados.
+### 5. Iniciar a API e o frontend
 
-### 6. Rodar as aplicações
+Execute em terminais separados:
+
+**Terminal 1 — API**
 
 ```bash
-npm run dev:api   # API em http://localhost:4000
-npm run dev:web   # Web em http://localhost:5173
+npm run dev:api
 ```
 
-### Alternativa: tudo em Docker
+**Terminal 2 — Frontend**
 
 ```bash
-docker compose up --build
+npm run dev:web
 ```
 
-- Web: http://localhost:8080
-- API: http://localhost:4000
-- Healthcheck: http://localhost:4000/health
+## Jornada de uso
 
----
+1. **Cadastro:** acesse `/cadastro` e crie uma conta com perfil de licitante ou leiloeiro.
+2. **Carteira:** como licitante, acesse `/conta/carteira` e utilize o depósito simulado.
+3. **Participação:** navegue pelos lotes e envie lances nos pregões disponíveis.
+4. **Gestão:** como leiloeiro, acesse `/leiloeiro` e crie lotes em `/leiloeiro/lotes/novo`.
+5. **Auditoria:** consulte `/auditoria` para verificar a cadeia de eventos.
+6. **Comprovantes:** acesse `/comprovante/:codigo` para consultar um comprovante pelo código.
 
-## Contas de demonstração
+## Engenharia transacional
 
-Criadas pelo `db:seed`. A senha é o valor de `SEED_DEMO_PASSWORD` no
-`apps/api/.env` (padrão de exemplo: `senhaDemoForte2026`).
+| Mecanismo                   | Solução técnica                                  | Objetivo                                     |
+| --------------------------- | ------------------------------------------------ | -------------------------------------------- |
+| Concorrência de lances      | Transações serializáveis e bloqueio de registros | Reduzir condições de corrida                 |
+| Reserva de fundos           | Operações transacionais de reserva e liberação   | Preservar a consistência dos saldos          |
+| Prevenção de saldo negativo | Validações condicionais no banco                 | Evitar débitos acima do saldo disponível     |
+| Idempotência                | Chave associada à requisição                     | Evitar processamento duplicado               |
+| Transactional Outbox        | Persistência dos eventos antes da publicação     | Reduzir divergências entre banco e mensagens |
 
-| Papel       | E-mail                        | Estado inicial                            |
-| ----------- | ----------------------------- | ----------------------------------------- |
-| Leiloeira   | `leiloeiro.demo@lance.local`  | Termo do leiloeiro já aceito              |
-| Licitante A | `licitante.demo@lance.local`  | R$ 5.000,00 disponíveis                   |
-| Licitante B | `licitante2.demo@lance.local` | R$ 5.000,00, R$ 110,00 reservados (líder) |
+## Endpoints da API
 
-**Cenário semeado:**
+Base de produção: `https://lance-api-rfiz.onrender.com`
 
-- 1 lote **ao vivo** com 2 lances (A abriu com R$ 100,00, B cobriu com R$ 110,00)
-- 1 lote **agendado** para daqui a 2 horas
-- 2 itens de catálogo fictícios, com origem declarada
+### Autenticação e sessão
 
-> Nunca reutilize essas credenciais em produção.
+| Método | Rota             | Descrição                       |
+| ------ | ---------------- | ------------------------------- |
+| `POST` | `/auth/register` | Cadastro de usuário             |
+| `POST` | `/auth/login`    | Autenticação                    |
+| `POST` | `/auth/refresh`  | Renovação de sessão             |
+| `POST` | `/auth/logout`   | Encerramento de sessão          |
+| `GET`  | `/auth/me`       | Consulta do usuário autenticado |
 
----
+### Lotes e lances
 
-## Como percorrer o fluxo
+| Método  | Rota                | Descrição            |
+| ------- | ------------------- | -------------------- |
+| `GET`   | `/lots`             | Listagem de lotes    |
+| `GET`   | `/lots/:id`         | Detalhes do lote     |
+| `POST`  | `/lots`             | Criação de lote      |
+| `PATCH` | `/lots/:id`         | Edição de lote       |
+| `POST`  | `/lots/:id/publish` | Publicação do lote   |
+| `POST`  | `/lots/:id/cancel`  | Cancelamento do lote |
+| `POST`  | `/lots/:id/bids`    | Envio de lance       |
 
-1. **Vitrine** (`/`) — lotes ao vivo, agendados e encerrados. Cancelados não aparecem.
-2. **Sala do lote** (`/lotes/:id`) — preço atual, histórico com pseudônimos,
-   countdown, "você está liderando" / "você foi superado", atualização via Socket.IO.
-3. **Login** (`/entrar`) — licitante entra e vai para `/conta`.
-4. **Carteira** (`/conta/carteira`) — saldo total, comprometido, disponível e depósito simulado.
-5. **Lance** — botão na sala do lote; o valor mínimo é calculado pelo servidor.
-6. **Painel do leiloeiro** (`/leiloeiro`) — criar lote pelo assistente
-   (`/leiloeiro/lotes/novo`), publicar, cancelar e ver resultados.
-7. **Auditoria** (`/auditoria`) — pública, mostra a cadeia de hashes e o
-   resultado de `GET /audit/verify` recalculado pela API.
-8. **Comprovante** (`/comprovante/:codigo`) — público, acessível pelo link
-   compartilhado do arremate.
+### Carteira e auditoria
 
----
+| Método | Rota                          | Descrição                     |
+| ------ | ----------------------------- | ----------------------------- |
+| `GET`  | `/wallet`                     | Consulta de saldos            |
+| `GET`  | `/wallet/transactions`        | Extrato de movimentações      |
+| `POST` | `/wallet/deposits`            | Depósito simulado             |
+| `GET`  | `/catalog/search?q=:termo`    | Busca em catálogos externos   |
+| `GET`  | `/audit`                      | Trilha de auditoria           |
+| `GET`  | `/audit/verify`               | Verificação da cadeia SHA-256 |
+| `GET`  | `/receipts/:verificationCode` | Consulta de comprovante       |
+| `GET`  | `/health`                     | Estado da API                 |
 
-## Regras de negócio implementadas
-
-| Regra                                                                    | Onde                                  |
-| ------------------------------------------------------------------------ | ------------------------------------- |
-| Lotes `SCHEDULED → LIVE → ENDED` e `CANCELED`                            | `lots.service.ts`, worker             |
-| Primeiro lance ≥ preço inicial; seguintes ≥ atual + incremento           | `bids.service.ts`                     |
-| O líder não pode cobrir o próprio lance                                  | `bids.service.ts` (`ALREADY_LEADING`) |
-| Saldo disponível = total − reservado; lance exige o valor integral       | `bids.service.ts`                     |
-| Reserva anterior liberada e nova criada na mesma transação               | `bids.service.ts`                     |
-| Anti-sniping: lance nos últimos 2 min estende o fim em +2 min            | `bids.service.ts`                     |
-| Liquidação: débito do vencedor + crédito do leiloeiro + recibo           | `settlements.service.ts`              |
-| Lote sem lances encerra sem vencedor e sem movimentação                  | `settlements.service.ts`              |
-| Cancelamento libera reservas e impede liquidação posterior               | `lots.service.ts`                     |
-| Papéis exclusivos: leiloeiro não dá lance, licitante não administra lote | guards + serviços                     |
-
-### Mensagens de recusa
-
-Cada lance recusado devolve um `code` estável e uma mensagem em português com
-valores em Real (`R$ 105,00`), nunca em centavos:
-
-`INVALID_AMOUNT`, `LOT_NOT_FOUND`, `AUCTION_NOT_STARTED`, `AUCTION_ENDED`,
-`AUCTION_NOT_LIVE`, `INVALID_ROLE`, `SELLER_CANNOT_BID`, `ALREADY_LEADING`,
-`BELOW_MINIMUM`, `INSUFFICIENT_FUNDS`, `RESERVATION_INCONSISTENT`,
-`CONCURRENCY_CONFLICT`, `IDEMPOTENCY_KEY_REUSED`, `IDEMPOTENCY_PENDING`.
-
----
-
-## Concorrência e integridade financeira
-
-- Transação `Serializable` com `SELECT ... FOR UPDATE` no lote, serializando
-  todos os lances do mesmo lote.
-- Retry automático em conflito de serialização (até 3 tentativas).
-- Índice único **parcial** no banco impedindo duas reservas `ACTIVE` por lote.
-- Débitos/créditos usam `updateMany` condicional: o saldo nunca fica negativo.
-- `WalletTransaction.idempotencyKey` único impede depósito ou liquidação duplicados.
-- `BidRequest (bidderId, idempotencyKey)` + hash da requisição garante
-  idempotência do lance, inclusive em requisições simultâneas.
-
----
-
-## Auditoria à prova de adulteração
-
-**Técnica:** cadeia de hashes SHA-256 encadeados (`previousHash` → `eventHash`).
-
-- Cada evento relevante grava `sequence`, `eventType`, `entityType`, `entityId`,
-  `payload`, `previousHash`, `eventHash` e `createdAt`.
-- O hash é calculado sobre uma **representação canônica versionada**:
-  chaves ordenadas alfabeticamente, objetos aninhados normalizados e a versão
-  da canonicalização incluída no material (`src/audit/audit-chain.ts`).
-- A escrita acontece na **mesma transação** da operação de negócio, com lock em
-  `AuditChainState` (`SELECT ... FOR UPDATE`), o que impede bifurcações.
-- `GET /audit/verify` recalcula a cadeia inteira e confere:
-  1. continuidade do encadeamento;
-  2. hash recalculado de cada evento;
-  3. correspondência com a cabeça da cadeia.
-
-**Eventos gravados:** `LOT_CREATED`, `LOT_LIVE`, `BID_PLACED`, `LOT_CANCELED`,
-`AUCTION_ENDED`, `AUCTION_WON`, `AUCTION_ENDED_NO_BIDS`, `SETTLEMENT_COMPLETED`,
-`SETTLEMENT_FAILED`, `WALLET_DEPOSITED`.
-
-**Privacidade:** a auditoria pública nunca expõe nome, e-mail, telefone ou ID
-interno. Licitantes aparecem como pseudônimo estável (`Licitante •••• 4A2F`).
-
-### Limitações declaradas
-
-- A cadeia **não é assinada** (Ed25519) nem ancorada externamente
-  (OpenTimestamps). Isso está fora do escopo desta versão.
-- Consequência: a cadeia detecta alteração, remoção ou inserção local no banco,
-  mas **não impede** que alguém com acesso total ao banco reescreva todos os
-  eventos e recalcule a cadeia inteira. Ancoragem externa resolveria esse
-  limite e não está implementada.
-- O relógio do servidor é a fonte de tempo; um relógio incorreto afeta a ordem
-  dos eventos.
-
----
-
-## API
-
-Base: `http://localhost:4000`. Autenticação por `Authorization: Bearer <token>`.
-
-### Autenticação
-
-| Método | Rota             | Descrição                               |
-| ------ | ---------------- | --------------------------------------- |
-| POST   | `/auth/register` | Cria conta (`LEILOEIRO` ou `LICITANTE`) |
-| POST   | `/auth/login`    | Retorna access + refresh token          |
-| POST   | `/auth/refresh`  | Rotaciona o refresh token               |
-| POST   | `/auth/logout`   | Revoga a sessão                         |
-| GET    | `/auth/me`       | Usuário autenticado                     |
-
-### Catálogo
-
-| Método | Rota                                  | Descrição                                       |
-| ------ | ------------------------------------- | ----------------------------------------------- |
-| GET    | `/catalog/search?q=`                  | Busca nas APIs externas (Met, AIC, MusicBrainz) |
-| POST   | `/catalog/:source/:externalId/import` | Importa item (LEILOEIRO)                        |
-
-### Lotes
-
-| Método | Rota                | Descrição                                  |
-| ------ | ------------------- | ------------------------------------------ |
-| GET    | `/lots`             | Lista (cancelados ocultos)                 |
-| GET    | `/lots/:id`         | Detalhe público + histórico pseudonimizado |
-| GET    | `/seller/lots`      | Lotes do leiloeiro (LEILOEIRO)             |
-| POST   | `/lots`             | Cria lote (LEILOEIRO, exige termo aceito)  |
-| PATCH  | `/lots/:id`         | Edita lote `SCHEDULED` (LEILOEIRO)         |
-| POST   | `/lots/:id/publish` | Publica o lote ao vivo (LEILOEIRO)         |
-| POST   | `/lots/:id/cancel`  | Cancela com justificativa (LEILOEIRO)      |
-
-### Lances
-
-| Método | Rota                | Descrição                                     |
-| ------ | ------------------- | --------------------------------------------- |
-| POST   | `/lots/:lotId/bids` | Dá lance. Exige `Idempotency-Key` (LICITANTE) |
-
-### Carteira
-
-| Método | Rota                   | Descrição                                  |
-| ------ | ---------------------- | ------------------------------------------ |
-| GET    | `/wallet`              | Saldo total, reservado e disponível        |
-| GET    | `/wallet/transactions` | Extrato                                    |
-| POST   | `/wallet/deposits`     | Depósito simulado. Exige `Idempotency-Key` |
-
-### Minha conta
-
-| Método | Rota                     | Descrição                      |
-| ------ | ------------------------ | ------------------------------ |
-| GET    | `/me/bids`               | Meus lances                    |
-| GET    | `/me/wins`               | Meus arremates com comprovante |
-| GET    | `/me/notifications`      | Notificações + não lidas       |
-| PATCH  | `/me/notifications/read` | Marca todas como lidas         |
-
-### Auditoria, recibos e saúde
-
-| Método | Rota                          | Descrição                       |
-| ------ | ----------------------------- | ------------------------------- |
-| GET    | `/audit`                      | Histórico global pseudonimizado |
-| GET    | `/audit/lots/:lotId`          | Histórico do lote               |
-| GET    | `/audit/verify`               | Verifica a cadeia inteira       |
-| GET    | `/receipts/:verificationCode` | Comprovante público             |
-| GET    | `/health`                     | Healthcheck (API + banco)       |
-
-### Termo do leiloeiro
-
-| Método | Rota                        | Descrição                  |
-| ------ | --------------------------- | -------------------------- |
-| GET    | `/seller-agreement/current` | Termo aceito (LEILOEIRO)   |
-| POST   | `/seller-agreement/accept`  | Aceita o termo (LEILOEIRO) |
-
----
-
-## Testes
+## Testes automatizados
 
 ```bash
-# API — unitários
+# Testes da API
 npm test --workspace @lance/api
 
-# API — integração + e2e (usa o banco lance_test, nunca o de dev)
+# Testes de integração / E2E da API
 npm run test:e2e --workspace @lance/api
 
-# Web — regras de negócio
+# Testes do frontend
 npm test --workspace @lance/web
 ```
 
-Os testes de integração exigem `localhost:5432/lance_test`. O setup
-(`test/jest-e2e.setup.ts`) valida a URL e troca o banco automaticamente; se a
-URL não for a esperada, a suíte **aborta** em vez de rodar contra o banco de
-desenvolvimento.
-
-Cenários cobertos em `test/flow.integration.e2e-spec.ts`:
-
-- liquidação com vencedor (débito + crédito + recibo)
-- liquidação sem lances (sem vencedor, sem movimentação)
-- liquidação repetida (idempotência de saldo e recibo)
-- retomada de settlement preso em `PROCESSING`
-- settlement marcado como `FAILED` quando o estado está inconsistente
-- cancelamento com reserva ativa (estorno)
-- concorrência entre licitantes distintos
-- líder não cobre o próprio lance
-- **adulteração direta no banco detectada** por `/audit/verify`
-- **remoção de evento** detectada por `/audit/verify`
+A cobertura efetiva depende dos testes presentes no repositório. Os cenários relevantes incluem concorrência de lances, idempotência, liquidação e verificação da integridade dos eventos.
 
 ---
 
-## Estrutura
+<div align="center">
 
-```
-apps/
-  api/
-    prisma/            schema, migrations, seed
-    src/
-      audit/           cadeia de hashes + verificacao
-      auth/            registro, login, refresh rotativo, guards
-      bids/            transacao de lance, recusas de dominio
-      catalog/         adaptadores (Met, AIC, MusicBrainz, CAA)
-      lots/            ciclo de vida do lote
-      me/              lances, arremates, notificacoes
-      outbox/          publicacao pos-commit
-      realtime/        gateway Socket.IO autenticado
-      receipts/        comprovantes
-      seller-agreements/ termo do leiloeiro
-      settlements/     liquidacao + worker de reconciliacao
-      wallet/          carteira e ledger
-    test/              integracao e2e
-  web/
-    src/
-      components/      layout e dominio
-      context/         AppContext (sessao, API, realtime)
-      logic/           regras puras + testes
-      pages/           telas
-      services/        cliente HTTP com refresh automatico
-```
+**LANCE**
 
----
+_Tecnologia, transparência e confiança em cada lance._
 
-## Limitações conhecidas
+[Aplicação em produção](https://lance-leiloes.vercel.app/) · [API](https://lance-api-rfiz.onrender.com)
 
-| Limitação                       | Consequência                                                                               |
-| ------------------------------- | ------------------------------------------------------------------------------------------ |
-| Liquidação simulada             | Nenhum valor real é movimentado; sem nota fiscal                                           |
-| Sem Ed25519 / ancoragem externa | Cadeia detecta adulteração local, não reescrita total                                      |
-| Sem notificações por e-mail     | Avisos apenas dentro da plataforma (sino)                                                  |
-| Worker roda dentro da API       | Em hospedagem que suspende o processo, a liquidação atrasa até a próxima execução          |
-| Sem lock distribuído no worker  | Duas instâncias podem reconciliar ao mesmo tempo; o efeito financeiro continua idempotente |
-| Sem OpenTelemetry/métricas      | Diagnóstico por logs da aplicação e `/health`                                              |
-| Filtro de categoria do catálogo | Depende do campo `category` do item importado, hoje frequentemente vazio                   |
+<sub>Projeto demonstrativo. As operações financeiras apresentadas são simuladas.</sub>
 
----
-
-## Scripts
-
-| Comando                                      | O que faz                            |
-| -------------------------------------------- | ------------------------------------ |
-| `npm run dev:api`                            | API em modo watch                    |
-| `npm run dev:web`                            | Vite dev server                      |
-| `npm run db:generate --workspace @lance/api` | Gera o Prisma Client                 |
-| `npm run db:migrate --workspace @lance/api`  | Aplica migrations (`migrate deploy`) |
-| `npm run db:seed --workspace @lance/api`     | Semeia o cenário de demonstração     |
-| `npm test --workspace @lance/api`            | Testes unitários da API              |
-| `npm run test:e2e --workspace @lance/api`    | Integração/e2e da API                |
-| `npm test --workspace @lance/web`            | Testes das regras do front           |
-
----
-
-## Deploy
-
-### Backend (Render, Railway, Fly.io…)
-
-1. Build: `npm ci && npm run db:generate --workspace @lance/api && npm run build --workspace @lance/api`
-2. Start: `npx prisma migrate deploy --schema prisma/schema.prisma && node dist/src/main.js`
-3. Variáveis: `DATABASE_URL`, `JWT_SECRET`, `WEB_ORIGIN`, `SEED_DEMO_PASSWORD`
-
-### Frontend (Vercel, Netlify…)
-
-1. Build: `npm ci && npm run build --workspace @lance/web`
-2. Publish directory: `apps/web/dist`
-3. Variável: `VITE_API_URL` apontando para a API publicada
-
-### Docker
-
-```bash
-docker compose up --build
-```
-
----
-
-## Uso de IA
-
-Este projeto foi construído com apoio de assistência de IA para geração de
-código, revisão e auditoria. Todo o código foi revisado e validado por build,
-testes unitários e testes de integração contra PostgreSQL real antes de ser
-considerado concluído.
+</div>
