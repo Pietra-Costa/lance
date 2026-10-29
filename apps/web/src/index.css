@@ -1,29 +1,125 @@
 @import "tailwindcss";
 
+/*
+ * Tema claro/escuro.
+ *
+ * `dark` é acionado pela classe `.dark` no <html> (ver ThemeProvider), e não
+ * por `prefers-color-scheme`, porque o usuário escolhe o tema e a escolha é
+ * persistida em localStorage.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
+  /* Cores fixas da marca — não mudam entre temas. */
   --color-brand-primary: #123d2f;
+  /*
+   * Verde interativo: papel de "cor de destaque" em texto, ícones e
+   * hover. É a mesma cor da marca no tema claro e clareia no escuro,
+   * para manter contraste sobre superfícies escuras.
+   */
+  --color-brand-interactive: var(--app-brand-interactive);
+  /* Texto sobre bloco verde escuro fixo (hero, footer, modais). */
+  --color-brand-on-dark: #f5f1e7;
+  /* Dourado só para TEXTO sobre superfície clara (o #c8a96a dá 1.9:1). */
+  --color-accent-gold-ink: var(--app-accent-gold-ink);
   --color-brand-deep: #0a2b22;
-  --color-surface-base: #f5f1e7;
-  --color-text-primary: #222923;
-  --color-text-secondary: #68716a;
   --color-accent-gold: #c8a96a;
 
-  --color-surface-card: #ffffff;
-  --color-surface-muted: #efe9db;
-  --color-border-subtle: #e2ddd2;
-  --color-border-strong: #cdc5b4;
+  /* Cores semânticas: apontam para os tokens de tema (abaixo). */
+  --color-surface-base: var(--app-surface-base);
+  --color-surface-card: var(--app-surface-card);
+  --color-surface-muted: var(--app-surface-muted);
+  --color-surface-subtle: var(--app-surface-subtle);
 
-  --color-semantic-success: #1e7e34;
-  --color-semantic-success-bg: #eaf7ee;
-  --color-semantic-warning: #b45309;
-  --color-semantic-warning-bg: #fef3c7;
-  --color-semantic-error: #b91c1c;
-  --color-semantic-error-bg: #fee2e2;
-  --color-semantic-info: #1d4ed8;
-  --color-semantic-info-bg: #eff6ff;
+  --color-text-primary: var(--app-text-primary);
+  --color-text-secondary: var(--app-text-secondary);
+
+  --color-border-subtle: var(--app-border-subtle);
+  --color-border-strong: var(--app-border-strong);
+  --color-border-invert: var(--app-invert-border);
+
+  --color-semantic-success: var(--app-success);
+  --color-semantic-success-bg: var(--app-success-bg);
+  --color-semantic-warning: var(--app-warning);
+  --color-semantic-warning-bg: var(--app-warning-bg);
+  --color-semantic-error: var(--app-error);
+  --color-semantic-error-bg: var(--app-error-bg);
+  --color-semantic-info: var(--app-info);
+  --color-semantic-info-bg: var(--app-info-bg);
 
   --font-heading: "Sora", sans-serif;
   --font-body: "Inter", sans-serif;
+}
+
+/* ---------- Tema claro (padrão) ---------- */
+:root,
+.light {
+  color-scheme: light;
+
+  --app-surface-base: #f5f1e7;
+  --app-surface-card: #ffffff;
+  --app-surface-muted: #ebe4d4;
+  --app-surface-subtle: #faf7f2;
+
+  --app-text-primary: #222923;
+  --app-text-secondary: #68716a;
+
+  --app-border-subtle: #ddd5c6;
+  --app-border-strong: #cdc5b4;
+
+  --app-success: #1e7e34;
+  --app-success-bg: #eaf7ee;
+  --app-warning: #b45309;
+  --app-warning-bg: #fef3c7;
+  --app-error: #b91c1c;
+  --app-error-bg: #fee2e2;
+  --app-info: #1d4ed8;
+  --app-info-bg: #eff6ff;
+
+  /* Verde/creme usados em blocos invertidos (hero, footer, header). */
+  --app-invert-bg: #123d2f;
+  --app-invert-fg: #f5f1e7;
+  --app-brand-interactive: #123d2f;
+  --app-accent-gold-ink: #7a5c22;
+
+  /* Borda translúcida em blocos invertidos (hero, footer, modais). */
+  --app-invert-border: rgba(255, 255, 255, 0.15);
+}
+
+/* ---------- Tema escuro ---------- */
+.dark {
+  color-scheme: dark;
+
+  --app-surface-base: #0d1a15;
+  --app-surface-card: #14261f;
+  --app-surface-muted: #1b2f27;
+  --app-surface-subtle: #112019;
+
+  --app-text-primary: #ece7dc;
+  --app-text-secondary: #9aa79f;
+
+  --app-border-subtle: #24382f;
+  --app-border-strong: #37503f;
+
+  --app-success: #4ade80;
+  --app-success-bg: #10301f;
+  --app-warning: #fbbf24;
+  --app-warning-bg: #33260c;
+  --app-error: #f87171;
+  --app-error-bg: #331518;
+  --app-info: #7dd3fc;
+  --app-info-bg: #0e2733;
+
+  /* No escuro o verde fica mais fundo que o fundo, mantendo a hierarquia. */
+  --app-invert-bg: #071310;
+  --app-invert-fg: #f5f1e7;
+
+  /* Verde clareado: mantém contraste de leitura sobre superfícies escuras. */
+  --app-brand-interactive: #7fc9a3;
+  --app-accent-gold-ink: #e3c58a;
+
+  /* No escuro o contraste vem do verde profundo, não de branco puro. */
+  --app-invert-border: rgba(245, 241, 231, 0.14);
 }
 
 html {
@@ -51,6 +147,34 @@ h4,
   font-family: var(--font-heading);
 }
 
+/*
+ * Transição suave ao trocar de tema.
+ *
+ * Desativada em quem pediu menos movimento, e limitada às propriedades de cor
+ * (nunca `all`, que animaria layout e transformações).
+ */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    fill 220ms ease,
+    stroke 220ms ease !important;
+  transition-delay: 0ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
+}
+
 /* Hide scrollbar for clean horizontal tabs */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -66,14 +190,14 @@ h4,
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f5f1e7;
+  background: var(--app-surface-base);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cdc5b4;
+  background: var(--app-border-strong);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #68716a;
+  background: var(--app-text-secondary);
 }
 
 @keyframes strikeRipple {

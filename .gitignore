@@ -40,3 +40,6 @@ apps/web/public/assets/aistudio/
 .DS_Store
 Thumbs.db
 .idea/
+
+# Prévia local de build (não versionar)
+.preview-dark/

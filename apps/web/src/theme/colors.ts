@@ -10,9 +10,15 @@
  * utilitárias (`bg-surface-base`) ou, quando precisar do valor em JS
  * (canvas, SVG, gráficos), importe daqui.
  *
+ * Temas: `colors` (abaixo) é a paleta fixa da marca — NÃO muda entre claro e
+ * escuro. As cores que mudam de tema são tokens CSS (`--app-*` em
+ * `index.css`); para lê-las em JS use `readThemeColors()`.
+ *
  * Paleta oficial: Lance_Identidade_Visual.pdf / seção 33 do documento
  * de arquitetura.
  */
+
+import type { ResolvedTheme } from "./useTheme";
 
 export const colors = {
   /** Verde Lance — cor institucional principal. */
@@ -66,3 +72,53 @@ export const placeholderPalettes = [
 ] as const;
 
 export type ColorToken = keyof typeof colors;
+
+/** Tokens de tema lidos do CSS em tempo de execução. */
+export interface ThemeColors {
+  surfaceBase: string;
+  surfaceCard: string;
+  surfaceMuted: string;
+  surfaceSubtle: string;
+  textPrimary: string;
+  textSecondary: string;
+  borderSubtle: string;
+  borderStrong: string;
+  invertBg: string;
+  invertFg: string;
+}
+
+/**
+ * Lê os tokens do tema ativo direto do CSS.
+ *
+ * Necessário para canvas/SVG/Three.js, onde não existe classe utilitária.
+ * Chame apenas no cliente (durante efeitos), nunca no primeiro render do SSR.
+ */
+export function readThemeColors(
+  element: HTMLElement = document.documentElement,
+): ThemeColors {
+  const styles = getComputedStyle(element);
+  const token = (name: string, fallback: string) =>
+    styles.getPropertyValue(name).trim() || fallback;
+
+  return {
+    surfaceBase: token("--app-surface-base", colors.surfaceBase),
+    surfaceCard: token("--app-surface-card", colors.surfaceCard),
+    surfaceMuted: token("--app-surface-muted", colors.surfaceMuted),
+    surfaceSubtle: token("--app-surface-subtle", colors.surfaceSubtle),
+    textPrimary: token("--app-text-primary", colors.textPrimary),
+    textSecondary: token("--app-text-secondary", colors.textSecondary),
+    borderSubtle: token("--app-border-subtle", colors.borderSubtle),
+    borderStrong: token("--app-border-strong", colors.borderStrong),
+    invertBg: token("--app-invert-bg", colors.brandPrimary),
+    invertFg: token("--app-invert-fg", colors.surfaceBase),
+  };
+}
+
+/** `true` quando o tema escuro está ativo no documento. */
+export function isDarkTheme(): boolean {
+  return document.documentElement.classList.contains("dark");
+}
+
+/** Assinatura do tema resolvido, útil em dependências de efeitos. */
+export type ThemeName = ResolvedTheme;
+
