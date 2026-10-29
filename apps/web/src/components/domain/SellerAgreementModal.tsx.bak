@@ -1,0 +1,174 @@
+import React, { useEffect, useState } from "react";
+import { useApp } from "../../context/AppContext";
+import {
+  ShieldAlert,
+  CheckCircle2,
+  FileText,
+  ArrowRight,
+  Lock,
+} from "lucide-react";
+import { Logo } from "../layout/Logo";
+
+export interface SellerAgreementModalProps {
+  onClose?: () => void;
+}
+
+export const SellerAgreementModal: React.FC<SellerAgreementModalProps> = ({
+  onClose,
+}) => {
+  const { currentUser, sellerAgreement, acceptSellerAgreement } = useApp();
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const [confirmedCheckbox, setConfirmedCheckbox] = useState(false);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollTop + clientHeight >= scrollHeight - 30) {
+      setHasScrolledToBottom(true);
+    }
+  };
+
+  // Trava o scroll da página: antes o overlay não cobria o conteúdo rolável
+  // e a tela inteira continuava rolando por baixo da modal.
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
+  const handleAccept = () => {
+    acceptSellerAgreement();
+    if (onClose) onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/70 backdrop-blur-xs p-0 sm:p-4 overflow-hidden">
+      <div className="bg-white rounded-none sm:rounded-2xl max-w-2xl w-full border border-border-subtle shadow-2xl flex flex-col max-h-dvh sm:max-h-[92vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-brand-deep text-surface-base p-6 border-b border-brand-primary">
+          <div className="flex items-center justify-between">
+            <Logo variant="dark" size="sm" />
+            <span className="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded bg-brand-primary text-accent-gold border border-[#C8A96A]/30">
+              REQUISITO REGULATÓRIO
+            </span>
+          </div>
+          <h3 className="font-heading font-bold text-xl text-surface-base mt-3">
+            Termo de Responsabilidade e Condução de Pregão
+          </h3>
+          <p className="text-xs text-surface-base/70 mt-1">
+            Habilitação da conta para criação de lotes, importação de catálogo e
+            abertura de leilões.
+          </p>
+        </div>
+
+        {/* Scrollable Terms Content */}
+        <div
+          onScroll={handleScroll}
+          className="p-6 overflow-y-auto space-y-4 text-xs text-text-primary leading-relaxed bg-[#FAF7F2] font-body"
+        >
+          <div className="p-3 bg-white rounded-xl border border-border-subtle flex items-center gap-3">
+            <Lock className="w-5 h-5 text-brand-primary shrink-0" />
+            <div>
+              <p className="font-semibold text-brand-primary">
+                Leiloeiro Identificado:
+              </p>
+              <p className="text-text-secondary">
+                {currentUser?.name || "Leiloeiro autenticado"}
+              </p>
+            </div>
+          </div>
+
+          <h4 className="font-heading font-bold text-sm text-brand-primary">
+            1. Objeto e Exclusividade de Papéis
+          </h4>
+          <p>
+            O presente termo estabelece as diretrizes para atuação como
+            Leiloeiro na plataforma Lance. Por regra estrita de negócio, o
+            usuário habilitado neste papel está impedido de participar ou emitir
+            lances como licitante nos leilões disponibilizados nesta mesma
+            conta.
+          </p>
+
+          <h4 className="font-heading font-bold text-sm text-brand-primary">
+            2. Importação e Snapshots Imutáveis
+          </h4>
+          <p>
+            Ao utilizar adaptadores de dados externos (The Metropolitan Museum
+            of Art, Art Institute of Chicago e MusicBrainz), os metadados e
+            imagens selecionados serão consolidados em um registro local
+            imutável (LotItemSnapshot). Eventual alteração ou indisponibilidade
+            nas APIs de origem não afeta os lotes publicados.
+          </p>
+
+          <h4 className="font-heading font-bold text-sm text-brand-primary">
+            3. Verificação de Direitos e Procedência de Imagens
+          </h4>
+          <p>
+            O leiloeiro declara ciência de que a mera disponibilidade de uma
+            imagem ou metadado em repositórios abertos não constitui licença
+            comercial irrestrita ou certificação material. É obrigação do
+            leiloeiro revisar os metadados de licença e procedência antes de
+            publicar qualquer lote.
+          </p>
+
+          <h4 className="font-heading font-bold text-sm text-brand-primary">
+            4. Regras de Encerramento e Anti-Sniping
+          </h4>
+          <p>
+            Todos os lotes sob sua condução observarão a regra de anti-sniping
+            (prorrogação automática em 2 minutos para lances válidos recebidos
+            na janela final de 2 minutos). Cancelamentos de lotes em andamento
+            com lances ativos exigem justificativa formal registrada na trilha
+            de auditoria criptográfica pública.
+          </p>
+
+          <div className="p-3 bg-semantic-warning-bg rounded-xl text-semantic-warning border border-[#B45309]/30">
+            <strong>Evidência Técnica:</strong> O aceite deste termo gera um
+            registro de auditoria com hash criptográfico associado ao seu ID e
+            timestamp imutável no banco de dados.
+          </div>
+        </div>
+
+        {/* Footer with Checkbox & Acceptance Action */}
+        <div className="p-6 bg-white border-t border-border-subtle space-y-4">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirmedCheckbox}
+              onChange={(e) => setConfirmedCheckbox(e.target.checked)}
+              className="mt-0.5 rounded border-border-strong text-brand-primary focus:ring-[#123D2F]"
+            />
+            <span className="text-xs text-text-primary">
+              Li e concordo integralmente com os termos de responsabilidade
+              técnica, exclusividade de papéis e integridade do pregão na
+              plataforma Lance.
+            </span>
+          </label>
+
+          <div className="flex gap-3">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl border border-border-subtle text-text-secondary text-xs font-medium hover:bg-[#FAF7F2] cursor-pointer"
+              >
+                Decidir depois
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleAccept}
+              disabled={!confirmedCheckbox}
+              className="flex-1 py-3 px-4 rounded-xl bg-brand-primary text-surface-base font-semibold text-xs hover:bg-brand-deep disabled:opacity-40 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            >
+              <CheckCircle2 className="w-4 h-4 text-accent-gold" />
+              <span>Formalizar e Assinar Termo (v1.0)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
