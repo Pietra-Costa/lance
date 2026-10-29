@@ -73,10 +73,21 @@ O sistema contempla fluxos transacionais, concorrência controlada, comunicaçã
 
 ### 2. Curadoria e cadastro de lotes
 
-- Busca e importação de itens de acervos públicos.
-- Integração com o The Metropolitan Museum of Art e o Art Institute of Chicago.
-- Fluxo guiado para seleção, procedência, configuração do pregão e prévia.
+- Busca e importação de itens de acervos públicos e de bases musicais.
+- Fluxo guiado para seleção, procedência, condições do lote, detalhes do item e prévia.
 - Registro dos metadados e das referências das imagens no momento da publicação.
+- Completável pelo leiloeiro quando a fonte externa não traz material, dimensões, período ou condições da imagem.
+
+#### Fontes de catálogo
+
+| Fonte                     | API utilizada                                     | O que fornece                                        | Observações                                                       |
+| ------------------------- | ------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| The Metropolitan Museum   | `collectionapi.metmuseum.org/public/collection/v1` | Objetos, autor, data, técnica, dimensões, imagem     | `hasImages=true`; aceita `q=*` para varrer o acervo com imagem    |
+| Art Institute of Chicago  | `api.artic.edu/api/v1`                            | Obras, artista, data, técnica, imagem IIIF           | Só itens com imagem pública                                       |
+| MusicBrainz               | `musicbrainz.org/ws/2` (release-groups)            | Álbuns, artista, data do primeiro lançamento, tipo    | `User-Agent` identificando a aplicação e ~1 req/s (política deles) |
+| Cover Art Archive         | `coverartarchive.org`                             | Capa frontal do release group                         | Complementa o MusicBrainz; 404 significa "sem capa" e não é erro  |
+
+As fontes são independentes: se uma cair ou estourar o tempo de resposta, ela entra em `failedSources` e as demais continuam respondendo. Cada item devolvido carrega a sua fonte, e a busca é paginada (`offset`/`limit`, máximo 40 por página). O MusicBrainz e o Cover Art Archive são a base da categoria **Discos e edições musicais**.
 
 ### 3. Carteira digital e ledger
 
@@ -112,6 +123,22 @@ O sistema contempla fluxos transacionais, concorrência controlada, comunicaçã
 - Componentes visuais consistentes.
 - Animações e notificações dentro da aplicação.
 - Identidade visual inspirada em casas de leilões tradicionais.
+- **Tema claro e escuro** com preferência persistida (`light` / `dark` / `system`).
+
+### 8. Notificações
+
+- Central de notificações no cabeçalho, com contador de não lidas.
+- Eventos notificados: lance superado (`BID_OUTBID`), lote arrematado (`AUCTION_WON`) e lote cancelado (`LOT_CANCELED`).
+- Marcação de leitura individual ou em lote, sempre restrita ao dono da notificação.
+- A API é a fonte de verdade; o evento em tempo real apenas sinaliza que algo mudou.
+
+### 9. Proteções de abuso
+
+- Rate limit global de 120 requisições por minuto por IP.
+- Limites mais restritos em rotas sensíveis: cadastro/login (10/min), renovação de sessão (30/min), criação de lance e busca no catálogo (60/min) e depósito (20/min).
+- Cabeçalhos de segurança via `helmet` e corpo JSON limitado a 64 kB.
+- Sessões de acesso curtas com refresh token rotativo e logout que revoga a sessão.
+- Socket.IO recusa conexão sem token válido e valida o lote antes de entrar na sala.
 
 ## Identidade visual
 
@@ -136,8 +163,37 @@ A paleta combina verde profundo, dourado e tons de creme, com contraste editoria
 | Banco de dados | PostgreSQL 16 · Prisma ORM       | Persistência e transações          |
 | Tempo real     | Socket.IO · WebSockets           | Comunicação entre participantes    |
 | Segurança      | Argon2id · JWT · SHA-256         | Senhas, sessões e integridade      |
+| Abuso          | helmet · @nestjs/throttler       | Cabeçalhos e limites por rota      |
+| Catálogo       | The Met · ArtIC · MusicBrainz    | Acervo externo e capas             |
 | Infraestrutura | Docker Compose · Vercel · Render | Execução e implantação             |
 | Testes         | Jest · Supertest · Vitest        | Testes automatizados               |
+
+## Temas (claro e escuro)
+
+A interface tem dois temas, escolhidos pelo usuário e persistidos em `localStorage` na chave `lance:theme` (`light`, `dark` ou `system`). O padrão é `system`, que segue `prefers-color-scheme`.
+
+| Peça                    | Onde                                                          | Papel                                                                 |
+| ----------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Tokens de tema          | `apps/web/src/index.css` (`--app-*`)                          | Superfícies, texto, bordas e cores semânticas de cada tema            |
+| Utilitários             | `apps/web/src/index.css` (`@theme`, `@custom-variant dark`)     | Ligam `bg-surface-card`, `text-primary` etc. aos tokens do tema ativo |
+| Estado do tema          | `apps/web/src/theme/useTheme.ts`                              | `useSyncExternalStore` sobre storage + media query                    |
+| Aplicação               | classe `.dark` no `<html>`                                    | Um único interruptor para toda a árvore                              |
+| Sem flash                | script inline no `index.html`                                 | Aplica o tema antes do primeiro paint                                 |
+| Botão                   | `components/layout/ThemeToggle.tsx`                           | Cabeçalho (desktop e mobile) e menu da conta                          |
+
+**Regras de cor.** Cores de marca (`brand-primary`, `brand-deep`, `accent-gold`) são fixas nos dois temas. Texto de detalhe usa tokens que mudam de tema:
+
+| Token                  | Uso                                                                       |
+| ---------------------- | ------------------------------------------------------------------------- |
+| `surface-base/card/muted/subtle` | Fundo da página, cards, áreas rebaixadas e blocos internos        |
+| `text-primary/secondary`         | Texto de conteúdo e texto auxiliar                                |
+| `border-subtle/strong`           | Divisores e bordas de controle                                    |
+| `brand-interactive`              | Verde de destaque em texto, ícones e hover (clareia no tema escuro) |
+| `brand-on-dark`                  | Creme fixo para texto sobre bloco verde escuro (hero, rodapé, modais) |
+| `accent-gold-ink`                | Dourado escurecido para texto sobre superfície clara               |
+| `border-invert`                  | Borda translúcida dentro de blocos invertidos                     |
+
+Para código que não usa classe utilitária (canvas, SVG, Three.js) existe `readThemeColors()` em `theme/colors.ts`, que lê os mesmos tokens do CSS.
 
 ## Arquitetura do monorepo
 
@@ -145,31 +201,54 @@ A paleta combina verde profundo, dourado e tons de creme, com contraste editoria
 lance/
 ├── apps/
 │   ├── api/
-│   │   ├── prisma/
-│   │   └── src/
-│   │       ├── audit/           # Auditoria criptográfica
-│   │       ├── auth/            # Autenticação e autorização
-│   │       ├── bids/            # Processamento de lances
-│   │       ├── catalog/         # Integrações com catálogos
-│   │       ├── lots/            # Ciclo de vida dos lotes
-│   │       ├── outbox/          # Publicação de eventos
-│   │       ├── realtime/        # Gateway WebSocket
-│   │       ├── receipts/        # Comprovantes digitais
-│   │       ├── seller-agreements/
-│   │       ├── settlements/     # Liquidação e reconciliação
-│   │       └── wallet/          # Carteira e ledger
+│   │   ├── prisma/            # Schema, migrations e seed
+│   │   ├── src/
+│   │   │   ├── audit/         # Auditoria criptográfica
+│   │   │   ├── auth/          # Autenticação e autorização (JWT + refresh)
+│   │   │   ├── bids/          # Processamento de lances e recusas
+│   │   │   ├── catalog/       # Adapters The Met, ArtIC, MusicBrainz, CAA
+│   │   │   ├── lots/          # Ciclo de vida dos lotes
+│   │   │   ├── me/            # Dados do usuário e notificações
+│   │   │   ├── outbox/        # Publicação de eventos
+│   │   │   ├── realtime/      # Gateway Socket.IO
+│   │   │   ├── receipts/      # Comprovantes digitais públicos
+│   │   │   ├── seller-agreements/
+│   │   │   ├── settlements/   # Liquidação e reconciliação
+│   │   │   └── wallet/        # Carteira e ledger
+│   │   └── test/              # E2E e integração (PostgreSQL real)
 │   └── web/
 │       └── src/
-│           ├── components/      # Componentes e design system
-│           ├── context/         # Sessão e estado da aplicação
-│           ├── logic/           # Regras de negócio do frontend
-│           ├── pages/           # Páginas da plataforma
-│           └── services/        # Cliente HTTP e serviços
-├── docs/
-│   └── images/                  # Banner e capturas de tela
+│           ├── components/    # Componentes e design system
+│           ├── context/       # Sessão, carteira e estado realtime
+│           ├── logic/         # Regras de negócio do frontend
+│           ├── pages/         # Páginas da plataforma
+│           ├── services/      # Cliente HTTP e refresh de token
+│           └── theme/         # Tokens e preferência de tema
+├── scripts/                   # Utilitários de diagnóstico e codemods
 ├── docker-compose.yml
 └── package.json
 ```
+
+### Por que um monorepo
+
+O produto tem duas aplicações que evoluem **juntas**: a API define os contratos
+(lote, lance, reserva, liquidação, auditoria) e o web consome exatamente esses
+contratos. Um monorepo com npm workspaces resolve isso com custo próximo de
+zero:
+
+| Motivo                          | O que ganha                                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Contrato único                  | Uma mudança de endpoint entra no mesmo commit/PR que o cliente e o teste — sem versionar pacote    |
+| Ambiente único                  | Um `npm ci` na raiz, um `package-lock.json`, mesmas versões de TypeScript/ESLint/Vitest            |
+| Scripts coordenados             | `dev:api` e `dev:web` na raiz; o CI roda os dois conjuntos de testes com um comando                |
+| Docker e deploy juntos          | Um `docker-compose.yml` sobe Postgres + API + Web; migrations versionadas junto do código         |
+| Refatoração segura              | Renomear um campo é uma busca única no repositório, não um upgrade coordenado entre repositórios   |
+
+**Trade-off aceito:** npm workspaces faz *hoisting* de dependências, o que pode
+mascarar uma dependência não declarada. A mitigação é usar sempre escopo
+(`--workspace @lance/api`), como os scripts do projeto já fazem. Ferramentas
+como Nx ou Turborepo só se pagam com mais aplicações e cache remoto — não é o
+caso de duas apps.
 
 ## Executar com Docker
 
@@ -270,15 +349,132 @@ npm run dev:web
 5. **Auditoria:** consulte `/auditoria` para verificar a cadeia de eventos.
 6. **Comprovantes:** acesse `/comprovante/:codigo` para consultar um comprovante pelo código.
 
+## Regras de negócio
+
+### Ciclo de vida do lote
+
+```text
+SCHEDULED ──(startsAt chegou / publish)──> LIVE ──(endsAt)──> ENDED ──> settlement
+     │                                       │
+     └──────────── cancel ───────────────────┴──> CANCELED
+```
+
+| Status          | Regra                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------- |
+| `SCHEDULED`     | Lote criado com início no futuro; não aceita lance                                    |
+| `LIVE`          | Aceita lances entre `startsAt` e `endsAt`; criado já `LIVE` se o início já passou      |
+| `ENDED`         | Fora da janela; o worker liquida e grava o resultado                                  |
+| `CANCELED`      | Oculta do catálogo por padrão; reservas ativas são estornadas e o motivo é registrado  |
+
+### Anti-sniping (extensão de prazo)
+
+Quando um lance é aceito e faltam **2 minutos ou menos** para o fim, o prazo do
+lote passa a ser **instante do lance + 2 minutos**. A regra nunca encurta o
+prazo, e cada novo lance dentro da janela renova os 2 minutos. O novo `endsAt`
+vai no payload do evento de auditoria `BID_PLACED`, então a extensão é
+verificável depois. Coberto por `apps/api/test/anti-sniping.integration.e2e-spec.ts`
+(extensão, fora da janela, janela inteira com 10s restantes, renovação e auditoria).
+
+### Recusa de lance
+
+Toda recusa devolve `code` estável + mensagem em português com os valores já
+formatados em Real:
+
+| `code`              | Quando acontece                                         |
+| ------------------- | ------------------------------------------------------- |
+| `INVALID_AMOUNT`    | Valor não inteiro ou menor que 1 centavo                 |
+| `BELOW_MINIMUM`     | Abaixo de `preço atual + incremento`                     |
+| `ALREADY_LEADING`   | O líder tentando cobrir o próprio lance                  |
+| `INSUFFICIENT_FUNDS`| Saldo disponível insuficiente                            |
+| `LOT_NOT_LIVE`      | Lote ainda não iniciado ou já encerrado                  |
+| `LOT_NOT_FOUND`     | Lote inexistente                                         |
+| `IDEMPOTENCY_*`     | Chave repetida com outro conteúdo ou ainda sem resposta  |
+
+### Reserva de saldo
+
+```text
+saldo total = disponível + reservado
+```
+
+Cada lance líder cria uma `BidReservation` `ACTIVE`. Quando outro licitante
+supera o lance, a reserva anterior vira `RELEASED` e o valor volta ao
+disponível; na liquidação, a reserva do vencedor vira `CONSUMED` e é
+debitada. Existe índice único garantindo **uma reserva ativa por lote**.
+
+### Liquidação
+
+| Status       | Significado                                                                 |
+| ------------ | --------------------------------------------------------------------------- |
+| `PENDING`    | Lote encerrado, aguardando processamento                                    |
+| `PROCESSING` | Em andamento; se a API cair, o reconcile retoma (catch-up)                  |
+| `COMPLETED`  | Débito do vencedor, crédito do leiloeiro e recibo emitido, na mesma transação |
+| `FAILED`     | A transação principal foi revertida e a falha ficou registrada para análise  |
+
+### Pseudônimos
+
+Lances e trilha de auditoria pública nunca expõem nome ou e-mail: cada usuário
+tem um pseudônimo estável derivado do seu id (`AuthService.publicPseudonym`),
+que é o que aparece para os demais licitantes na sala e no histórico público.
+
 ## Engenharia transacional
 
 | Mecanismo                   | Solução técnica                                  | Objetivo                                     |
 | --------------------------- | ------------------------------------------------ | -------------------------------------------- |
-| Concorrência de lances      | Transações serializáveis e bloqueio de registros | Reduzir condições de corrida                 |
+| Concorrência de lances      | Transações serializáveis e `SELECT ... FOR UPDATE` | Reduzir condições de corrida               |
 | Reserva de fundos           | Operações transacionais de reserva e liberação   | Preservar a consistência dos saldos          |
 | Prevenção de saldo negativo | Validações condicionais no banco                 | Evitar débitos acima do saldo disponível     |
-| Idempotência                | Chave associada à requisição                     | Evitar processamento duplicado               |
+| Idempotência                | `BidRequest` com hash da requisição              | Evitar processamento duplicado               |
 | Transactional Outbox        | Persistência dos eventos antes da publicação     | Reduzir divergências entre banco e mensagens |
+| Retomada de liquidação      | Reconcile periódico dentro da API                | Fechar settlements parados em `PROCESSING`   |
+
+## Eventos de auditoria
+
+A cadeia recebe um evento por ação relevante. O hash é calculado sobre uma
+serialização canônica do payload (chaves ordenadas) com `CANONICALIZATION_VERSION`
+no material hasheado, então a mesma informação sempre produz o mesmo hash.
+
+| Evento                       | Quando é gravado                              |
+| ---------------------------- | --------------------------------------------- |
+| `LOT_CREATED`                | Lote criado pelo leiloeiro                    |
+| `LOT_LIVE`                   | Lote entra na janela de lances                |
+| `BID_PLACED` / `BID_ACCEPTED`| Lance aceito (com o `endsAt` resultante)      |
+| `AUCTION_ENDED` / `AUCTION_WON` | Encerramento e definição do vencedor       |
+| `LOT_CANCELED`               | Cancelamento com motivo                       |
+| `RESERVATION_ACTIVE` / `RESERVATION_RELEASED` | Reserva criada e liberada   |
+| `AUCTION_SETTLED` / `SETTLEMENT_COMPLETED` | Liquidação iniciada e concluída |
+| `WALLET_DEPOSITED`           | Depósito simulado na carteira                 |
+| `SELLER_AGREEMENT_ACCEPTED`  | Aceite do termo do leiloeiro                  |
+| `CHECKPOINT`                 | Marco periódico da cadeia                     |
+
+`GET /audit/verify` recalcula a cadeia e responde se ela está íntegra; qualquer
+alteração ou remoção de evento é detectada (há testes para os dois casos).
+
+## Migrations e dados
+
+As migrations ficam em `apps/api/prisma/migrations` e são **aditivas** — nenhuma
+delas derruba dados. O Prisma é configurado por `apps/api/prisma.config.ts`
+(schema, pasta de migrations e comando de seed). Aplicação:
+
+```bash
+npm run db:migrate --workspace @lance/api    # prisma migrate deploy
+npm run db:seed --workspace @lance/api       # seed idempotente
+```
+
+No Docker, o container da API roda `prisma migrate deploy` antes de subir o
+servidor, então nunca é necessário `migrate reset`.
+
+## Contas de demonstração
+
+O seed cria um leiloeiro e dois licitantes, com carteiras e lotes publicados.
+A senha vem de `SEED_DEMO_PASSWORD` (`apps/api/.env`), mínimo de 10 caracteres.
+O seed é **idempotente** e **determinístico**: rodar de novo não duplica nada.
+
+## Aplicação principal (Docker)
+
+A imagem da API é multi-stage (`node:22-alpine`), instala dependências com
+`npm ci --workspace @lance/api`, gera o Prisma Client, compila e no runtime roda
+as migrations e o `dist/src/main.js`. O container da web é o build do Vite
+servido por nginx com fallback de SPA.
 
 ## Endpoints da API
 
@@ -317,22 +513,58 @@ Base de produção: `https://lance-api-rfiz.onrender.com`
 | `GET`  | `/audit`                      | Trilha de auditoria           |
 | `GET`  | `/audit/verify`               | Verificação da cadeia SHA-256 |
 | `GET`  | `/receipts/:verificationCode` | Consulta de comprovante       |
-| `GET`  | `/health`                     | Estado da API                 |
+| `GET`  | `/health`                     | Estado da API (uptime + banco) |
+
+### Notificações do usuário
+
+| Método  | Rota                          | Descrição                                  |
+| ------- | ----------------------------- | ------------------------------------------ |
+| `GET`   | `/me/notifications`           | Lista notificações, não lidas e total      |
+| `PATCH` | `/me/notifications/read`      | Marca todas como lidas                     |
+| `PATCH` | `/me/notifications/:id/read`  | Marca uma notificação como lida            |
+
+### Parâmetros de consulta úteis
+
+| Rota                     | Parâmetros                                        |
+| ------------------------ | ------------------------------------------------- |
+| `GET /lots`              | `status` (`SCHEDULED` etc.) e `category`            |
+| `GET /catalog/search`    | `q` (vazio lista o acervo), `offset`, `limit` (máx. 40) |
 
 ## Testes automatizados
 
 ```bash
-# Testes da API
+# Unitários da API (Jest)
 npm test --workspace @lance/api
 
-# Testes de integração / E2E da API
+# Integração + E2E da API (usa o banco lance_test)
 npm run test:e2e --workspace @lance/api
 
-# Testes do frontend
+# Frontend (Vitest)
 npm test --workspace @lance/web
 ```
 
-A cobertura efetiva depende dos testes presentes no repositório. Os cenários relevantes incluem concorrência de lances, idempotência, liquidação e verificação da integridade dos eventos.
+Os testes de integração sobem contra um PostgreSQL real e exigem
+`localhost:5432/lance_test` (o `test/jest-e2e.setup.ts` troca o nome do banco do
+`.env` para `lance_test` e aborta se o host não for local). Cenários cobertos:
+
+| Arquivo                                         | Cobre                                                                 |
+| ----------------------------------------------- | --------------------------------------------------------------------- |
+| `test/flow.integration.e2e-spec.ts`              | Liquidação com e sem vencedor, idempotência, catch-up, estorno, adulteração da cadeia, concorrência |
+| `test/anti-sniping.integration.e2e-spec.ts`      | Extensão de prazo nos últimos 2 min e reflexo na auditoria             |
+| `test/bids.integration.e2e-spec.ts`              | Regras de lance e reserva                                             |
+| `test/app.e2e-spec.ts`                           | Healthcheck e rotas básicas                                           |
+| `apps/web/src/logic/auctionRules.test.ts`        | Regras de lance do frontend (mesma verdade da API)                    |
+
+## Limitações conhecidas
+
+- **Pagamento simulado**: não há cobrança real, nota fiscal, entrega ou revenda.
+- **Liquidação roda dentro da API**: em hospedagem que hiberna o processo, o
+  settlement pode atrasar até a próxima inicialização (o reconcile retoma).
+- **Fontes externas**: The Met, ArtIC, MusicBrainz e CAA têm limites próprios de
+  taxa e podem ficar indisponíveis; nesse caso a busca degrada por fonte.
+- **Catálogo sem busca em texto livre no banco**: a busca é feita nas APIs
+  externas, não sobre um índice local.
+- **Upload de imagens**: não há; a imagem vem sempre da fonte externa.
 
 ---
 
