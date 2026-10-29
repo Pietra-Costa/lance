@@ -108,12 +108,13 @@ describe('AuthService', () => {
         expect.objectContaining({
           accessToken: 'fake-jwt-token',
           tokenType: 'Bearer',
-          user: {
+          user: expect.objectContaining({
             id: 'user-123',
             name: dto.name,
             email: dto.email,
             role: dto.role,
-          },
+            publicPseudonym: expect.stringContaining('Licitante'),
+          }),
         }),
       );
       expect(result.refreshToken).toContain('refresh-123.');
@@ -199,12 +200,13 @@ describe('AuthService', () => {
         expect.objectContaining({
           accessToken: 'fake-jwt-token',
           tokenType: 'Bearer',
-          user: {
+          user: expect.objectContaining({
             id: existingUser.id,
             name: existingUser.name,
             email: existingUser.email,
             role: existingUser.role,
-          },
+            publicPseudonym: expect.stringContaining('Licitante'),
+          }),
         }),
       );
       expect(result.refreshToken).toContain('refresh-123.');
