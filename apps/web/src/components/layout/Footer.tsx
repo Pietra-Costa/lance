@@ -1,37 +1,36 @@
-import React from 'react';
-import { useApp } from '../../context/AppContext';
-import { Logo } from './Logo';
-import { ShieldCheck, BookOpen, ExternalLink, Code2 } from 'lucide-react';
+import React from "react";
+import { useApp } from "../../context/AppContext";
+import { Logo } from "./Logo";
+import { ShieldCheck } from "lucide-react";
 
 export const Footer: React.FC = () => {
   const { navigateTo } = useApp();
 
   return (
-    <footer className="bg-[#0A2B22] text-[#F5F1E7] border-t border-[#123D2F]/80 pt-16 pb-12 mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-white/10">
-          {/* Col 1: Brand & Manifesto */}
-          <div className="md:col-span-1 space-y-4">
+    <footer className="bg-brand-deep text-surface-base border-t border-brand-primary/80 mt-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
+        <div className="grid grid-cols-1 min-[881px]:grid-cols-4 gap-10 pb-12 border-b border-white/10">
+          <div className="min-[881px]:col-span-1 space-y-4">
             <Logo variant="dark" size="md" />
-            <p className="text-xs text-[#F5F1E7]/70 leading-relaxed font-body">
-              A Lance é uma casa de leilões digital que conecta colecionadores a peças singulares
-              por meio de uma experiência clara, organizada e confiável.
+            <p className="text-xs text-surface-base/70 leading-relaxed font-body">
+              A Lance é uma casa de leilões digital que conecta colecionadores a
+              peças singulares por meio de uma experiência clara, organizada e
+              confiável.
             </p>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#123D2F] text-[11px] text-[#C8A96A] border border-[#C8A96A]/20">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-brand-primary text-[11px] text-accent-gold border border-accent-gold/20">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Auditoria com integridade verificável</span>
             </div>
           </div>
 
-          {/* Col 2: Catálogo & Categorias */}
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-[#C8A96A]">
+            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold">
               Explorar Catálogo
             </h4>
-            <ul className="space-y-2 text-xs text-[#F5F1E7]/80">
+            <ul className="space-y-2 text-xs text-surface-base/80">
               <li>
                 <button
-                  onClick={() => navigateTo('/lotes')}
+                  onClick={() => navigateTo("/lotes")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Todos os Lotes Disponíveis
@@ -39,31 +38,31 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/lotes?cat=Arte')}
+                  onClick={() => navigateTo("/lotes?cat=Arte")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Arte & Pinturas
+                  Arte &amp; Pinturas
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/lotes?cat=Esculturas')}
+                  onClick={() => navigateTo("/lotes?cat=Esculturas")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Esculturas Clássicas & Modernas
+                  Esculturas Clássicas &amp; Modernas
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/lotes?cat=Objetos de coleção')}
+                  onClick={() => navigateTo("/lotes?cat=Objetos de coleção")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Objetos de Coleção & Decoração
+                  Objetos de Coleção &amp; Decoração
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/lotes?cat=Mobiliário')}
+                  onClick={() => navigateTo("/lotes?cat=Mobiliário")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Mobiliário Modernista Brasileiro
@@ -71,7 +70,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/lotes?cat=Discos')}
+                  onClick={() => navigateTo("/lotes?cat=Discos")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Discos e Edições Musicais Históricas
@@ -80,15 +79,14 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Col 3: Institucional & Regras */}
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-[#C8A96A]">
+            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold">
               Institucional
             </h4>
-            <ul className="space-y-2 text-xs text-[#F5F1E7]/80">
+            <ul className="space-y-2 text-xs text-surface-base/80">
               <li>
                 <button
-                  onClick={() => navigateTo('/#como-funciona')}
+                  onClick={() => navigateTo("/#como-funciona")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Como Funciona o Pregão Online
@@ -96,78 +94,77 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/auditoria')}
+                  onClick={() => navigateTo("/auditoria")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Trilha de Auditoria & Hashes
+                  Trilha de Auditoria &amp; Hashes
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/termos')}
+                  onClick={() => navigateTo("/sobre")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Regras Gerais & Termo do Leiloeiro
+                  O que é a Lance?
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => navigateTo('/conta/carteira')}
+                  onClick={() => navigateTo("/regras")}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Política de Reservas & Carteira
+                  Regras Gerais do Pregão
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => navigateTo("/termo-leiloeiro")}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  Termo do Leiloeiro
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => navigateTo("/politica-reservas")}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  Política de Reservas &amp; Carteira
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Col 4: Fontes Oficiais & Adaptadores */}
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-[#C8A96A]">
+            <h4 className="text-xs uppercase tracking-widest font-heading font-semibold text-accent-gold">
               Fontes de Catálogo
             </h4>
-            <p className="text-[11px] text-[#F5F1E7]/60 leading-normal">
-              Adaptadores de dados conectados para importação e snapshots imutáveis:
-            </p>
-            <ul className="space-y-1.5 text-xs text-[#F5F1E7]/80">
+            <ul className="space-y-1.5 text-xs text-surface-base/80">
               <li className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C8A96A]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-gold" />
                 <span>The Metropolitan Museum of Art API</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C8A96A]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-gold" />
                 <span>Art Institute of Chicago API</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C8A96A]"></span>
-                <span>MusicBrainz & Cover Art Archive</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-gold" />
+                <span>MusicBrainz &amp; Cover Art Archive</span>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Legal & Prototype Notice */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#F5F1E7]/60">
+        <div className="pt-8 flex flex-col min-[881px]:flex-row items-center justify-between gap-4 text-[11px] text-surface-base/60">
           <div>
-            <p>© 2026 Lance — Casa de Leilões. Todos os direitos reservados.</p>
-            <p className="mt-0.5 text-[#F5F1E7]/40">
+            <p>
+              © 2026 Lance — Casa de Leilões. Todos os direitos reservados à
+              Pietra.
+            </p>
+            <p className="mt-0.5 text-surface-base/40">
               Plataforma com dados e operações persistidos pela API.
             </p>
-          </div>
-
-          {/* Mandatory subtle link to internal Design System */}
-          <div>
-            <button
-              onClick={() => navigateTo('/design-system')}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-[#C8A96A]/30 text-[#C8A96A] hover:bg-[#123D2F] transition-colors cursor-pointer"
-              title="Acessar documentação técnica interna do Design System"
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              <span>/design-system</span>
-              <span className="text-[9px] text-[#F5F1E7]/40 ml-1 hidden lg:inline">
-                (Área interna de protótipo)
-              </span>
-            </button>
           </div>
         </div>
       </div>

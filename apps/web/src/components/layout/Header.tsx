@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
-import { Logo } from "./Logo";
 import {
   Menu,
   X,
   User,
   Wallet,
   Gavel,
-  Shield,
   ChevronDown,
   LogOut,
   Layers,
@@ -15,6 +13,9 @@ import {
   FileCheck,
 } from "lucide-react";
 import { formatBRL } from "../../logic/auctionRules";
+import { NotificationBell } from "./NotificationBell";
+import { Logo } from "./Logo";
+import { AnimatePresence, motion } from "motion/react";
 
 export const Header: React.FC = () => {
   const { currentRoute, navigateTo, currentUser, wallet, logoutUser } =
@@ -35,10 +36,13 @@ export const Header: React.FC = () => {
     setAccountMenuOpen(false);
   };
 
+  const toggleAccountMenu = () => {
+    setAccountMenuOpen((prev) => !prev);
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-[#F5F1E7]/95 backdrop-blur-md border-b border-[#E2DDD2] transition-colors">
+    <header className="sticky top-0 z-40 bg-surface-base/95 backdrop-blur-md border-b border-border-subtle transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Brand Logo */}
         <Logo
           variant="light"
           size="md"
@@ -46,52 +50,97 @@ export const Header: React.FC = () => {
           className="hover:opacity-90"
         />
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#222923]">
+        <nav className="hidden lg:flex items-center gap-8 text-m font-medium text-text-primary">
           <button
             onClick={() => handleNav("/lotes")}
-            className={`transition-colors cursor-pointer py-1 relative ${
+            className={`relative py-2 transition-colors cursor-pointer ${
               isActive("/lotes")
-                ? "text-[#123D2F] font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#123D2F]"
-                : "text-[#222923]/80 hover:text-[#123D2F]"
+                ? "text-brand-primary font-semibold"
+                : "text-text-primary/80 hover:text-brand-primary"
             }`}
           >
             Explorar Lotes
+            <span
+              className={`absolute bottom-0 left-0 h-0.5 bg-brand-primary transition-all duration-300 ease-out ${
+                isActive("/lotes") ? "w-full opacity-100" : "w-0 opacity-0"
+              }`}
+            />
           </button>
 
           <button
             onClick={() => handleNav("/auditoria")}
-            className={`flex items-center gap-1 transition-colors cursor-pointer ${
+            className={`relative py-2 transition-colors cursor-pointer ${
               isActive("/auditoria")
-                ? "text-[#123D2F] font-semibold"
-                : "text-[#222923]/80 hover:text-[#123D2F]"
+                ? "text-brand-primary font-semibold"
+                : "text-text-primary/80 hover:text-brand-primary"
             }`}
           >
-            <Shield className="w-3.5 h-3.5 text-[#123D2F]" />
-            <span>Auditoria Pública</span>
+            Auditoria Pública
+            <span
+              className={`absolute bottom-0 left-0 h-0.5 bg-brand-primary transition-all duration-300 ease-out ${
+                isActive("/auditoria") ? "w-full opacity-100" : "w-0 opacity-0"
+              }`}
+            />
+          </button>
+
+          <button
+            onClick={() => handleNav("/sobre")}
+            className={`relative py-2 transition-colors cursor-pointer ${
+              isActive("/sobre")
+                ? "text-brand-primary font-semibold"
+                : "text-text-primary/80 hover:text-brand-primary"
+            }`}
+          >
+            Sobre a Lance
+            <span
+              className={`absolute bottom-0 left-0 h-0.5 bg-brand-primary transition-all duration-300 ease-out ${
+                isActive("/sobre") ? "w-full opacity-100" : "w-0 opacity-0"
+              }`}
+            />
           </button>
         </nav>
 
-        {/* Right CTA / User Account Area */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
+          {currentUser && currentUser.role === "LICITANTE" && (
+            <button
+              onClick={() => handleNav("/conta/carteira")}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-subtle bg-white hover:border-border-strong transition-colors cursor-pointer"
+              title="Saldo disponível na carteira"
+            >
+              <Wallet className="w-3.5 h-3.5 text-brand-primary" />
+              <span className="flex flex-col items-start leading-tight">
+                <span className="text-[9px] uppercase tracking-wide text-text-secondary">
+                  Disponível
+                </span>
+                <span className="text-[11px] font-bold text-brand-primary font-mono">
+                  {formatBRL(wallet.availableCents)}
+                </span>
+              </span>
+            </button>
+          )}
+
+          <div onClick={() => setAccountMenuOpen(false)}>
+            <NotificationBell />
+          </div>
+
           {currentUser ? (
             <div className="relative">
               <button
-                onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                className="flex items-center gap-3 p-1.5 pl-3 rounded-lg border border-[#E2DDD2] bg-white hover:border-[#CDC5B4] transition-all cursor-pointer shadow-xs"
+                onClick={toggleAccountMenu}
+                className="flex items-center gap-3 p-1.5 pl-3 rounded-lg border border-border-subtle bg-white hover:border-border-strong transition-all cursor-pointer shadow-xs"
               >
                 <div className="flex flex-col text-right leading-tight">
-                  <span className="text-xs font-semibold text-[#123D2F] max-w-[130px] truncate">
+                  <span className="text-xs font-semibold text-brand-primary max-w-32.5 truncate">
                     {currentUser.name}
                   </span>
-                  <span className="text-[10px] text-[#68716A] uppercase font-medium tracking-wide">
+                  <span className="text-[10px] text-text-secondary uppercase font-medium tracking-wide">
                     {currentUser.role === "LEILOEIRO"
                       ? "Leiloeiro Oficial"
                       : "Licitante"}
                   </span>
                 </div>
 
-                <div className="w-8 h-8 rounded-full bg-[#123D2F] text-[#F5F1E7] flex items-center justify-center font-bold text-xs overflow-hidden border border-[#123D2F]">
+                <div className="w-8 h-8 rounded-full bg-brand-primary text-surface-base flex items-center justify-center font-bold text-xs overflow-hidden border border-brand-primary">
                   {currentUser.avatarUrl ? (
                     <img
                       src={currentUser.avatarUrl}
@@ -102,22 +151,28 @@ export const Header: React.FC = () => {
                     currentUser.name.charAt(0)
                   )}
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-[#68716A]" />
+                <ChevronDown className="w-3.5 h-3.5 text-text-secondary" />
               </button>
 
-              {/* Account Dropdown */}
               {accountMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-[#E2DDD2] py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="px-4 py-2 border-b border-[#E2DDD2]/60">
-                    <p className="text-xs text-[#68716A]">Conectado como</p>
-                    <p className="text-sm font-semibold text-[#123D2F] truncate">
+                <div
+                  className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-border-subtle py-2 z-50
+                  origin-top-right
+                  animate-[dropdown-enter_180ms_cubic-bezier(0.16,1,0.3,1)_both]
+                  motion-reduce:animate-none"
+                >
+                  <div className="px-4 py-2 border-b border-border-subtle/60">
+                    <p className="text-xs text-text-secondary">
+                      Conectado como
+                    </p>
+                    <p className="text-sm font-semibold text-brand-primary truncate">
                       {currentUser.email}
                     </p>
                     {currentUser.role === "LICITANTE" && (
-                      <div className="mt-2 p-2 bg-[#F5F1E7] rounded-md text-xs">
-                        <div className="flex justify-between text-[#68716A]">
+                      <div className="mt-2 p-2 bg-surface-base rounded-md text-xs">
+                        <div className="flex justify-between text-text-secondary">
                           <span>Saldo Disponível:</span>
-                          <span className="font-semibold text-[#123D2F]">
+                          <span className="font-semibold text-brand-primary">
                             {formatBRL(wallet.availableCents)}
                           </span>
                         </div>
@@ -129,30 +184,30 @@ export const Header: React.FC = () => {
                     <div className="py-1">
                       <button
                         onClick={() => handleNav("/conta")}
-                        className="w-full px-4 py-2 text-left text-xs font-medium text-[#222923] hover:bg-[#F5F1E7] flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <User className="w-3.5 h-3.5 text-[#123D2F]" />
+                        <User className="w-3.5 h-3.5 text-brand-primary" />
                         <span>Visão Geral da Conta</span>
                       </button>
                       <button
                         onClick={() => handleNav("/conta/lances")}
-                        className="w-full px-4 py-2 text-left text-xs font-medium text-[#222923] hover:bg-[#F5F1E7] flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Gavel className="w-3.5 h-3.5 text-[#123D2F]" />
+                        <Gavel className="w-3.5 h-3.5 text-brand-primary" />
                         <span>Meus Lances</span>
                       </button>
                       <button
                         onClick={() => handleNav("/conta/arrematados")}
-                        className="w-full px-4 py-2 text-left text-xs font-medium text-[#222923] hover:bg-[#F5F1E7] flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <FileCheck className="w-3.5 h-3.5 text-[#123D2F]" />
+                        <FileCheck className="w-3.5 h-3.5 text-brand-primary" />
                         <span>Lotes Arrematados</span>
                       </button>
                       <button
                         onClick={() => handleNav("/conta/carteira")}
-                        className="w-full px-4 py-2 text-left text-xs font-medium text-[#222923] hover:bg-[#F5F1E7] flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Wallet className="w-3.5 h-3.5 text-[#123D2F]" />
+                        <Wallet className="w-3.5 h-3.5 text-brand-primary" />
                         <span>Carteira</span>
                       </button>
                     </div>
@@ -160,32 +215,32 @@ export const Header: React.FC = () => {
                     <div className="py-1">
                       <button
                         onClick={() => handleNav("/leiloeiro")}
-                        className="w-full px-4 py-2 text-left text-xs font-medium text-[#222923] hover:bg-[#F5F1E7] flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Layers className="w-3.5 h-3.5 text-[#123D2F]" />
+                        <Layers className="w-3.5 h-3.5 text-brand-primary" />
                         <span>Painel do Leiloeiro</span>
                       </button>
                       <button
                         onClick={() => handleNav("/leiloeiro/lotes/novo")}
-                        className="w-full px-4 py-2 text-left text-xs font-medium text-[#123D2F] font-semibold hover:bg-[#F5F1E7] flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-semibold text-brand-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <PlusCircle className="w-3.5 h-3.5 text-[#123D2F]" />
+                        <PlusCircle className="w-3.5 h-3.5 text-brand-primary" />
                         <span>Criar Novo Lote</span>
                       </button>
                       <button
                         onClick={() => handleNav("/leiloeiro/lotes")}
-                        className="w-full px-4 py-2 text-left text-xs font-medium text-[#222923] hover:bg-[#F5F1E7] flex items-center gap-2 cursor-pointer"
+                        className="w-full px-4 py-2 text-left text-xs font-medium text-text-primary hover:bg-surface-base flex items-center gap-2 cursor-pointer"
                       >
-                        <Gavel className="w-3.5 h-3.5 text-[#123D2F]" />
+                        <Gavel className="w-3.5 h-3.5 text-brand-primary" />
                         <span>Gestão de Lotes</span>
                       </button>
                     </div>
                   )}
 
-                  <div className="pt-1 border-t border-[#E2DDD2]/60">
+                  <div className="pt-1 border-t border-border-subtle/60">
                     <button
                       onClick={logoutUser}
-                      className="w-full px-4 py-2 text-left text-xs font-medium text-[#B91C1C] hover:bg-[#FEE2E2]/40 flex items-center gap-2 cursor-pointer"
+                      className="w-full px-4 py-2 text-left text-xs font-medium text-semantic-error hover:bg-semantic-error-bg/40 flex items-center gap-2 cursor-pointer"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Sair da conta</span>
@@ -198,13 +253,13 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleNav("/entrar")}
-                className="px-4 py-2 text-sm font-medium text-[#123D2F] hover:text-[#0A2B22] transition-colors cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-brand-primary hover:text-brand-deep transition-colors cursor-pointer"
               >
                 Entrar
               </button>
               <button
                 onClick={() => handleNav("/cadastro")}
-                className="px-4 py-2 text-sm font-semibold text-[#F5F1E7] bg-[#123D2F] hover:bg-[#0A2B22] rounded-lg transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2 text-sm font-semibold text-surface-base bg-brand-primary hover:text-brand-deep rounded-lg transition-colors cursor-pointer shadow-xs"
               >
                 Cadastrar
               </button>
@@ -212,133 +267,170 @@ export const Header: React.FC = () => {
           )}
         </div>
 
-        {/* Mobile Hamburger Button */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex lg:hidden items-center gap-2">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-[#222923] hover:bg-[#E2DDD2]/50 transition-colors"
-            aria-label="Menu principal"
+            onClick={() => {
+              setMobileMenuOpen((prev) => !prev);
+              setAccountMenuOpen(false);
+            }}
+            className="p-2 rounded-lg text-text-primary hover:bg-surface-base[#E2DDD2]/50 transition-colors cursor-pointer"
+            aria-label={
+              mobileMenuOpen ? "Fechar menu principal" : "Abrir menu principal"
+            }
+            aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={mobileMenuOpen ? "close" : "menu"}
+                initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
+                transition={{ duration: 0.16, ease: "easeOut" }}
+                className="flex"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </motion.span>
+            </AnimatePresence>
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#F5F1E7] border-b border-[#E2DDD2] px-4 pt-2 pb-6 space-y-3">
-          <div className="flex flex-col space-y-2">
-            <button
-              onClick={() => handleNav("/lotes")}
-              className="text-left py-2 font-medium text-[#222923] hover:text-[#123D2F]"
-            >
-              Explorar Catálogo de Lotes
-            </button>
-            <button
-              onClick={() => handleNav("/lotes?cat=Arte")}
-              className="text-left py-2 font-medium text-[#222923] hover:text-[#123D2F]"
-            >
-              Arte & Coleções
-            </button>
-            <button
-              onClick={() => handleNav("/lotes?cat=Discos")}
-              className="text-left py-2 font-medium text-[#222923] hover:text-[#123D2F]"
-            >
-              Edições Musicais
-            </button>
-            <button
-              onClick={() => handleNav("/auditoria")}
-              className="text-left py-2 font-medium text-[#222923] hover:text-[#123D2F]"
-            >
-              Auditoria Pública Verificável
-            </button>
-          </div>
+      <AnimatePresence initial={false}>
+        {mobileMenuOpen && (
+          <motion.div
+            key="mobile-menu"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="lg:hidden bg-surface-base[#F5F1E7] border-b  px-4 pt-3 pb-6 space-y-4 shadow-inner"
+          >
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={() => handleNav("/lotes")}
+                className={`text-left py-2 font-medium transition-colors ${
+                  isActive("/lotes")
+                    ? "text-brand-primary font-semibold"
+                    : "text-text-primary hover:text-brand-primary"
+                }`}
+              >
+                Explorar Catálogo de Lotes
+              </button>
 
-          <div className="pt-4 border-t border-[#E2DDD2]">
-            {currentUser ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 pb-2">
-                  <div className="w-7 h-7 rounded-full bg-[#123D2F] text-[#F5F1E7] flex items-center justify-center font-bold text-xs">
-                    {currentUser.name.charAt(0)}
+              <button
+                onClick={() => handleNav("/auditoria")}
+                className={`text-left py-2 font-medium transition-colors ${
+                  isActive("/auditoria")
+                    ? "text-brand-primary font-semibold"
+                    : "text-text-primary hover:text-brand-primary"
+                }`}
+              >
+                Auditoria Pública Verificável
+              </button>
+
+              <button
+                onClick={() => handleNav("/sobre")}
+                className={`text-left py-2 font-medium transition-colors ${
+                  isActive("/sobre")
+                    ? "text-brand-primary font-semibold"
+                    : "text-text-primary hover:text-brand-primary"
+                }`}
+              >
+                Sobre a Lance
+              </button>
+            </div>
+
+            <div className="pt-4 border-t border-border-subtle">
+              {currentUser ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 pb-2 border-b border-border-subtle60">
+                    <div className="w-8 h-8 rounded-full bg-brand-primary text-surface-base flex items-center justify-center font-bold text-xs">
+                      {currentUser.name.charAt(0)}
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-semibold text-brand-primary">
+                        {currentUser.name}
+                      </p>
+                      <p className="text-[10px] text-text-secondary uppercase font-medium">
+                        {currentUser.role}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-[#123D2F]">
-                      {currentUser.name}
-                    </p>
-                    <p className="text-[10px] text-[#68716A] uppercase">
-                      {currentUser.role}
-                    </p>
-                  </div>
+
+                  {currentUser.role === "LICITANTE" ? (
+                    <>
+                      <button
+                        onClick={() => handleNav("/conta")}
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                      >
+                        Minha Conta & Saldo
+                      </button>
+
+                      <button
+                        onClick={() => handleNav("/conta/lances")}
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                      >
+                        Meus Lances
+                      </button>
+
+                      <button
+                        onClick={() => handleNav("/conta/arrematados")}
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                      >
+                        Comprovantes de Arremate
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleNav("/leiloeiro")}
+                        className="w-full text-left py-1.5 text-xs font-medium text-brand-primary"
+                      >
+                        Painel do Leiloeiro
+                      </button>
+
+                      <button
+                        onClick={() => handleNav("/leiloeiro/lotes/novo")}
+                        className="w-full text-left py-1.5 text-xs font-semibold text-brand-primary"
+                      >
+                        Criar Novo Lote (Wizard)
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    onClick={logoutUser}
+                    className="w-full text-left py-2 text-xs font-semibold text-semantic-error"
+                  >
+                    Sair da Conta
+                  </button>
                 </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <button
+                    onClick={() => handleNav("/entrar")}
+                    className="py-2.5 text-center text-xs font-semibold rounded-lg border border-brand-primary text-brand-primary bg-white/50"
+                  >
+                    Entrar
+                  </button>
 
-                {currentUser.role === "LICITANTE" ? (
-                  <>
-                    <button
-                      onClick={() => handleNav("/conta")}
-                      className="w-full text-left py-1.5 text-xs font-medium text-[#123D2F]"
-                    >
-                      Minha Conta & Saldo
-                    </button>
-                    <button
-                      onClick={() => handleNav("/conta/lances")}
-                      className="w-full text-left py-1.5 text-xs font-medium text-[#123D2F]"
-                    >
-                      Meus Lances
-                    </button>
-                    <button
-                      onClick={() => handleNav("/conta/arrematados")}
-                      className="w-full text-left py-1.5 text-xs font-medium text-[#123D2F]"
-                    >
-                      Comprovantes de Arremate
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => handleNav("/leiloeiro")}
-                      className="w-full text-left py-1.5 text-xs font-medium text-[#123D2F]"
-                    >
-                      Painel do Leiloeiro
-                    </button>
-                    <button
-                      onClick={() => handleNav("/leiloeiro/lotes/novo")}
-                      className="w-full text-left py-1.5 text-xs font-semibold text-[#123D2F]"
-                    >
-                      Criar Novo Lote (Wizard)
-                    </button>
-                  </>
-                )}
-
-                <button
-                  onClick={logoutUser}
-                  className="w-full text-left py-2 text-xs font-semibold text-[#B91C1C]"
-                >
-                  Sair da Conta
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleNav("/entrar")}
-                  className="py-2.5 text-center text-xs font-semibold rounded-lg border border-[#123D2F] text-[#123D2F]"
-                >
-                  Entrar
-                </button>
-                <button
-                  onClick={() => handleNav("/cadastro")}
-                  className="py-2.5 text-center text-xs font-semibold rounded-lg bg-[#123D2F] text-[#F5F1E7]"
-                >
-                  Cadastrar
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+                  <button
+                    onClick={() => handleNav("/cadastro")}
+                    className="py-2.5 text-center text-xs font-semibold rounded-lg bg-brand-primary text-surface-base"
+                  >
+                    Cadastrar
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
