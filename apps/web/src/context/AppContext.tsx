@@ -644,7 +644,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const authenticateApiUser = async (apiUser: ApiUser): Promise<void> => {
+  const authenticateApiUser = async (apiUser: ApiUser,  options: { redirect?: boolean } = {},
+): Promise<void> => {
     const authenticatedUser = {
       id: apiUser.id,
       name: apiUser.name,
@@ -683,12 +684,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Falha ao consultar o termo do leiloeiro:", error);
     }
 
-    const destination =
-      returnRouteAfterLogin ??
-      (apiUser.role === "LICITANTE" ? "/conta" : "/leiloeiro");
+    if (options.redirect !== false) {
+      const destination =
+        returnRouteAfterLogin ??
+        (apiUser.role === "LICITANTE" ? "/conta" : "/leiloeiro");
 
-    setReturnRouteAfterLogin(null);
-    navigateTo(destination);
+      setReturnRouteAfterLogin(null);
+      navigateTo(destination);
+    }
 
     addNotification({
       title: "Login realizado",
@@ -822,8 +825,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     apiGet<ApiUser>("/auth/me")
       .then(async user => {
         if (active) {
-          await authenticateApiUser(user);
-        }
+          await authenticateApiUser(user, { redirect: false });        }
       })
       .catch(error => {
         if (!active) return;
