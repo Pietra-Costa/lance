@@ -5,7 +5,7 @@
  * Lance_Brand_Copy_System_Design_Premium_cb725681.pdf
  */
 
-import { Lot, User, Wallet } from '../types/auction';
+import { Lot, User, Wallet } from "../types/auction";
 
 /**
  * Calculates the next minimum required bid in cents.
@@ -27,12 +27,12 @@ export function calculateNextMinimumBid(lot: {
 export interface BidValidationResult {
   allowed: boolean;
   code?:
-    | 'INVALID_ROLE'
-    | 'AUCTION_NOT_LIVE'
-    | 'AUCTION_EXPIRED'
-    | 'ALREADY_LEADING'
-    | 'BELOW_MINIMUM'
-    | 'INSUFFICIENT_FUNDS';
+    | "INVALID_ROLE"
+    | "AUCTION_NOT_LIVE"
+    | "AUCTION_EXPIRED"
+    | "ALREADY_LEADING"
+    | "BELOW_MINIMUM"
+    | "INSUFFICIENT_FUNDS";
   reason?: string;
   nextMinimumCents?: number;
 }
@@ -41,30 +41,40 @@ export interface BidValidationResult {
  * Validates whether a bid can be placed according to domain rules.
  */
 export function validateBidSubmission(
-  lot: Pick<Lot, 'status' | 'startsAt' | 'endsAt' | 'currentLeaderBidderId' | 'currentBidCents' | 'startingPriceCents' | 'minIncrementCents' | 'bidCount'>,
-  bidder: Pick<User, 'id' | 'role'>,
+  lot: Pick<
+    Lot,
+    | "status"
+    | "startsAt"
+    | "endsAt"
+    | "currentLeaderBidderId"
+    | "currentBidCents"
+    | "startingPriceCents"
+    | "minIncrementCents"
+    | "bidCount"
+  >,
+  bidder: Pick<User, "id" | "role">,
   offerAmountCents: number,
-  wallet: Pick<Wallet, 'availableCents'>,
-  currentTimeMs: number = Date.now()
+  wallet: Pick<Wallet, "availableCents">,
+  currentTimeMs: number = Date.now(),
 ): BidValidationResult {
   // Rule: Exclusivity of roles. Auctioneers cannot bid.
-  if (bidder.role !== 'LICITANTE') {
+  if (bidder.role !== "LICITANTE") {
     return {
       allowed: false,
-      code: 'INVALID_ROLE',
-      reason: 'Apenas usuários com papel Licitante podem realizar lances.',
+      code: "INVALID_ROLE",
+      reason: "Apenas usuários com papel Licitante podem realizar lances.",
     };
   }
 
   // Rule: Auction must be actively in LIVE status
-  if (lot.status !== 'LIVE') {
+  if (lot.status !== "LIVE") {
     return {
       allowed: false,
-      code: 'AUCTION_NOT_LIVE',
+      code: "AUCTION_NOT_LIVE",
       reason:
-        lot.status === 'SCHEDULED'
-          ? 'Este lote ainda não foi iniciado para disputa.'
-          : 'Este lote já se encontra encerrado para lances.',
+        lot.status === "SCHEDULED"
+          ? "Este lote ainda não foi iniciado para disputa."
+          : "Este lote já se encontra encerrado para lances.",
     };
   }
 
@@ -73,8 +83,9 @@ export function validateBidSubmission(
   if (currentTimeMs >= endsAtMs) {
     return {
       allowed: false,
-      code: 'AUCTION_EXPIRED',
-      reason: 'O prazo do leilão foi atingido e o lote está em fase de encerramento.',
+      code: "AUCTION_EXPIRED",
+      reason:
+        "O prazo do leilão foi atingido e o lote está em fase de encerramento.",
     };
   }
 
@@ -82,8 +93,8 @@ export function validateBidSubmission(
   if (lot.currentLeaderBidderId === bidder.id) {
     return {
       allowed: false,
-      code: 'ALREADY_LEADING',
-      reason: 'Você já possui o lance mais alto e está liderando este lote.',
+      code: "ALREADY_LEADING",
+      reason: "Você já possui o lance mais alto e está liderando este lote.",
     };
   }
 
@@ -92,7 +103,7 @@ export function validateBidSubmission(
   if (offerAmountCents < nextMin) {
     return {
       allowed: false,
-      code: 'BELOW_MINIMUM',
+      code: "BELOW_MINIMUM",
       nextMinimumCents: nextMin,
       reason: `Seu lance de ${formatBRL(offerAmountCents)} está abaixo do mínimo exigido (${formatBRL(nextMin)}).`,
     };
@@ -102,7 +113,7 @@ export function validateBidSubmission(
   if (wallet.availableCents < offerAmountCents) {
     return {
       allowed: false,
-      code: 'INSUFFICIENT_FUNDS',
+      code: "INSUFFICIENT_FUNDS",
       reason: `Saldo disponível insuficiente (${formatBRL(wallet.availableCents)}). Necessário ${formatBRL(offerAmountCents)} para reserva.`,
     };
   }
@@ -119,7 +130,7 @@ export function evaluateAntiSniping(
   currentEndsAtISO: string,
   bidTimeMs: number = Date.now(),
   windowMs = 120000,
-  extensionDurationMs = 120000
+  extensionDurationMs = 120000,
 ): { extended: boolean; newEndsAtISO: string; secondsAdded: number } {
   const currentEndsAtMs = new Date(currentEndsAtISO).getTime();
   const timeRemainingMs = currentEndsAtMs - bidTimeMs;
@@ -148,7 +159,10 @@ export function evaluateAntiSniping(
  * Format: "Licitante •••• 4821"
  * Never exposes user real name, email, or database ID publicly.
  */
-export function generateAnonymousPseudonym(userId: string, lotId: string): string {
+export function generateAnonymousPseudonym(
+  userId: string,
+  lotId: string,
+): string {
   let hash = 0;
   const combined = `${userId}:${lotId}:lance_salt_2026`;
   for (let i = 0; i < combined.length; i++) {
@@ -162,53 +176,14 @@ export function generateAnonymousPseudonym(userId: string, lotId: string): strin
 }
 
 /**
- * Calculates a deterministic SHA-256 style hex hash simulation
- * for chained audit log records.
- */
-export function computeAuditRecordHash(
-  prevHash: string,
-  sequence: number,
-  eventType: string,
-  timestamp: string,
-  payload: Record<string, any>
-): string {
-  const serialized = JSON.stringify({
-    seq: sequence,
-    prev: prevHash,
-    type: eventType,
-    ts: timestamp,
-    data: payload,
-  });
-
-  // Pure deterministic 64-char hex hash generator
-  let h1 = 0xdeadbeef;
-  let h2 = 0x41c6ce57;
-  for (let i = 0; i < serialized.length; i++) {
-    const ch = serialized.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-
-  const hexPart1 = (h1 >>> 0).toString(16).padStart(8, '0');
-  const hexPart2 = (h2 >>> 0).toString(16).padStart(8, '0');
-  const hexPart3 = ((h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
-  const hexPart4 = ((h1 + h2) >>> 0).toString(16).padStart(8, '0');
-  const prefix = (prevHash || '00000000').slice(0, 16);
-  const full = `${prefix}${hexPart1}${hexPart2}${hexPart3}${hexPart4}`.slice(0, 64);
-  return full.padEnd(64, 'a');
-}
-
-/**
  * Formats a value in cents into Brazilian Real (BRL)
  * Example: 150000 -> "R$ 1.500,00"
  */
 export function formatBRL(cents: number): string {
   const value = (cents || 0) / 100;
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -221,15 +196,17 @@ export function formatBRL(cents: number): string {
 export function formatDateTimeBR(isoString: string): string {
   try {
     const date = new Date(isoString);
-    if (isNaN(date.getTime())) return 'Data a definir';
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).replace(',', ' às');
+    if (isNaN(date.getTime())) return "Data a definir";
+    return date
+      .toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .replace(",", " às");
   } catch {
-    return 'Data a definir';
+    return "Data a definir";
   }
 }
