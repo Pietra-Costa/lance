@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { createHash } from 'node:crypto';
 import { PrismaService } from '../infrastructure/database/prisma.service';
 import { AuthService } from '../auth/auth.service';
+import { CANONICALIZATION_VERSION, computeEventHash } from './audit-chain';
 @Injectable()
 export class AuditService {
   constructor(private readonly prisma: PrismaService) {}
@@ -36,7 +36,13 @@ export class AuditService {
       createdAt: Date;
     }>,
   ) {
-    const lotIds = [...new Set(events.map((event) => event.entityId))];
+    const lotIds = [
+      ...new Set(
+        events
+          .filter((event) => event.entityType === 'LOT')
+          .map((event) => event.entityId),
+      ),
+    ];
     const lots = await this.prisma.lot.findMany({
       where: { id: { in: lotIds } },
       select: {
@@ -57,6 +63,11 @@ export class AuditService {
         typeof original.bidderId === 'string' ? original.bidderId : undefined;
       const winnerId =
         typeof original.winnerId === 'string' ? original.winnerId : undefined;
+      const pseudonymFor = (userId: string | undefined) =>
+        userId ? AuthService.publicPseudonym(userId) : null;
+      const bidderPseudonym = pseudonymFor(bidderId);
+      const winnerPseudonym = pseudonymFor(winnerId);
+
       const publicPayload = Object.fromEntries(
         Object.entries(original).filter(
           ([key]) =>
@@ -75,6 +86,10 @@ export class AuditService {
               'settlementId',
               'receiptId',
               'catalogItemId',
+              'walletId',
+              'userId',
+              'transactionId',
+              'reason',
             ].includes(key),
         ),
       );
@@ -89,49 +104,85 @@ export class AuditService {
         sequence: event.sequence.toString(),
         payload: {
           ...publicPayload,
-          bidderPseudonym: bidderId
-            ? AuthService.publicPseudonym(bidderId)
-            : undefined,
-          winnerPseudonym: winnerId
-            ? AuthService.publicPseudonym(winnerId)
-            : undefined,
+          bidderPseudonym,
+          winnerPseudonym,
         },
       };
     });
   }
+  /**
+   * Verifica a integridade da cadeia de auditoria.
+   *
+   * Confere, para cada evento em ordem de sequência:
+   *  1. continuidade do encadeamento (`previousHash` = hash do anterior);
+   *  2. recálculo do hash a partir dos dados persistidos.
+   *
+   * Também compara a cabeça da cadeia com o `AuditChainState`, o que detecta
+   * remoção do último evento ou avanço indevido do estado global.
+   *
+   * Limite conhecido (documentado no README): uma cadeia de hashes sem
+   * ancoragem externa detecta alteração local, mas não impede que alguém com
+   * acesso ao banco reescreva todos os eventos e recalcule a cadeia inteira.
+   */
   async verify() {
     const events = await this.prisma.auditEvent.findMany({
       orderBy: { sequence: 'asc' },
     });
+
     let previousHash: string | null = null;
+    let previousSequence = 0n;
+
     for (const event of events) {
-      const calculated = createHash('sha256')
-        .update(
-          JSON.stringify({
-            eventType: event.eventType,
-            entityType: event.entityType,
-            entityId: event.entityId,
-            payload: event.payload,
-            previousHash,
-            createdAt: event.createdAt.toISOString(),
-          }),
-        )
-        .digest('hex');
-      if (event.previousHash !== previousHash || event.eventHash !== calculated)
+      // Buracos na sequência indicam evento removido.
+      if (event.sequence <= previousSequence) {
         return {
           valid: false,
           checkedEvents: events.length,
           invalidSequence: event.sequence.toString(),
+          reason: 'SEQUENCE_OUT_OF_ORDER',
         };
+      }
+
+      const calculated = computeEventHash({
+        eventType: event.eventType,
+        entityType: event.entityType,
+        entityId: event.entityId,
+        payload: event.payload,
+        previousHash,
+        createdAt: event.createdAt,
+      });
+
+      if (
+        event.previousHash !== previousHash ||
+        event.eventHash !== calculated
+      ) {
+        return {
+          valid: false,
+          checkedEvents: events.length,
+          invalidSequence: event.sequence.toString(),
+          reason:
+            event.previousHash !== previousHash
+              ? 'BROKEN_LINK'
+              : 'HASH_MISMATCH',
+        };
+      }
+
       previousHash = event.eventHash;
+      previousSequence = event.sequence;
     }
+
     const state = await this.prisma.auditChainState.findUnique({
       where: { id: 'global' },
     });
+
+    const headMatches = !state || state.lastEventHash === previousHash;
+
     return {
-      valid: !state || state.lastEventHash === previousHash,
+      valid: headMatches,
       checkedEvents: events.length,
       lastHash: previousHash,
+      canonicalizationVersion: CANONICALIZATION_VERSION,
+      reason: headMatches ? null : 'HEAD_MISMATCH',
     };
   }
 }
