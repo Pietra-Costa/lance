@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { AppProvider, useApp } from "./context/AppContext";
 import { ViewportSimulator } from "./components/layout/ViewportSimulator";
 import { Header } from "./components/layout/Header";
@@ -12,6 +12,13 @@ import { AuctioneerArea } from "./pages/AuctioneerArea";
 import { CreateLotWizard } from "./pages/CreateLotWizard";
 import { AuditPage } from "./pages/AuditPage";
 import { DesignSystemPage } from "./pages/DesignSystemPage";
+import { PublicReceiptPage } from "./pages/PublicReceiptPage";
+import { AboutPage } from "./pages/AboutPage";
+import {
+  RulesPage,
+  SellerTermsPage,
+  ReservationPolicyPage,
+} from "./pages/InstitutionalPages";
 import { BidModal } from "./components/domain/BidModal";
 import { ReceiptModal } from "./components/domain/ReceiptModal";
 import { CheckCircle, AlertTriangle, Info, XCircle, X } from "lucide-react";
@@ -27,6 +34,7 @@ const MainAppContent: React.FC = () => {
     setSelectedReceiptForModal,
     notifications,
     dismissNotification,
+    lots,
   } = useApp();
 
   // Resolve current view component from route
@@ -63,8 +71,24 @@ const MainAppContent: React.FC = () => {
     if (currentRoute.startsWith("/leiloeiro")) {
       return <AuctioneerArea />;
     }
+    if (currentRoute.startsWith("/comprovante/")) {
+      const verificationCode = currentRoute.replace("/comprovante/", "");
+      return <PublicReceiptPage verificationCode={verificationCode} />;
+    }
     if (currentRoute === "/auditoria") {
       return <AuditPage />;
+    }
+    if (currentRoute === "/sobre") {
+      return <AboutPage />;
+    }
+    if (currentRoute === "/regras") {
+      return <RulesPage />;
+    }
+    if (currentRoute === "/termo-leiloeiro") {
+      return <SellerTermsPage />;
+    }
+    if (currentRoute === "/politica-reservas") {
+      return <ReservationPolicyPage />;
     }
     if (currentRoute === "/design-system") {
       return <DesignSystemPage />;
@@ -78,11 +102,11 @@ const MainAppContent: React.FC = () => {
   const getFrameContainerClass = () => {
     switch (viewportMode) {
       case "desktop":
-        return "max-w-[1440px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-xl sm:rounded-2xl border border-[#CDC5B4] overflow-hidden";
+        return "max-w-[1440px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-xl sm:rounded-2xl border border-border-strong overflow-hidden";
       case "tablet":
-        return "max-w-[768px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-[#0A2B22] overflow-hidden";
+        return "max-w-[768px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-brand-deep overflow-hidden";
       case "mobile":
-        return "max-w-[390px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-2xl sm:rounded-3xl border-4 sm:border-8 border-[#0A2B22] overflow-hidden";
+        return "max-w-[390px] w-full mx-auto shadow-2xl my-2 sm:my-4 rounded-2xl sm:rounded-3xl border-4 sm:border-8 border-brand-deep overflow-hidden";
       case "native":
       default:
         return "w-full max-w-full";
@@ -91,9 +115,9 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#EFE9DB] flex flex-col font-body w-full max-w-full overflow-x-hidden">
-      {/* Main Responsive Canvas - Vitrine de Leilões */}
+      {/* Main Responsive Canvas - Vitrine de LeilÃµes */}
       <div
-        className={`flex-1 flex flex-col justify-between bg-[#F5F1E7] transition-all duration-300 w-full ${getFrameContainerClass()}`}
+        className={`flex-1 flex flex-col justify-between bg-surface-base transition-all duration-300 w-full ${getFrameContainerClass()}`}
       >
         <Header />
 
@@ -106,7 +130,12 @@ const MainAppContent: React.FC = () => {
       <AnimatePresence>
         {selectedLotForBidModal && (
           <BidModal
-            lot={selectedLotForBidModal}
+            // Sempre o estado mais recente do lote: se um evento realtime
+            // atualizar preÃ§o/lÃ­der, o modal reflete na hora.
+            lot={
+              lots.find((item) => item.id === selectedLotForBidModal.id) ??
+              selectedLotForBidModal
+            }
             onClose={() => setSelectedLotForBidModal(null)}
           />
         )}
@@ -123,17 +152,17 @@ const MainAppContent: React.FC = () => {
 
       {/* Notification Toast Stack */}
       <div className="fixed bottom-4 right-4 sm:right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 max-w-full sm:max-w-sm w-auto pointer-events-none">
-        {notifications.map(notif => (
+        {notifications.map((notif) => (
           <div
             key={notif.id}
             className={`pointer-events-auto p-4 rounded-xl shadow-lg border text-xs flex items-start justify-between gap-3 animate-in slide-in-from-bottom-3 duration-200 ${
               notif.type === "success"
-                ? "bg-[#EAF7EE] border-[#1E7E34]/30 text-[#1E7E34]"
+                ? "bg-semantic-success-bg border-semantic-success/30 text-semantic-success"
                 : notif.type === "warning"
-                  ? "bg-[#FEF3C7] border-[#B45309]/30 text-[#B45309]"
+                  ? "bg-semantic-warning-bg border-semantic-warning/30 text-semantic-warning"
                   : notif.type === "error"
-                    ? "bg-[#FEE2E2] border-[#B91C1C]/30 text-[#B91C1C]"
-                    : "bg-white border-[#CDC5B4] text-[#222923]"
+                    ? "bg-semantic-error-bg border-semantic-error/30 text-semantic-error"
+                    : "bg-white border-border-strong text-text-primary"
             }`}
           >
             <div className="flex items-start gap-2.5">
@@ -147,7 +176,7 @@ const MainAppContent: React.FC = () => {
                 <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
               )}
               {notif.type === "info" && (
-                <Info className="w-4 h-4 text-[#123D2F] shrink-0 mt-0.5" />
+                <Info className="w-4 h-4 text-brand-primary shrink-0 mt-0.5" />
               )}
 
               <div>
@@ -179,3 +208,4 @@ export default function App() {
     </AppProvider>
   );
 }
+
